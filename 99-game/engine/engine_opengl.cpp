@@ -668,6 +668,60 @@ void engine_opengl::reload_uniform()
                                 *uniforms_world->scale_z_obj);
 }
 
+void engine_opengl::audio_callback(void*    engine_ptr,
+                                   uint8_t* stream,
+                                   int      stream_size)
+{
+
+    std::lock_guard<std::mutex> lock(audio_mutex);
+    // no sound default
+    std::fill_n(stream, stream_size, '\0');
+
+    engine_opengl* e = static_cast<engine_opengl*>(engine_ptr);
+
+    for (audio_buffer* buff : e->audio_output)
+    {
+        if (buff->is_playing)
+        {
+            uint32_t rest         = buff->length - buff->current_index;
+            uint8_t* current_buff = &buff->buffer[buff->current_index];
+
+            if (rest <= static_cast<uint32_t>(stream_size))
+            {
+                // copy rest to buffer
+                SDL_MixAudioFormat(stream,
+                                   current_buff,
+                                   e->audio_device_spec.format,
+                                   rest,
+                                   SDL_MIX_MAXVOLUME);
+                buff->current_index += rest;
+            }
+            else
+            {
+                SDL_MixAudioFormat(stream,
+                                   current_buff,
+                                   e->audio_device_spec.format,
+                                   static_cast<uint32_t>(stream_size),
+                                   SDL_MIX_MAXVOLUME);
+                buff->current_index += static_cast<uint32_t>(stream_size);
+            }
+
+            if (buff->current_index == buff->length)
+            {
+                if (buff->is_looped)
+                {
+                    // start from begining
+                    buff->current_index = 0;
+                }
+                else
+                {
+                    buff->is_playing = false;
+                }
+            }
+        }
+    }
+}
+
 void engine_opengl::set_shader(shader* shader)
 {
     this->active_shader = shader;

@@ -4,7 +4,6 @@
 #include "core/types.h"
 #include "engine/engine_opengl.h"
 #include "objects/camera.h"
-#include "objects/model.h"
 
 /*
 0100 0100 0100 0110

@@ -1,4 +1,5 @@
 #include "game.h"
+#include "objects/model.h"
 
 game_tetris::game_tetris()
 {

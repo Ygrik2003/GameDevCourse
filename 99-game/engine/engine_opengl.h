@@ -1,6 +1,9 @@
+#include "audio_buffer.h"
 #include "engine.h"
 #include "imgui/imgui.h"
 #include "texture.h"
+
+#include <SDL3/SDL.h>
 
 class engine_opengl : public engine
 {
@@ -52,8 +55,17 @@ public:
     void reload_uniform() override;
 
 private:
-    void*    window         = nullptr;
-    void*    gl_context     = nullptr;
-    shader*  active_shader  = nullptr;
-    uniform* uniforms_world = nullptr;
+    SDL_Window*   window         = nullptr;
+    SDL_GLContext gl_context     = nullptr;
+    shader*       active_shader  = nullptr;
+    uniform*      uniforms_world = nullptr;
+
+    SDL_AudioDeviceID          audio_device;
+    SDL_AudioSpec              audio_device_spec;
+    std::vector<audio_buffer*> audio_output;
+
+    static void       audio_callback(void*    engine_ptr,
+                                     uint8_t* stream,
+                                     int      stream_size);
+    static std::mutex audio_mutex;
 };

@@ -14,7 +14,6 @@ add_library(
     core/picopng.hxx
     core/types.cpp
     core/types.h
-    engine/engine.cpp
     engine/engine.h
     engine/engine_opengl.cpp
     engine/engine_opengl.h
