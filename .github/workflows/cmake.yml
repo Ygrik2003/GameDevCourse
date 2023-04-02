@@ -27,13 +27,13 @@ jobs:
 
     - name: Default HelloWolrd
       # Build your program with the given configuration
-      run: ./out/build/01-1-hello-world/01-1-hello-world
+      run: ./out/build/ninja/01-1-hello-world/01-1-hello-world
 
     - name: Static HelloWolrd
       # Build your program with the given configuration
-      run: ./out/build/01-2-hello-world-lib/bin/01-2-hello-world-static
+      run: ./out/build/ninja/01-2-hello-world-lib/bin/01-2-hello-world-static
     
     - name: Dynamic HelloWolrd
       # Build your program with the given configuration
-      run: ./out/build/01-2-hello-world-lib/bin/01-2-hello-world-dynamic
+      run: ./out/build/ninja/01-2-hello-world-lib/bin/01-2-hello-world-dynamic
       
