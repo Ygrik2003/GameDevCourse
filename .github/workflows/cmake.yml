@@ -21,6 +21,7 @@ jobs:
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
       run: |
         sudo apt install libboost-all-dev
+        sudo apt install ninja-build
         cmake --preset CMakePresets.json --preset=ninja
         cmake --build --preset CMakePresets.json --preset=ninja
 
