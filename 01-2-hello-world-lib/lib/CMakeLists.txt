@@ -11,7 +11,7 @@ target_include_directories(hello-lib-dynamic
                            PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 
-if (Boost_EXAMPE)
+if (Boost_EXAMPLE)
     add_library(hello-async-lib-dynamic SHARED include/hello_world_async.h src/hello_world_async.cpp)
     target_include_directories(hello-async-lib-dynamic
                             PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
@@ -45,6 +45,6 @@ endif()
 
 target_compile_features(hello-lib-static PUBLIC cxx_std_20)
 target_compile_features(hello-lib-dynamic PUBLIC cxx_std_20)
-if (Boost_EXAMPE)
+if (Boost_EXAMPLE)
     target_compile_features(hello-async-lib-dynamic PUBLIC cxx_std_20)
 endif()
