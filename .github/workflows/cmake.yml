@@ -33,9 +33,9 @@ jobs:
       run: ./out/build/ninja/01-2-hello-world-lib/bin/01-2-hello-world-static
     
     - name: Dynamic HelloWolrd
-    
-    - ${{ if vars.use_boost }}:
-      - script: "./out/build/ninja/01-2-hello-world-lib/bin/01-2-hello-world-dynamic"
+    - run: |
+      - ${{ if vars.use_boost }}:
+        - script: "./out/build/ninja/01-2-hello-world-lib/bin/01-2-hello-world-dynamic"
       
   # windows-build:
   #   runs-on: windows-latest
