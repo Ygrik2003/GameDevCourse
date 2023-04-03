@@ -20,3 +20,7 @@ if (Boost_EXAMPLE)
     target_compile_features(bin-async-dynamic PRIVATE cxx_std_20)
     target_link_libraries(bin-async-dynamic LINK_PUBLIC hello-async-lib-dynamic)
 endif()
+
+
+add_test(NAME execute-test-static COMMAND 01-2-hello-world-static)
+add_test(NAME execute-test-dynamic COMMAND 01-2-hello-world-dynamic)
