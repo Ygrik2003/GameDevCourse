@@ -63,5 +63,5 @@ jobs:
     
     - name: Dynamic HelloWolrd
       # Build your program with the given configuration
-      run: ./out/build/ninja/01-2-hello-world-lib/bin/01-2-hello-world-dynamic.exe
+      run: ./out/build/ninja/01-2-hello-world-dynamic.exe
       
