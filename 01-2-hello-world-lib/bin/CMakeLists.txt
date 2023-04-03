@@ -11,6 +11,10 @@ target_compile_features(01-2-hello-world-dynamic PRIVATE cxx_std_20)
 target_link_libraries(01-2-hello-world-dynamic LINK_PUBLIC hello-lib-dynamic)
 
 
+if (WIN32)
+    set_target_properties(hello-lib-dynamic PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+endif()
+
 if (Boost_EXAMPLE)
     add_executable(bin-async-dynamic src/main_async.cpp)
     target_compile_features(bin-async-dynamic PRIVATE cxx_std_20)
