@@ -12,7 +12,7 @@ target_link_libraries(01-2-hello-world-dynamic LINK_PUBLIC hello-lib-dynamic)
 
 
 if (WIN32)
-    set_target_properties(hello-lib-dynamic PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+    set_target_properties(01-2-hello-world-dynamic PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 endif()
 
 if (Boost_EXAMPLE)
