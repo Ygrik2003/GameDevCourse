@@ -18,12 +18,5 @@
             "name": "ninja",
             "configurePreset": "ninja"
         }
-    ],
-    "testPresets": [
-        {
-            "name": "ninja-tests",
-            "description": "",
-            "displayName": "ninja tests"
-        }
     ]
 }
