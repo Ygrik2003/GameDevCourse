@@ -11,3 +11,5 @@ endif()
 
 add_subdirectory(01-1-hello-world)
 add_subdirectory(01-2-hello-world-lib)
+
+add_subdirectory(02-1-sdl-version)
