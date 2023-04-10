@@ -1,4 +1,5 @@
-#include <SDL2/SDL_version.h>
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_version.h>
 #include <cstdlib>
 #include <iostream>
 
@@ -22,6 +23,5 @@ int main()
     std::cout << "Linked version: " << version_linked << std::endl;
     std::cout << "Compile version: " << version_compile << std::endl;
 
-    int result = std::cout.fail();
-    return result ? EXIT_FAILURE : EXIT_SUCCESS;
+    return std::cout.fail() ? EXIT_FAILURE : EXIT_SUCCESS;
 }
