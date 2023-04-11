@@ -1,6 +1,7 @@
-#include <SDL3/SDL_version.h>
 #include <cstdlib>
 #include <iostream>
+
+#include <SDL3/SDL_version.h>
 
 std::ostream& operator<<(std::ostream& out, SDL_version sdl_v)
 {
