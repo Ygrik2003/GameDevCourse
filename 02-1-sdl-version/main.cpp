@@ -1,4 +1,3 @@
-#include <SDL3/SDL.h>
 #include <SDL3/SDL_version.h>
 #include <cstdlib>
 #include <iostream>
