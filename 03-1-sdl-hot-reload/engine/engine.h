@@ -62,5 +62,5 @@ struct game
 
 } // namespace yg
 
-yg::game* start_game(yg::engine*);
-void      destroy_game(yg::game*);
+extern "C" yg::game* start_game(yg::engine*);
+extern "C" void      destroy_game(yg::game*);
