@@ -30,10 +30,16 @@ struct event
         uint8_t right_released : 1;
     } keyboard;
 
+    struct
+    {
+        uint8_t quit : 1;
+    } action;
+
     void clear()
     {
         (uint8_t&)this->mouse    = 0;
         (uint8_t&)this->keyboard = 0;
+        (uint8_t&)this->action   = 0;
     }
 };
 
@@ -44,8 +50,13 @@ public:
 
     virtual int initialize(config cfg) = 0;
 
-    virtual bool read_input()   = 0;
-    virtual void uninitialize() = 0;
+    virtual bool read_input(yg::event& event) = 0;
+    virtual void uninitialize()               = 0;
+
+    virtual config get_config() = 0;
+
+protected:
+    config conf;
 };
 
 engine* create_engine();

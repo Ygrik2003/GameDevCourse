@@ -14,13 +14,20 @@ dll_injection::dll_injection(yg::engine* engine,
 
     if (boost::filesystem::exists(this->name_dll))
     {
-        dll_pointers.push_back(SDL_LoadObject(this->name_dll));
+
+        if (boost::filesystem::exists(this->name_dll_temp))
+            boost::filesystem::remove(name_dll_temp);
+        boost::filesystem::copy(name_dll, name_dll_temp);
+
+        dll_pointers.push_back(SDL_LoadObject(name_dll_temp));
         version = 0;
+
         if (dll_pointers[version] == nullptr)
         {
             std::cerr << "error: failed to load: [" << this->name_dll << "] "
                       << SDL_GetError() << std::endl;
         }
+        start();
     }
     else
     {
@@ -63,9 +70,40 @@ dll_injection::dll_injection(yg::engine* engine,
     }
 }
 
-void dll_injection::update_dll()
+yg::game* dll_injection::update_dll()
 {
-    dll_pointers[version] = SDL_LoadObject(name_dll);
+    if (game != nullptr)
+    {
+        stop();
+        SDL_UnloadObject(dll_pointers[version]);
+    }
+    if (boost::filesystem::exists(name_dll))
+    {
+        if (boost::filesystem::exists(this->name_dll_temp))
+            boost::filesystem::remove(name_dll_temp);
+        boost::filesystem::copy(name_dll, name_dll_temp);
+
+        dll_pointers[version] = SDL_LoadObject(name_dll_temp);
+        version               = 0;
+
+        if (dll_pointers[version] == nullptr)
+        {
+            std::cerr << "error: failed to load: [" << this->name_dll << "] "
+                      << SDL_GetError() << std::endl;
+        }
+        restart();
+    }
+    else
+    {
+        std::cerr << "error: No file .so: " << std::endl;
+    }
+
+    return game;
+}
+
+void dll_injection::add_dll()
+{
+    dll_pointers.push_back(SDL_LoadObject(name_dll));
 }
 
 void dll_injection::change_dll(size_t index)
@@ -74,6 +112,7 @@ void dll_injection::change_dll(size_t index)
         version = index;
     else
         std::cerr << "Dll version with number " << index << "doesnt exist.";
+    this->restart();
 }
 
 yg::game* dll_injection::start()
@@ -110,10 +149,19 @@ void dll_injection::stop()
     auto destroy_game_func =
         reinterpret_cast<destroy_game_ptr>(destroy_game_func_ptr);
 
-    destroy_game_func(game);
+    // destroy_game_func(game);
 }
 yg::game* dll_injection::restart()
 {
     stop();
-    return start();
+    std::cout << '\n' << "Restarting..." << '\n';
+
+    game = start();
+    game->initialize();
+    return game;
+}
+
+yg::game* dll_injection::get_game()
+{
+    return game;
 }

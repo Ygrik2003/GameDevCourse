@@ -21,12 +21,15 @@ public:
 
     boost::signals2::signal<void()> fileChanged;
 
-    void update_dll();
-    void change_dll(size_t index);
+    yg::game* update_dll();
+    void      add_dll();
+    void      change_dll(size_t index);
 
     yg::game* start();
     void      stop();
     yg::game* restart();
+
+    yg::game* get_game();
 
 private:
     const char* name_dll            = nullptr;

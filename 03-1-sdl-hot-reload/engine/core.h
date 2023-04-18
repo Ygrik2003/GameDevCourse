@@ -16,6 +16,7 @@ struct point
 #pragma pack(push, 1)
 struct config
 {
+    config() {}
     config(uint8_t max_chars,
            char    char_placeholder,
            char    char_start,
