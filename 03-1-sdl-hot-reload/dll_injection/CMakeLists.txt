@@ -14,11 +14,10 @@ find_package(Boost COMPONENTS system filesystem REQUIRED)
 
 target_include_directories(03-1-dll-injection PUBLIC
                            ${Boost_INCLUDE_DIRS}
-                           03-1-engine
-                          )
+                           03-1-engine)
+                           
 target_link_libraries(03-1-dll-injection PRIVATE 
                       SDL3::SDL3 
                       ${Boost_FILESYSTEM_LIBRARY}
-                      ${Boost_SYSTEM_LIBRARY}
-                     )
+                      ${Boost_SYSTEM_LIBRARY})
 
