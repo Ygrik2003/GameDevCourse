@@ -149,11 +149,11 @@ void dll_injection::stop()
     auto destroy_game_func =
         reinterpret_cast<destroy_game_ptr>(destroy_game_func_ptr);
 
+    delete game;
     // destroy_game_func(game);
 }
 yg::game* dll_injection::restart()
 {
-    stop();
     std::cout << '\n' << "Restarting..." << '\n';
 
     game = start();

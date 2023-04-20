@@ -10,7 +10,7 @@ namespace yg
 
 struct event
 {
-    struct
+    struct event_mouse
     {
         uint8_t left : 1;
         uint8_t right : 1;
@@ -18,7 +18,7 @@ struct event
         uint8_t back : 1;
         uint8_t next : 1;
     } mouse;
-    struct
+    struct event_keyboard
     {
         uint8_t up_clicked : 1;
         uint8_t up_released : 1;
@@ -30,16 +30,16 @@ struct event
         uint8_t right_released : 1;
     } keyboard;
 
-    struct
+    struct event_action
     {
         uint8_t quit : 1;
     } action;
 
     void clear()
     {
-        (uint8_t&)this->mouse    = 0;
-        (uint8_t&)this->keyboard = 0;
-        (uint8_t&)this->action   = 0;
+        mouse    = event_mouse{};
+        keyboard = event_keyboard{};
+        action   = event_action{};
     }
 };
 
