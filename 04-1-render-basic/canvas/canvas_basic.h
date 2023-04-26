@@ -34,6 +34,9 @@ public:
     void save_image(const char* path);
     void load_image(const char* path);
 
+    size_t get_width() const;
+    size_t get_height() const;
+
     void set_pixel(size_t x, size_t y, rgb color);
     rgb  get_pixel(size_t x, size_t y) const;
 

@@ -7,8 +7,8 @@
 constexpr double pi = 3.1415926535;
 
 constexpr double R      = 250;
-constexpr double dTheta = 0.1;
-constexpr double dPhi   = 0.1;
+constexpr double dTheta = pi / 10;
+constexpr double dPhi   = 2 * pi / 50;
 
 const vector3d camera_pos(100., 100., -100.);
 
@@ -21,8 +21,8 @@ vertex get_sphere(double phi, double theta)
                    255 * std::pow(std::cos(theta), 2),
                    0,
                    0,
-                   0,
-                   0 };
+                   (1 + cos(phi) * sin(theta)) / 2,
+                   (1 + sin(phi) * sin(theta)) / 2 };
 }
 
 void get_sphere_triangles(std::vector<vertex>& vertexes,
@@ -72,7 +72,7 @@ int main()
     // render.set_pen_color(rgb{ 0, 0, 0 });
     render.clear(rgb{ 255, 255, 255 });
 
-    struct program : gfx_program
+    struct program_1 : gfx_program
     {
         void set_uniforms(uniforms& uniforms_)
         {
@@ -84,11 +84,8 @@ int main()
 
             // constexpr double angle = 3.1415 * 0;
 
-            double x = out.x /* + std::sqrt(2) * out.z*/;
-            double y = out.y /* + std::sqrt(2) * out.z*/;
-
-            // out.x = x * std::cos(angle) - y * std::sin(angle);
-            // out.y = x * std::sin(angle) + y * std::cos(angle);
+            double x = out.x + std::sqrt(2) * out.z;
+            double y = out.y + std::sqrt(2) * out.z;
 
             out.x = x + 2 * R;
             out.y = y + 2 * R;
@@ -102,12 +99,12 @@ int main()
                      static_cast<uint8_t>(v_in.b) };
         }
         uniforms* uniforms_1;
-    } program_1;
+    } red_texture;
 
     uniforms uni;
 
-    program_1.set_uniforms(uni);
-    render.set_gfx_program(program_1);
+    red_texture.set_uniforms(uni);
+    render.set_gfx_program(red_texture);
 
     std::vector<vertex> vertexes;
     std::vector<uint>   indexes;
@@ -144,5 +141,58 @@ int main()
     //     { 0, 1, 2, 3, 4, 5 });
 
     image.save_image("04_interpolated_triangle.ppm");
+
+    struct program_2 : gfx_program
+    {
+        void set_uniforms(uniforms& uniforms_)
+        {
+            this->uniforms_1 = &uniforms_;
+        }
+        vertex vertex_shader(const vertex& v_in)
+        {
+            vertex out(v_in);
+
+            // constexpr double angle = 3.1415 * 0;
+
+            double x = out.x + std::sqrt(2) * out.z;
+            double y = out.y + std::sqrt(2) * out.z;
+
+            out.x = x + 2 * R;
+            out.y = y + 2 * R;
+
+            return out;
+        }
+        rgb fragment_shader(const vertex& v_in)
+        {
+            rgb out;
+
+            float tex_x = v_in.u; // 0..1
+            float tex_y = v_in.v; // 0..1
+
+            canvas* texture = uniforms_1->texture0;
+
+            size_t tex_width  = texture->get_width();
+            size_t tex_height = texture->get_height();
+
+            size_t t_x = static_cast<size_t>((tex_width - 1) * tex_x);
+            size_t t_y = static_cast<size_t>((tex_height - 1) * tex_y);
+
+            out = texture->get_pixel(t_x, t_y);
+
+            return out;
+        }
+        uniforms* uniforms_1;
+    } image_texture;
+
+    canvas texture(0, 0);
+    texture.load_image("/home/ygrik/Downloads/third.ppm");
+    uni.texture0 = &texture;
+    image_texture.set_uniforms(uni);
+
+    render.set_gfx_program(image_texture);
+    render.draw_triangles(vertexes, indexes);
+
+    image.save_image("rofl.ppm");
+
     return EXIT_SUCCESS;
 }

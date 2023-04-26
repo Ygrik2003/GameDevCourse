@@ -76,6 +76,15 @@ void canvas::load_image(const char* path)
     std::fclose(file);
 }
 
+size_t canvas::get_width() const
+{
+    return width;
+}
+size_t canvas::get_height() const
+{
+    return height;
+}
+
 void canvas::set_pixel(size_t x, size_t y, rgb color)
 {
     rgb& pixel = pixels.at(y * width + x);
