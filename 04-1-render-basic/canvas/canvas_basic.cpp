@@ -5,15 +5,30 @@ bool operator==(const rgb& l, const rgb& r)
     return l.r == r.r && l.g == r.g && l.b == r.b;
 }
 
+constexpr size_t color_size = sizeof(rgb);
+static_assert(3 == color_size, "24 bit per pixel(r,g,b)");
+
 std::ostream& operator<<(std::ostream& out, const rgb& color)
 {
     // clang-format off
     out << "RGB("
         << static_cast<int>(color.r) << ", "
-        << static_cast<int>(color.r) << ", "
-        << static_cast<int>(color.r) << ")";
+        << static_cast<int>(color.g) << ", "
+        << static_cast<int>(color.b) << ")";
     // clang-format on
     return out;
+}
+
+rgb rgb::generate()
+{
+    // clang-format off
+    return
+    {
+        static_cast<uint8_t>(rand() % 256), 
+        static_cast<uint8_t>(rand() % 256),
+        static_cast<uint8_t>(rand() % 256)
+    };
+    // clang-format on
 }
 
 canvas::canvas(size_t w, size_t h)

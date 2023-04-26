@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <cstdio>
 #include <iomanip>
 #include <vector>
@@ -16,6 +17,8 @@ struct rgb
     friend bool operator==(const rgb& l, const rgb& r);
 
     friend std::ostream& operator<<(std::ostream& out, const rgb& color);
+
+    static rgb generate();
 };
 #pragma pack(pop)
 
@@ -32,7 +35,10 @@ public:
     void load_image(const char* path);
 
     void set_pixel(size_t x, size_t y, rgb color);
-    rgb get_pixel(size_t x, size_t y) const;
+    rgb  get_pixel(size_t x, size_t y) const;
+
+    auto begin() { return pixels.begin(); }
+    auto end() { return pixels.end(); }
 
     bool operator==(const canvas& other) const;
     bool operator!=(const canvas& other) const;
