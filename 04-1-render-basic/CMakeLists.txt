@@ -33,7 +33,8 @@ target_include_directories(04-3-triangle-indexed-render PUBLIC
                            ${CMAKE_CURRENT_SOURCE_DIR}/triangle_indexed_render)
 
 add_executable(04-4-triangle-interpolated-render triangle_interpolated_render_main.cpp
-               core/vector3d.h core/vector3d.cpp               
+               core/matrix.h core/matrix.cpp
+               core/view_convertation.h core/view_convertation.cpp             
                irender/irender.h irender/irender.cpp
                canvas/canvas_basic.h canvas/canvas_basic.cpp
                line_render/line_render.h line_render/line_render.cpp

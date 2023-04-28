@@ -44,9 +44,9 @@ pixels line_render::pixels_positions(position start, position end)
             if (D > 0)
             {
                 y += yi;
-                D -= 2 * dx;
+                D -= dx;
             }
-            D += 2 * dy;
+            D += dy;
         }
     };
 
@@ -75,7 +75,7 @@ pixels line_render::pixels_positions(position start, position end)
         }
     };
 
-    if (abs(y1 - y0) < abs(x1 - x0))
+    if (abs(y1 - y0) <= abs(x1 - x0))
     {
         if (x0 > x1)
         {

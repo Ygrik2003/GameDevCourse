@@ -21,7 +21,7 @@ double interpolate_sin(const double x1, const double x2, const double t)
 {
     if (t > 1 || t < 0)
         throw std::runtime_error("Interpolation2kind out of range");
-    return (x2 - x1) * std::sin(3.1415 * t) + x1;
+    return (x2 - x1) * std::sin(M_PI * t) + x1;
 }
 
 vertex interpolate(const vertex& v1, const vertex& v2, const double t)
@@ -121,7 +121,7 @@ std::vector<vertex> triangle_interpolated_redner::rasterize_triangle(
 
             for (int i = 0; i < line.size(); i++)
             {
-
+                // TODO
                 vertex v = interpolate(
                     v1, v3, static_cast<double>(i) / (line.size() + 1));
                 v.x = line[i].x;

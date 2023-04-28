@@ -1,22 +1,20 @@
 #include "canvas_basic.h"
+#include "matrix.h"
 #include "triangle_interpolated_render.h"
-#include "vector3d.h"
+#include "view_convertation.h"
 
 #include <algorithm>
+#include <iostream>
 
-constexpr double pi = 3.1415926535;
-
-constexpr double R      = 250;
-constexpr double dTheta = 0.1;
-constexpr double dPhi   = 0.1;
-
-const vector3d camera_pos(100., 100., -100.);
+constexpr double R      = 200;
+constexpr double dTheta = 2 * M_PI / 5;
+constexpr double dPhi   = M_PI / 5;
 
 vertex get_sphere(double phi, double theta)
 {
 
-    return vertex{ R * cos(phi) * sin(theta),
-                   R * sin(phi) * sin(theta),
+    return vertex{ R * (2 + cos(phi) * sin(theta)),
+                   R * (2 + sin(phi) * sin(theta)),
                    R * cos(theta),
                    255 * std::pow(std::cos(theta), 2),
                    0,
@@ -33,10 +31,10 @@ void get_sphere_triangles(std::vector<vertex>& vertexes,
 
     double theta = 0, phi;
 
-    for (int thetaCounter = 0; thetaCounter <= pi / dTheta; thetaCounter++)
+    for (int thetaCounter = 0; thetaCounter <= M_PI / dTheta; thetaCounter++)
     {
         phi = 0;
-        for (int phiCounter = 0; phiCounter <= 2 * pi / dPhi; phiCounter++)
+        for (int phiCounter = 0; phiCounter <= 2 * M_PI / dPhi; phiCounter++)
         {
             vertexes.push_back(get_sphere(phi, theta));
             vertexes.push_back(get_sphere(phi, theta + dTheta));
@@ -58,7 +56,9 @@ void get_sphere_triangles(std::vector<vertex>& vertexes,
 
 double mean_z(const std::vector<vertex>& vertexes, int i1, int i2, int i3)
 {
-    return (vertexes[i1].z + vertexes[i2].z + vertexes[i3].z) / 3;
+    std::vector<double> arr{ vertexes[i1].z, vertexes[i2].z, vertexes[i3].z };
+    return *std::max(arr.begin(), arr.end());
+    // return (vertexes[i1].z + vertexes[i2].z + vertexes[i3].z) / 3;
 }
 
 int main()
@@ -83,15 +83,24 @@ int main()
             vertex out(v_in);
 
             // constexpr double angle = 3.1415 * 0;
+            if (out.z > R || out.z < -R)
+                std::cout << "ss: " << out.z << std::endl;
+            matrix res = view.convert(static_cast<int>(out.x),
+                                      static_cast<int>(out.y),
+                                      static_cast<int>(out.z));
+            out.x      = width * (res.getElement(0, 0) + 1) / 2;
+            out.y      = height * (res.getElement(0, 1) + 1) / 2;
+            out.z      = res.getElement(0, 2);
 
-            double x = out.x /* + std::sqrt(2) * out.z*/;
-            double y = out.y /* + std::sqrt(2) * out.z*/;
-
-            // out.x = x * std::cos(angle) - y * std::sin(angle);
-            // out.y = x * std::sin(angle) + y * std::cos(angle);
-
-            out.x = x + 2 * R;
-            out.y = y + 2 * R;
+            // if (!(out.x > width || out.x < 0 || out.y > height || out.y < 0))
+            std::cout << out.x << " " << out.y << std::endl;
+            // out.x += R;
+            // out.y += R;
+            if ((out.x > width || out.x < 0 || out.y > height || out.y < 0))
+            {
+                out.x = 0;
+                out.y = 0;
+            }
 
             return out;
         }
@@ -101,7 +110,9 @@ int main()
                      static_cast<uint8_t>(v_in.g),
                      static_cast<uint8_t>(v_in.b) };
         }
-        uniforms* uniforms_1;
+        uniforms*         uniforms_1;
+        view_convertation view =
+            view_convertation(static_cast<double>(width) / height, -2 * R, R);
     } program_1;
 
     uniforms uni;
@@ -131,17 +142,6 @@ int main()
     }
 
     render.draw_triangles(vertexes, indexes);
-
-    // render.draw_triangles(
-    //     {
-    //         { 0, 0, 0, 255, 0, 0, 0, 0 },
-    //         { 100, 100, 0, 0, 255, 0, 0, 0 },
-    //         { 100, 0, 0, 0, 0, 255, 0, 0 },
-    //         { 110, 0, 0, 255, 0, 0, 0, 0 },
-    //         { 210, 100, 0, 0, 255, 0, 0, 0 },
-    //         { 210, 10, 0, 0, 0, 255, 0, 0 },
-    //     },
-    //     { 0, 1, 2, 3, 4, 5 });
 
     image.save_image("04_interpolated_triangle.ppm");
     return EXIT_SUCCESS;
