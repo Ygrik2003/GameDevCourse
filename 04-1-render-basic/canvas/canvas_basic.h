@@ -34,8 +34,9 @@ public:
     void save_image(const char* path);
     void load_image(const char* path);
 
-    void set_pixel(size_t x, size_t y, rgb color);
-    rgb  get_pixel(size_t x, size_t y) const;
+    void             set_pixel(size_t x, size_t y, rgb color);
+    rgb              get_pixel(size_t x, size_t y) const;
+    std::vector<rgb> get_pixels() const;
 
     auto begin() { return pixels.begin(); }
     auto end() { return pixels.end(); }

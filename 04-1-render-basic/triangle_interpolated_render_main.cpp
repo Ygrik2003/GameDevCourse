@@ -6,16 +6,16 @@
 #include <algorithm>
 #include <iostream>
 
-constexpr double R      = 200;
-constexpr double dTheta = 2 * M_PI / 5;
-constexpr double dPhi   = M_PI / 5;
+constexpr double R      = 400;
+constexpr double dTheta = 2 * M_PI / 15;
+constexpr double dPhi   = M_PI / 15;
 
 vertex get_sphere(double phi, double theta)
 {
 
-    return vertex{ R * (2 + cos(phi) * sin(theta)),
-                   R * (2 + sin(phi) * sin(theta)),
-                   R * cos(theta),
+    return vertex{ R * (cos(phi) * sin(theta)),
+                   R * (sin(phi) * sin(theta)),
+                   R * (1 + cos(theta)),
                    255 * std::pow(std::cos(theta), 2),
                    0,
                    0,
@@ -69,7 +69,7 @@ int main()
     canvas image(width, height);
 
     triangle_interpolated_redner render(image);
-    // render.set_pen_color(rgb{ 0, 0, 0 });
+    render.set_pen_color(rgb{ 0, 0, 0 });
     render.clear(rgb{ 255, 255, 255 });
 
     struct program : gfx_program
@@ -82,25 +82,21 @@ int main()
         {
             vertex out(v_in);
 
-            // constexpr double angle = 3.1415 * 0;
-            if (out.z > R || out.z < -R)
-                std::cout << "ss: " << out.z << std::endl;
             matrix res = view.convert(static_cast<int>(out.x),
                                       static_cast<int>(out.y),
                                       static_cast<int>(out.z));
-            out.x      = width * (res.getElement(0, 0) + 1) / 2;
-            out.y      = height * (res.getElement(0, 1) + 1) / 2;
-            out.z      = res.getElement(0, 2);
 
-            // if (!(out.x > width || out.x < 0 || out.y > height || out.y < 0))
-            std::cout << out.x << " " << out.y << std::endl;
-            // out.x += R;
-            // out.y += R;
-            if ((out.x > width || out.x < 0 || out.y > height || out.y < 0))
-            {
-                out.x = 0;
-                out.y = 0;
-            }
+            out.x = width * (1 + res.getElement(0, 0)) / 2;
+            out.y = height * (1 + res.getElement(0, 1)) / 2;
+            out.z = 1 + res.getElement(0, 2);
+
+            std::printf("cordinate: (%lf, %lf, %lf), color: (%lf, %lf, %lf)\n",
+                        out.x,
+                        out.y,
+                        out.z,
+                        out.r,
+                        out.g,
+                        out.b);
 
             return out;
         }
@@ -112,7 +108,7 @@ int main()
         }
         uniforms*         uniforms_1;
         view_convertation view =
-            view_convertation(static_cast<double>(width) / height, -2 * R, R);
+            view_convertation(static_cast<double>(width) / height, R, 5 * R);
     } program_1;
 
     uniforms uni;

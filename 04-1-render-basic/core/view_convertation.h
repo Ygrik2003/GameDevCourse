@@ -22,27 +22,27 @@ public:
                                       2,
                                       (distance_back + distance_front) /
                                           (distance_back - distance_front));
-        projection_matrix.set_element(3,
-                                      2,
+        projection_matrix.set_element(2,
+                                      3,
                                       -2 * distance_back * distance_front /
                                           (distance_back - distance_front));
-        projection_matrix.set_element(2, 3, 1);
+        projection_matrix.set_element(3, 2, 1);
         std::cout << projection_matrix.getElement(2, 2) << " "
-                  << projection_matrix.getElement(3, 2) << std::endl;
+                  << projection_matrix.getElement(2, 3) << std::endl;
     }
 
     void set_fovy(double fovy)
     {
         this->fovy = fovy;
 
-        projection_matrix.set_element(0, 0, 1 / (aspect * std::tan(fovy / 2)));
-        projection_matrix.set_element(1, 1, 1 / std::tan(fovy / 2));
+        projection_matrix.set_element(0, 0, 1. / (aspect * std::tan(fovy / 2)));
+        projection_matrix.set_element(1, 1, 1. / std::tan(fovy / 2));
     }
     void set_aspect(double aspect)
     {
         this->aspect = aspect;
 
-        projection_matrix.set_element(0, 0, 1 / (aspect * std::tan(fovy / 2)));
+        projection_matrix.set_element(0, 0, 1. / (aspect * std::tan(fovy / 2)));
     }
     void set_rotation() {}
     void set_translation(int x, int y, int z)
@@ -70,7 +70,7 @@ public:
     }
 
 private:
-    double fovy           = M_PI / 3;
+    double fovy           = M_PI / 100;
     double aspect         = 0;
     double distance_front = 0;
     double distance_back  = 0;

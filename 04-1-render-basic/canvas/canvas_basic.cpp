@@ -78,13 +78,25 @@ void canvas::load_image(const char* path)
 
 void canvas::set_pixel(size_t x, size_t y, rgb color)
 {
-    rgb& pixel = pixels.at(y * width + x);
-    pixel      = color;
+    try
+    {
+        rgb& pixel = pixels.at(y * width + x);
+        pixel      = color;
+    }
+    catch (std::out_of_range e)
+    {
+        std::printf("Point (%d, %d) out of range. \n", x, y);
+    }
 }
 
 rgb canvas::get_pixel(size_t x, size_t y) const
 {
     return pixels.at(y * width + x);
+}
+
+std::vector<rgb> canvas::get_pixels() const
+{
+    return pixels;
 }
 
 bool canvas::operator==(const canvas& other) const
