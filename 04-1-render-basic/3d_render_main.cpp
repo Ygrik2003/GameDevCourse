@@ -172,8 +172,10 @@ int main()
             continue;
         last_time = curr_time;
 
-        program_1.view.set_translation(R * cos(phi), R * sin(phi), 2 * R);
-        phi += dPhi / 10;
+        program_1.view.set_translation(0, 0, 5 * R);
+        // program_1.view.set_translation(R * cos(phi), R * sin(phi), 50 * R);
+        program_1.view.set_rotation(0, 0, phi);
+        phi += dPhi / 5;
 
         triangle_render.clear({ 255, 255, 255 });
         triangle_render.draw_triangles(vertexes, indexes);

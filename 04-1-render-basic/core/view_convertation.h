@@ -15,6 +15,10 @@ public:
         this->distance_front = distance_front;
         this->distance_back  = distance_back;
 
+        set_scale(1, 1, 1);
+        set_rotation(0, 0, 0);
+        set_translation(0, 0, 0);
+
         projection_matrix.set_element(0, 0, 1 / (aspect * std::tan(fovy / 2)));
         projection_matrix.set_element(1, 1, 1 / std::tan(fovy / 2));
 
@@ -44,12 +48,36 @@ public:
 
         projection_matrix.set_element(0, 0, 1. / (aspect * std::tan(fovy / 2)));
     }
-    void set_rotation()
+    void set_rotation(double alpha, double beta, double gamma)
     {
-        rotation_matrix.set_element(0, 0, 1);
-        rotation_matrix.set_element(1, 1, 1);
-        rotation_matrix.set_element(2, 2, 1);
+        using namespace std;
+        rotation_matrix.set_element(0, 0, cos(alpha) * cos(beta));
+        rotation_matrix.set_element(0,
+                                    1,
+                                    cos(alpha) * sin(beta) * sin(gamma) -
+                                        sin(alpha) * cos(gamma));
+        rotation_matrix.set_element(0,
+                                    2,
+                                    cos(alpha) * sin(beta) * cos(gamma) -
+                                        sin(alpha) * sin(gamma));
+
+        rotation_matrix.set_element(1, 0, sin(alpha) * cos(beta));
+        rotation_matrix.set_element(1,
+                                    1,
+                                    sin(alpha) * sin(beta) * sin(gamma) +
+                                        cos(alpha) * cos(gamma));
+        rotation_matrix.set_element(1,
+                                    2,
+                                    sin(alpha) * sin(beta) * cos(gamma) -
+                                        cos(alpha) * sin(gamma));
+
+        rotation_matrix.set_element(2, 0, -sin(beta));
+        rotation_matrix.set_element(2, 1, cos(beta) * sin(gamma));
+        rotation_matrix.set_element(2, 2, cos(beta) * cos(gamma));
+
         rotation_matrix.set_element(3, 3, 1);
+
+        rotation_matrix.transpose();
     }
     void set_translation(int x, int y, int z)
     {
@@ -63,7 +91,13 @@ public:
         translation_matrix.set_element(3, 3, 1);
     }
 
-    void set_scale(double scale_x, double scale_y, double scale_z) {}
+    void set_scale(double scale_x, double scale_y, double scale_z)
+    {
+        scale_matrix.set_element(0, 0, scale_x);
+        scale_matrix.set_element(1, 1, scale_y);
+        scale_matrix.set_element(2, 2, scale_z);
+        scale_matrix.set_element(3, 3, 1);
+    }
 
     matrix convert(int x, int y, int z)
     {
@@ -73,7 +107,8 @@ public:
         vec4.set_element(0, 2, z);
         vec4.set_element(0, 3, 1);
 
-        matrix res = vec4 * translation_matrix * projection_matrix;
+        matrix res = vec4 * scale_matrix * rotation_matrix *
+                     translation_matrix * projection_matrix;
         if (res.getElement(0, 3) == 0)
             return res;
         return res / res.getElement(0, 3);
