@@ -5,13 +5,14 @@
 
 #include <SDL3/SDL.h>
 #include <algorithm>
+#include <chrono>
 #include <iostream>
 
 constexpr int width  = 1000;
 constexpr int height = 1000;
 
-constexpr double R      = 400;
-constexpr double dTheta = 2 * M_PI / 15;
+constexpr double R      = 100;
+constexpr double dTheta = 2 * M_PI / 50;
 constexpr double dPhi   = M_PI / 15;
 
 struct program : gfx_program
@@ -29,14 +30,6 @@ struct program : gfx_program
         out.y = height * (1 + res.getElement(0, 1)) / 2;
         out.z = 1 + res.getElement(0, 2);
 
-        std::printf("cordinate: (%lf, %lf, %lf), color: (%lf, %lf, %lf)\n",
-                    out.x,
-                    out.y,
-                    out.z,
-                    out.r,
-                    out.g,
-                    out.b);
-
         return out;
     }
     rgb fragment_shader(const vertex& v_in)
@@ -47,7 +40,7 @@ struct program : gfx_program
     }
     uniforms*         uniforms_1;
     view_convertation view =
-        view_convertation(static_cast<double>(width) / height, R, 5 * R);
+        view_convertation(static_cast<double>(width) / height, 1, 3 * R);
 } program_1;
 
 vertex get_sphere(double phi, double theta)
@@ -55,7 +48,7 @@ vertex get_sphere(double phi, double theta)
 
     return vertex{ R * (cos(phi) * sin(theta)),
                    R * (sin(phi) * sin(theta)),
-                   R * (1 + cos(theta)),
+                   R * (2 + cos(theta)),
                    255 * std::pow(std::cos(theta), 2),
                    0,
                    0,
@@ -131,24 +124,18 @@ int main()
     void*     pixels = image.get_pixels().data();
     const int depth  = sizeof(rgb) * 8;
     const int pitch  = width * sizeof(rgb);
-    const int rmask  = 0x000000ff;
-    const int gmask  = 0x0000ff00;
-    const int bmask  = 0x00ff0000;
-    const int amask  = 0;
 
     triangle_interpolated_redner triangle_render(image);
     triangle_render.set_pen_color(rgb{ 0, 0, 0 });
     triangle_render.clear(rgb{ 255, 255, 255 });
 
     uniforms uni;
-
+    double   phi = 0;
     program_1.set_uniforms(uni);
     triangle_render.set_gfx_program(program_1);
 
     std::vector<vertex> vertexes;
     std::vector<uint>   indexes;
-
-    get_sphere_triangles(vertexes, indexes);
 
     for (int i = 0; i < indexes.size(); i += 3)
     {
@@ -166,10 +153,10 @@ int main()
         }
     }
 
-    triangle_render.draw_triangles(vertexes, indexes);
+    get_sphere_triangles(vertexes, indexes);
 
-    bool is_alive = true;
-
+    bool                                       is_alive = true;
+    std::chrono::_V2::steady_clock::time_point last_time;
     while (is_alive)
     {
         SDL_Event event;
@@ -179,6 +166,18 @@ int main()
                 is_alive = false;
             break;
         }
+        auto curr_time = std::chrono::steady_clock::now();
+        if (static_cast<std::chrono::duration<double>>(curr_time - last_time)
+                .count() < 1. / 60.)
+            continue;
+        last_time = curr_time;
+
+        program_1.view.set_translation(R * cos(phi), R * sin(phi), 2 * R);
+        phi += dPhi / 10;
+
+        triangle_render.clear({ 255, 255, 255 });
+        triangle_render.draw_triangles(vertexes, indexes);
+
         SDL_Surface* bitmapSurface = SDL_CreateSurfaceFrom(
             pixels, width, height, pitch, SDL_PIXELFORMAT_RGB24);
 
@@ -188,26 +187,26 @@ int main()
             return EXIT_FAILURE;
         }
 
-        // SDL_Texture* bitmapTex =
-        //     SDL_CreateTextureFromSurface(renderer, bitmapSurface);
+        SDL_Texture* bitmapTex =
+            SDL_CreateTextureFromSurface(renderer, bitmapSurface);
 
-        // if (bitmapTex == nullptr)
-        // {
-        //     std::cout << SDL_GetError() << std::endl;
-        //     return EXIT_FAILURE;
-        // }
+        if (bitmapTex == nullptr)
+        {
+            std::cout << SDL_GetError() << std::endl;
+            return EXIT_FAILURE;
+        }
 
-        // SDL_DestroySurface(bitmapSurface);
+        SDL_DestroySurface(bitmapSurface);
 
-        // SDL_RenderClear(renderer);
-        // SDL_RenderTexture(renderer, bitmapTex, nullptr, nullptr);
-        // SDL_RenderPresent(renderer);
+        SDL_RenderClear(renderer);
+        SDL_RenderTexture(renderer, bitmapTex, nullptr, nullptr);
+        SDL_RenderPresent(renderer);
 
-        // SDL_DestroyTexture(bitmapTex);
+        SDL_DestroyTexture(bitmapTex);
     }
 
-    // SDL_DestroyRenderer(renderer);
-    // SDL_DestroyWindow(window_main);
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window_main);
 
     SDL_Quit();
 

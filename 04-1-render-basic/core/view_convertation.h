@@ -44,7 +44,13 @@ public:
 
         projection_matrix.set_element(0, 0, 1. / (aspect * std::tan(fovy / 2)));
     }
-    void set_rotation() {}
+    void set_rotation()
+    {
+        rotation_matrix.set_element(0, 0, 1);
+        rotation_matrix.set_element(1, 1, 1);
+        rotation_matrix.set_element(2, 2, 1);
+        rotation_matrix.set_element(3, 3, 1);
+    }
     void set_translation(int x, int y, int z)
     {
         translation_matrix.set_element(3, 0, x);
@@ -57,6 +63,8 @@ public:
         translation_matrix.set_element(3, 3, 1);
     }
 
+    void set_scale(double scale_x, double scale_y, double scale_z) {}
+
     matrix convert(int x, int y, int z)
     {
         matrix vec4 = matrix(1, 4);
@@ -65,12 +73,14 @@ public:
         vec4.set_element(0, 2, z);
         vec4.set_element(0, 3, 1);
 
-        matrix res = vec4 * projection_matrix;
+        matrix res = vec4 * translation_matrix * projection_matrix;
+        if (res.getElement(0, 3) == 0)
+            return res;
         return res / res.getElement(0, 3);
     }
 
 private:
-    double fovy           = M_PI / 100;
+    double fovy           = M_PI / 3;
     double aspect         = 0;
     double distance_front = 0;
     double distance_back  = 0;

@@ -24,7 +24,7 @@ rgb rgb::generate()
     // clang-format off
     return
     {
-        static_cast<uint8_t>(rand() % 256), 
+        static_cast<uint8_t>(rand() % 256),
         static_cast<uint8_t>(rand() % 256),
         static_cast<uint8_t>(rand() % 256)
     };
@@ -85,7 +85,7 @@ void canvas::set_pixel(size_t x, size_t y, rgb color)
     }
     catch (std::out_of_range e)
     {
-        std::printf("Point (%d, %d) out of range. \n", x, y);
+        // std::printf("Point (%d, %d) out of range. \n", x, y);
     }
 }
 
@@ -94,7 +94,7 @@ rgb canvas::get_pixel(size_t x, size_t y) const
     return pixels.at(y * width + x);
 }
 
-std::vector<rgb> canvas::get_pixels() const
+std::vector<rgb>& canvas::get_pixels()
 {
     return pixels;
 }

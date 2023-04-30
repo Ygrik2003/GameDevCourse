@@ -71,4 +71,4 @@ target_include_directories(04-5-3d-render PUBLIC
                            ${CMAKE_CURRENT_SOURCE_DIR}/core)
 
 find_package(SDL3 REQUIRED)
-target_link_libraries(04-5-3d-render PUBLIC SDL3::SDL3-shared)
+target_link_libraries(04-5-3d-render PUBLIC SDL3::SDL3)
