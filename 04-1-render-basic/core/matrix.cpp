@@ -2,22 +2,22 @@
 
 matrix::matrix()
 {
-    this->setSize(1, 1);
+    this->set_size(1, 1);
 }
 
 matrix::matrix(int height, int width)
 {
-    this->setSize(height, width);
+    this->set_size(height, width);
 }
 
 matrix::matrix(msize size)
 {
-    this->setSize(size);
+    this->set_size(size);
 }
 
 matrix::matrix(const matrix& a)
 {
-    msize size = a.getSize();
+    msize size = a.get_size();
     mat.resize(size.height);
     for (int i = 0; i < size.height; i++)
     {
@@ -26,7 +26,7 @@ matrix::matrix(const matrix& a)
     }
 }
 
-void matrix::setSize(int height, int width)
+void matrix::set_size(int height, int width)
 {
     if (height <= 0 || width <= 0)
         throw matrix_exception(matrix_exception::errors::IndexError,
@@ -37,26 +37,27 @@ void matrix::setSize(int height, int width)
         mat[i].resize(width);
 }
 
-void matrix::setSize(msize size)
+void matrix::set_size(msize size)
 {
     if (size.height <= 0 || size.width <= 0)
         throw matrix_exception(matrix_exception::errors::IndexError, size);
 
-    this->setSize(size.height, size.width);
+    this->set_size(size.height, size.width);
 }
 
-msize matrix::getSize() const
+msize matrix::get_size() const
 {
     return msize(mat.size(), mat[0].size());
 }
 
 matrix matrix::operator+(matrix mat)
 {
-    if (this->getSize() != mat.getSize())
-        throw matrix_exception(
-            matrix_exception::errors::SumError, this->getSize(), mat.getSize());
+    if (this->get_size() != mat.get_size())
+        throw matrix_exception(matrix_exception::errors::SumError,
+                               this->get_size(),
+                               mat.get_size());
 
-    matrix temp(this->getSize());
+    matrix temp(this->get_size());
     for (int i = 0; i < this->mat.size(); i++)
         for (int j = 0; j < this->mat[i].size(); j++)
             temp.mat[i][j] = this->mat[i][j] + mat.mat[i][j];
@@ -65,11 +66,12 @@ matrix matrix::operator+(matrix mat)
 
 matrix matrix::operator-(matrix mat)
 {
-    if (this->getSize() != mat.getSize())
-        throw matrix_exception(
-            matrix_exception::errors::SubError, this->getSize(), mat.getSize());
+    if (this->get_size() != mat.get_size())
+        throw matrix_exception(matrix_exception::errors::SubError,
+                               this->get_size(),
+                               mat.get_size());
 
-    matrix temp(this->getSize());
+    matrix temp(this->get_size());
     for (int i = 0; i < this->mat.size(); i++)
         for (int j = 0; j < this->mat[i].size(); j++)
             temp.mat[i][j] = this->mat[i][j] - mat.mat[i][j];
@@ -78,7 +80,7 @@ matrix matrix::operator-(matrix mat)
 
 matrix matrix::operator*(const double number)
 {
-    matrix temp(this->getSize());
+    matrix temp(this->get_size());
     for (int i = 0; i < this->mat.size(); i++)
         for (int j = 0; j < this->mat[i].size(); j++)
             temp.mat[i][j] = this->mat[i][j] * number;
@@ -87,8 +89,8 @@ matrix matrix::operator*(const double number)
 
 matrix operator*(const double number, matrix mat)
 {
-    matrix temp(mat.getSize());
-    for (int i = 0; i < mat.getSize().height; i++)
+    matrix temp(mat.get_size());
+    for (int i = 0; i < mat.get_size().height; i++)
         for (int j = 0; j < mat.mat[i].size(); j++)
             temp.mat[i][j] = mat.mat[i][j] * number;
     return temp;
@@ -97,8 +99,9 @@ matrix operator*(const double number, matrix mat)
 matrix matrix::operator*(matrix mat)
 {
     if (this->mat[0].size() != mat.mat.size())
-        throw matrix_exception(
-            matrix_exception::errors::MulError, this->getSize(), mat.getSize());
+        throw matrix_exception(matrix_exception::errors::MulError,
+                               this->get_size(),
+                               mat.get_size());
 
     matrix temp(this->mat.size(), mat.mat[0].size());
     for (int i = 0; i < this->mat.size(); i++)
@@ -113,7 +116,7 @@ matrix matrix::operator/(const double number)
     if (number == 0)
         throw matrix_exception(matrix_exception::errors::ZeroDivisionError);
 
-    matrix temp(this->getSize());
+    matrix temp(this->get_size());
     for (int i = 0; i < this->mat.size(); i++)
         for (int j = 0; j < this->mat[i].size(); j++)
             temp.mat[i][j] = this->mat[i][j] / number;
@@ -134,18 +137,18 @@ double matrix::determinant()
 {
     if (this->mat[0].size() != mat.size())
         throw matrix_exception(matrix_exception::errors::DeterminantError,
-                               getSize());
+                               get_size());
 
     return det(mat);
 }
 
-double matrix::algAddition(int i, int j)
+double matrix::alg_addition(int i, int j)
 {
     matrix temp;
     double a = mat[i][j];
     temp.mat = mat;
-    temp.delRow(i);
-    temp.delColumn(j);
+    temp.del_row(i);
+    temp.del_column(j);
     return a * pow(-1, i + j) * temp.determinant();
 }
 
@@ -167,11 +170,11 @@ void matrix::reverse()
     matrix tmp(mat.size(), mat.size());
     for (int i = 0; i < mat.size(); i++)
         for (int j = 0; j < mat.size(); j++)
-            tmp.mat[i][j] = (1 / d) * algAddition(i, j);
+            tmp.mat[i][j] = (1 / d) * alg_addition(i, j);
     mat = tmp.mat;
 }
 
-std::vector<double> matrix::getRow(int i)
+std::vector<double> matrix::get_row(int i)
 {
     if (i >= mat.size() || i < 0)
         throw matrix_exception(matrix_exception::errors::IndexError,
@@ -179,18 +182,18 @@ std::vector<double> matrix::getRow(int i)
     return mat[i];
 }
 
-std::vector<double> matrix::getColumn(int j)
+std::vector<double> matrix::get_column(int j)
 {
     if (j >= mat[0].size() || j < 0)
         throw matrix_exception(matrix_exception::errors::IndexError,
                                msize(0, j));
     std::vector<double> tmp;
-    for (int i = 0; i < this->getSize().height; i++)
+    for (int i = 0; i < this->get_size().height; i++)
         tmp.push_back(mat[i][j]);
     return tmp;
 }
 
-double matrix::getElement(int i, int j)
+double matrix::get_element(int i, int j)
 {
     if ((i >= mat.size() || i < 0) || (j >= mat[0].size() || j < 0))
         throw matrix_exception(matrix_exception::errors::IndexError,
@@ -206,7 +209,7 @@ void matrix::set_element(int i, int j, double value)
     mat[i][j] = value;
 }
 
-void matrix::delRow(int i)
+void matrix::del_row(int i)
 {
     if (i >= mat.size() || i < 0)
         throw matrix_exception(matrix_exception::errors::IndexError,
@@ -214,7 +217,7 @@ void matrix::delRow(int i)
     mat.erase(mat.begin() + i);
 }
 
-void matrix::delColumn(int j)
+void matrix::del_column(int j)
 {
     if (j >= mat[0].size() || j < 0)
         throw matrix_exception(matrix_exception::errors::IndexError,
@@ -223,43 +226,45 @@ void matrix::delColumn(int j)
         mat[i].erase(mat[i].begin() + j);
 }
 
-void matrix::addRow(int i, std::vector<double> a)
+void matrix::add_row(int i, std::vector<double> a)
 {
     if (i >= mat.size() || i < 0)
         throw matrix_exception(matrix_exception::errors::IndexError,
                                msize(i, 0));
     if (mat[0].size() != a.size())
-        throw matrix_exception(
-            matrix_exception::errors::SizeError, getSize(), msize(1, a.size()));
+        throw matrix_exception(matrix_exception::errors::SizeError,
+                               get_size(),
+                               msize(1, a.size()));
     mat.insert(mat.begin() + i, a);
 }
 
-void matrix::addRow()
+void matrix::add_row()
 {
     std::vector<double> tmp;
     tmp.resize(mat[0].size());
     mat.push_back(tmp);
 }
 
-void matrix::addColumn(int j, std::vector<double> a)
+void matrix::add_column(int j, std::vector<double> a)
 {
     if (j >= mat[0].size() || j < 0)
         throw matrix_exception(matrix_exception::errors::IndexError,
                                msize(0, j));
     if (mat.size() != a.size())
-        throw matrix_exception(
-            matrix_exception::errors::SizeError, getSize(), msize(a.size(), 1));
+        throw matrix_exception(matrix_exception::errors::SizeError,
+                               get_size(),
+                               msize(a.size(), 1));
     for (int i = 0; i < a.size(); i++)
         mat[i].insert(mat[i].begin() + j, a[i]);
 }
 
-void matrix::addColumn()
+void matrix::add_column()
 {
     for (int i = 0; i < mat.size(); i++)
         mat[i].push_back(0);
 }
 
-void matrix::swapRows(int i1, int i2)
+void matrix::swap_rows(int i1, int i2)
 {
     if (i1 >= mat.size() || i1 < 0)
         throw matrix_exception(matrix_exception::errors::IndexError,
@@ -270,7 +275,7 @@ void matrix::swapRows(int i1, int i2)
     std::swap(mat[i1], mat[i2]);
 }
 
-void matrix::swapColumns(int j1, int j2)
+void matrix::swap_columns(int j1, int j2)
 {
     if (j1 >= mat[0].size() || j1 < 0)
         throw matrix_exception(matrix_exception::errors::IndexError,
@@ -376,7 +381,7 @@ matrix_exception::matrix_exception(errors type, msize a, msize b)
     std::printf("[%1]: %2", err, info);
 }
 
-void matrix_exception::printError()
+void matrix_exception::print_error()
 {
     std::printf("[%1]: %2", err, info);
 }

@@ -31,8 +31,8 @@ public:
                                       -2 * distance_back * distance_front /
                                           (distance_back - distance_front));
         projection_matrix.set_element(3, 2, 1);
-        std::cout << projection_matrix.getElement(2, 2) << " "
-                  << projection_matrix.getElement(2, 3) << std::endl;
+        std::cout << projection_matrix.get_element(2, 2) << " "
+                  << projection_matrix.get_element(2, 3) << std::endl;
     }
 
     void set_fovy(double fovy)
@@ -58,7 +58,7 @@ public:
                                         sin(alpha) * cos(gamma));
         rotation_matrix.set_element(0,
                                     2,
-                                    cos(alpha) * sin(beta) * cos(gamma) -
+                                    cos(alpha) * sin(beta) * cos(gamma) +
                                         sin(alpha) * sin(gamma));
 
         rotation_matrix.set_element(1, 0, sin(alpha) * cos(beta));
@@ -107,11 +107,11 @@ public:
         vec4.set_element(0, 2, z);
         vec4.set_element(0, 3, 1);
 
-        matrix res = vec4 * scale_matrix * rotation_matrix *
-                     translation_matrix * projection_matrix;
-        if (res.getElement(0, 3) == 0)
+        matrix res = vec4 * scale_matrix * translation_matrix *
+                     rotation_matrix * projection_matrix;
+        if (res.get_element(0, 3) == 0)
             return res;
-        return res / res.getElement(0, 3);
+        return res / res.get_element(0, 3);
     }
 
 private:

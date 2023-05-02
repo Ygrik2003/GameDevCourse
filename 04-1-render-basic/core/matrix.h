@@ -36,7 +36,7 @@ public:
     };
 
     matrix_exception(errors type, msize a = { 0, 0 }, msize b = { 0, 0 });
-    void printError();
+    void print_error();
 
 private:
     std::string err, info;
@@ -50,9 +50,9 @@ public:
     matrix(msize);
     matrix(const matrix&);
 
-    void  setSize(int, int);
-    void  setSize(msize);
-    msize getSize() const;
+    void  set_size(int, int);
+    void  set_size(msize);
+    msize get_size() const;
 
     matrix operator+(matrix);
     matrix operator-(matrix);
@@ -62,35 +62,36 @@ public:
     matrix        operator/(const double);
     matrix&       operator=(const matrix);
 
-    std::vector<double> getRow(int i);    // Получить i строку
-    std::vector<double> getColumn(int j); // Получить j столбец
-    double getElement(int i, int j); // Получить i j элемент матрицы
+    std::vector<double> get_row(int i);    // Получить i строку
+    std::vector<double> get_column(int j); // Получить j столбец
+    double get_element(int i, int j); // Получить i j элемент матрицы
     void set_element(
         int i,
         int j,
         double value); // Установить значение value для i j элемента матрицы
 
     double determinant(); // Определитель матрицы
-    double algAddition(
+    double alg_addition(
         int i, int j); // Алгебраическое дополнение по i строки и j столбцу
 
     void transpose();  // Транспонированная матрица
     void reverse();    // Обратная матрица
 
-    void delRow(int i);    // Удалить i строку
-    void delColumn(int j); // Удалить j столбец
+    void del_row(int i);    // Удалить i строку
+    void del_column(int j); // Удалить j столбец
 
-    void addRow(int i,
-                std::vector<double>
-                    row); // Добавить строку row после i строки исходной матрицы
-    void addRow();
-    void addColumn(int j,
-                   std::vector<double> column); // Добавить столбец column после
-                                                // j столбца исходной матрицы
-    void addColumn();
+    void add_row(int i,
+                 std::vector<double> row); // Добавить строку row после i строки
+                                           // исходной матрицы
+    void add_row();
+    void add_column(
+        int j,
+        std::vector<double> column); // Добавить столбец column после
+                                     // j столбца исходной матрицы
+    void add_column();
 
-    void swapRows(int i1, int i2); // Меняет местами i1 и i2 строки
-    void swapColumns(int j1, int j2); // Меняет местами j1 и j2 столбцы
+    void swap_rows(int i1, int i2); // Меняет местами i1 и i2 строки
+    void swap_columns(int j1, int j2); // Меняет местами j1 и j2 столбцы
 private:
     double                           det(std::vector<std::vector<double>>);
     std::vector<std::vector<double>> mat;

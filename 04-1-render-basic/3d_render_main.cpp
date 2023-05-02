@@ -12,7 +12,9 @@
 constexpr int width  = 1000;
 constexpr int height = 1000;
 
-constexpr double R      = 100;
+constexpr double r_big   = 100;
+constexpr double r_small = 30;
+
 constexpr double dTheta = M_PI / 15;
 constexpr double dPhi   = 2 * M_PI / 15;
 
@@ -27,9 +29,9 @@ void vertexs_projection(const std::vector<vertex>& v_in,
                                   static_cast<int>(v_in[i].y),
                                   static_cast<int>(v_in[i].z));
 
-        v_out[i].x = width * (1 + res.getElement(0, 0)) / 2;
-        v_out[i].y = height * (1 + res.getElement(0, 1)) / 2;
-        v_out[i].z = 1 + res.getElement(0, 2);
+        v_out[i].x = width * (1 + res.get_element(0, 0)) / 2;
+        v_out[i].y = height * (1 + res.get_element(0, 1)) / 2;
+        v_out[i].z = 1 + res.get_element(0, 2);
 
         v_out[i].r = v_in[i].r;
         v_out[i].g = v_in[i].g;
@@ -45,6 +47,15 @@ struct program : gfx_program
     vertex vertex_shader(const vertex& v_in)
     {
         vertex out(v_in);
+
+        // if (std::pow(std::pow(uniforms_1->f0 - v_in.x, 2) +
+        //                  std::pow(uniforms_1->f1 - v_in.y, 2),
+        //              1. / 2.) > r_big)
+        //     return out;
+
+        // out.x += 100 * cos(uniforms_1->f0 - v_in.x);
+        // out.y += 100 * cos(uniforms_1->f1 - v_in.y);
+
         return out;
     }
     rgb fragment_shader(const vertex& v_in)
@@ -62,17 +73,18 @@ struct program : gfx_program
     uniforms* uniforms_1;
 } program_1;
 
-vertex get_sphere(double phi, double theta)
+vertex get_sphere(double phi, double theta, double r)
 {
 
-    return vertex{ R * (cos(phi) * sin(theta)),
-                   R * (sin(phi) * sin(theta)),
-                   R * (cos(theta)),
+    return vertex{ r * (cos(phi) * sin(theta)),
+                   r * (sin(phi) * sin(theta)),
+                   r * (cos(theta)),
                    255 * std::pow(std::cos(theta), 2) };
 }
 
 void get_sphere_triangles(std::vector<vertex>& vertexes,
-                          std::vector<uint>&   indexes)
+                          std::vector<uint>&   indexes,
+                          double               r)
 {
     auto get_index = [](int phi_c, int theta_c)
     {
@@ -92,7 +104,6 @@ void get_sphere_triangles(std::vector<vertex>& vertexes,
         }
         else
         {
-
             return 1 + (theta_c - 1) * static_cast<int>(2 * M_PI / dPhi + 1) +
                    phi_c % static_cast<int>(2 * M_PI / dPhi);
         }
@@ -101,13 +112,13 @@ void get_sphere_triangles(std::vector<vertex>& vertexes,
     int    index = 0;
     double theta = 0, phi;
 
-    vertexes.push_back(get_sphere(0, 0));
+    vertexes.push_back(get_sphere(0, 0, r));
     for (int theta_counter = 1; theta_counter <= M_PI / dTheta; theta_counter++)
     {
         phi = 0;
         for (int phi_counter = 0; phi_counter <= 2 * M_PI / dPhi; phi_counter++)
         {
-            vertexes.push_back(get_sphere(phi, theta));
+            vertexes.push_back(get_sphere(phi, theta, r));
 
             if (theta_counter < static_cast<int>(M_PI / dTheta))
             {
@@ -132,7 +143,7 @@ void get_sphere_triangles(std::vector<vertex>& vertexes,
         }
         theta += dTheta;
     }
-    vertexes.push_back(get_sphere(0, M_PI));
+    vertexes.push_back(get_sphere(0, M_PI, r));
 }
 
 double mean_z(const std::vector<vertex>& vertexes, int i1, int i2, int i3)
@@ -145,9 +156,10 @@ double mean_z(const std::vector<vertex>& vertexes, int i1, int i2, int i3)
 int main()
 {
 
-    int camera_x = 0;
-    int camera_y = 0;
-    int camera_z = 0;
+    int    camera_x      = 0;
+    int    camera_y      = 0;
+    int    camera_z      = 0;
+    double camera_rotate = 0;
 
     if (0 != SDL_Init(SDL_INIT_VIDEO))
     {
@@ -177,21 +189,25 @@ int main()
     const int pitch  = width * sizeof(rgb);
 
     triangle_interpolated_redner triangle_render(image);
-    // triangle_render.set_pen_color(rgb{ 0, 0, 0 });
+    triangle_render.set_pen_color(rgb{ 0, 0, 0 });
     triangle_render.clear(rgb{ 255, 255, 255 });
 
     uniforms uni;
     program_1.set_uniforms(uni);
     triangle_render.set_gfx_program(program_1);
 
-    view_convertation   view(static_cast<double>(width) / height, 1, 3 * R);
-    double              phi = 0;
+    view_convertation view(static_cast<double>(width) / height, 1, 3 * r_big);
+
+    double           phi        = 0;
+    constexpr double d_phi      = M_PI / 30;
+    bool             is_rotated = true;
+
     std::vector<vertex> vertexes;
     std::vector<vertex> current_vertexes;
     std::vector<uint>   indexes;
     std::vector<uint>   current_indexes;
 
-    get_sphere_triangles(vertexes, indexes);
+    get_sphere_triangles(vertexes, indexes, r_big);
 
     double mouse_x = 0, mouse_y = 0;
     bool   is_alive = true;
@@ -220,12 +236,20 @@ int main()
                     camera_x -= 10;
                 if (event.key.keysym.sym == SDLK_d)
                     camera_x += 10;
+
+                if (event.key.keysym.sym == SDLK_RIGHT)
+                    camera_rotate -= 0.1;
+                if (event.key.keysym.sym == SDLK_LEFT)
+                    camera_rotate += 0.1;
+
+                if (event.key.keysym.sym == SDLK_SPACE)
+                    is_rotated = !is_rotated;
             }
         }
 
-        view.set_translation(
-            camera_x, camera_y + R * sin(phi), camera_z + 2 * R);
-        view.set_rotation(0, 0, phi);
+        view.set_translation(camera_x, camera_y, camera_z + 10 * r_big);
+        view.set_rotation(0, camera_rotate, 0);
+        ;
 
         vertexs_projection(vertexes, current_vertexes, view);
         current_indexes = indexes;
@@ -279,8 +303,10 @@ int main()
 
         SDL_DestroyTexture(bitmapTex);
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000 / 60));
-        phi += dPhi / 5;
+        // std::this_thread::sleep_for(std::chrono::milliseconds(1000 / 60));
+
+        if (is_rotated)
+            phi += d_phi;
     }
 
     SDL_DestroyRenderer(renderer);

@@ -6,16 +6,16 @@
 #include <algorithm>
 #include <iostream>
 
-constexpr double R      = 400;
+constexpr double r_big  = 400;
 constexpr double dTheta = 2 * M_PI / 15;
 constexpr double dPhi   = M_PI / 15;
 
 vertex get_sphere(double phi, double theta)
 {
 
-    return vertex{ R * (cos(phi) * sin(theta)),
-                   R * (sin(phi) * sin(theta)),
-                   R * (1 + cos(theta)),
+    return vertex{ r_big * (cos(phi) * sin(theta)),
+                   r_big * (sin(phi) * sin(theta)),
+                   r_big * (1 + cos(theta)),
                    255 * std::pow(std::cos(theta), 2),
                    0,
                    0,
@@ -86,9 +86,9 @@ int main()
                                       static_cast<int>(out.y),
                                       static_cast<int>(out.z));
 
-            out.x = width * (1 + res.getElement(0, 0)) / 2;
-            out.y = height * (1 + res.getElement(0, 1)) / 2;
-            out.z = 1 + res.getElement(0, 2);
+            out.x = width * (1 + res.get_element(0, 0)) / 2;
+            out.y = height * (1 + res.get_element(0, 1)) / 2;
+            out.z = 1 + res.get_element(0, 2);
 
             std::printf("cordinate: (%lf, %lf, %lf), color: (%lf, %lf, %lf)\n",
                         out.x,
@@ -107,8 +107,8 @@ int main()
                      static_cast<uint8_t>(v_in.b) };
         }
         uniforms*         uniforms_1;
-        view_convertation view =
-            view_convertation(static_cast<double>(width) / height, R, 5 * R);
+        view_convertation view = view_convertation(
+            static_cast<double>(width) / height, r_big, 5 * r_big);
     } program_1;
 
     uniforms uni;
