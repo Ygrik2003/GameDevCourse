@@ -2,4 +2,5 @@
 
 class sphere_engine : public engine
 {
+public:
 };
