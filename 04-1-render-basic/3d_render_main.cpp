@@ -18,29 +18,6 @@ constexpr double r_small = 30;
 constexpr double dTheta = M_PI / 15;
 constexpr double dPhi   = 2 * M_PI / 15;
 
-void vertexs_projection(const std::vector<vertex>& v_in,
-                        std::vector<vertex>&       v_out,
-                        view_convertation&         view)
-{
-    v_out.resize(v_in.size());
-    for (int i = 0; i < v_in.size(); i++)
-    {
-        matrix res = view.convert(static_cast<int>(v_in[i].x),
-                                  static_cast<int>(v_in[i].y),
-                                  static_cast<int>(v_in[i].z));
-
-        v_out[i].x = width * (1 + res.get_element(0, 0)) / 2;
-        v_out[i].y = height * (1 + res.get_element(0, 1)) / 2;
-        v_out[i].z = 1 + res.get_element(0, 2);
-
-        v_out[i].r = v_in[i].r;
-        v_out[i].g = v_in[i].g;
-        v_out[i].b = v_in[i].b;
-        v_out[i].u = v_in[i].u;
-        v_out[i].v = v_in[i].v;
-    }
-}
-
 struct program : gfx_program
 {
     void   set_uniforms(uniforms& uniforms_) { uniforms_1 = &uniforms_; }
@@ -48,13 +25,13 @@ struct program : gfx_program
     {
         vertex out(v_in);
 
-        // if (std::pow(std::pow(uniforms_1->f0 - v_in.x, 2) +
-        //                  std::pow(uniforms_1->f1 - v_in.y, 2),
-        //              1. / 2.) > r_big)
-        //     return out;
+        matrix res = view.convert(static_cast<int>(out.x),
+                                  static_cast<int>(out.y),
+                                  static_cast<int>(out.z));
 
-        // out.x += 100 * cos(uniforms_1->f0 - v_in.x);
-        // out.y += 100 * cos(uniforms_1->f1 - v_in.y);
+        out.x = width * (1 + res.get_element(0, 0)) / 2;
+        out.y = height * (1 + res.get_element(0, 1)) / 2;
+        out.z = 1 - res.get_element(0, 2);
 
         return out;
     }
@@ -70,7 +47,9 @@ struct program : gfx_program
                  static_cast<uint8_t>(green),
                  static_cast<uint8_t>(v_in.b) };
     }
-    uniforms* uniforms_1;
+    uniforms*         uniforms_1;
+    view_convertation view =
+        view_convertation(static_cast<double>(width) / height, 1, 3 * r_big);
 } program_1;
 
 vertex get_sphere(double phi, double theta, double r)
@@ -79,7 +58,9 @@ vertex get_sphere(double phi, double theta, double r)
     return vertex{ r * (cos(phi) * sin(theta)),
                    r * (sin(phi) * sin(theta)),
                    r * (cos(theta)),
-                   255 * std::pow(std::cos(theta), 2) };
+                   255 * std::pow(std::cos(theta), 10),
+                   0,
+                   255 * std::pow(std::sin(theta), 10) };
 }
 
 void get_sphere_triangles(std::vector<vertex>& vertexes,
@@ -189,23 +170,19 @@ int main()
     const int pitch  = width * sizeof(rgb);
 
     triangle_interpolated_redner triangle_render(image);
-    triangle_render.set_pen_color(rgb{ 0, 0, 0 });
+    // triangle_render.set_pen_color(rgb{ 0, 0, 0 });
     triangle_render.clear(rgb{ 255, 255, 255 });
 
     uniforms uni;
     program_1.set_uniforms(uni);
     triangle_render.set_gfx_program(program_1);
 
-    view_convertation view(static_cast<double>(width) / height, 1, 3 * r_big);
-
     double           phi        = 0;
     constexpr double d_phi      = M_PI / 30;
     bool             is_rotated = true;
 
     std::vector<vertex> vertexes;
-    std::vector<vertex> current_vertexes;
     std::vector<uint>   indexes;
-    std::vector<uint>   current_indexes;
 
     get_sphere_triangles(vertexes, indexes, r_big);
 
@@ -229,53 +206,42 @@ int main()
             else if (event.type == SDL_EVENT_KEY_DOWN)
             {
                 if (event.key.keysym.sym == SDLK_w)
-                    camera_z -= 10;
+                {
+                    camera_z -= 10 * std::cos(camera_rotate);
+                    camera_x += 10 * std::sin(camera_rotate);
+                }
                 if (event.key.keysym.sym == SDLK_s)
-                    camera_z += 10;
+                {
+                    camera_z += 10 * std::cos(camera_rotate);
+                    camera_x -= 10 * std::sin(camera_rotate);
+                }
                 if (event.key.keysym.sym == SDLK_a)
-                    camera_x -= 10;
+                {
+                    camera_z -= 10 * std::sin(camera_rotate);
+                    camera_x -= 10 * std::cos(camera_rotate);
+                }
                 if (event.key.keysym.sym == SDLK_d)
-                    camera_x += 10;
+                {
+                    camera_z += 10 * std::sin(camera_rotate);
+                    camera_x += 10 * std::cos(camera_rotate);
+                }
 
                 if (event.key.keysym.sym == SDLK_RIGHT)
-                    camera_rotate -= 0.1;
+                    camera_rotate += 0.05;
                 if (event.key.keysym.sym == SDLK_LEFT)
-                    camera_rotate += 0.1;
+                    camera_rotate -= 0.05;
 
                 if (event.key.keysym.sym == SDLK_SPACE)
                     is_rotated = !is_rotated;
             }
         }
 
-        view.set_translation(camera_x, camera_y, camera_z + 10 * r_big);
-        view.set_rotation(0, camera_rotate, 0);
-        ;
-
-        vertexs_projection(vertexes, current_vertexes, view);
-        current_indexes = indexes;
-
-        for (int i = 0; i < current_indexes.size(); i += 3)
-        {
-            for (int j = i + 3; j < current_indexes.size(); j += 3)
-            {
-                if (mean_z(current_vertexes,
-                           current_indexes[i + 0],
-                           current_indexes[i + 1],
-                           current_indexes[i + 2]) <
-                    mean_z(current_vertexes,
-                           current_indexes[j + 0],
-                           current_indexes[j + 1],
-                           current_indexes[j + 2]))
-                {
-                    std::swap(current_indexes[i + 0], current_indexes[j + 0]);
-                    std::swap(current_indexes[i + 1], current_indexes[j + 1]);
-                    std::swap(current_indexes[i + 2], current_indexes[j + 2]);
-                }
-            }
-        }
+        program_1.view.set_translation(
+            camera_x, camera_y, camera_z + 10 * r_big);
+        program_1.view.set_rotation(0, camera_rotate, 0);
 
         triangle_render.clear({ 255, 255, 255 });
-        triangle_render.draw_triangles(current_vertexes, current_indexes);
+        triangle_render.draw_triangles(vertexes, indexes);
 
         SDL_Surface* bitmapSurface = SDL_CreateSurfaceFrom(
             pixels, width, height, pitch, SDL_PIXELFORMAT_RGB24);
@@ -303,7 +269,7 @@ int main()
 
         SDL_DestroyTexture(bitmapTex);
 
-        // std::this_thread::sleep_for(std::chrono::milliseconds(1000 / 60));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000 / 60));
 
         if (is_rotated)
             phi += d_phi;

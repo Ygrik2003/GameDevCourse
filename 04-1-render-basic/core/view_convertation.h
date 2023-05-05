@@ -115,7 +115,7 @@ public:
     }
 
 private:
-    double fovy           = M_PI / 2;
+    double fovy           = M_PI / 3;
     double aspect         = 0;
     double distance_front = 0;
     double distance_back  = 0;

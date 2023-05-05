@@ -41,6 +41,9 @@ public:
     auto begin() { return pixels.begin(); }
     auto end() { return pixels.end(); }
 
+    size_t get_width() const;
+    size_t get_height() const;
+
     bool operator==(const canvas& other) const;
     bool operator!=(const canvas& other) const;
 

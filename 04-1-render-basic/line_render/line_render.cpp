@@ -5,16 +5,24 @@
 line_render::line_render(canvas& buffer_)
     : buffer(buffer_)
 {
+    z_buffer.resize(buffer.get_width() * buffer.get_height());
 }
 
 void line_render::clear(rgb c)
 {
     std::fill(buffer.begin(), buffer.end(), c);
+    std::fill(z_buffer.begin(), z_buffer.end(), 0);
 }
 
-void line_render::set_pixel(position p, rgb c)
+void line_render::set_pixel(position p, double z, rgb c)
 {
-    buffer.set_pixel(p.x, p.y, c);
+    if (p.x >= buffer.get_width() || p.y >= buffer.get_height())
+        return;
+    if (z_buffer[p.x + buffer.get_width() * p.y] <= z)
+    {
+        z_buffer[p.x + buffer.get_width() * p.y] = z;
+        buffer.set_pixel(p.x, p.y, c);
+    }
 }
 
 pixels line_render::pixels_positions(position start, position end)
@@ -103,5 +111,5 @@ pixels line_render::pixels_positions(position start, position end)
 void line_render::draw_line(position start, position end, rgb c)
 {
     pixels l = pixels_positions(start, end);
-    std::for_each(l.begin(), l.end(), [&](auto& pos) { set_pixel(pos, c); });
+    std::for_each(l.begin(), l.end(), [&](auto& pos) { set_pixel(pos, 0, c); });
 }

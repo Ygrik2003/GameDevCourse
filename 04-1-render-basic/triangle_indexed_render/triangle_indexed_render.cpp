@@ -44,7 +44,7 @@ void triangle_indexed_render::draw_triangles(pixels&            vertexes,
 
         for (auto pixel : triangle_pixels)
         {
-            set_pixel(pixel, color);
+            set_pixel(pixel, 0, color);
         }
     }
 }

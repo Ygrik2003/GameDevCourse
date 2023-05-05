@@ -78,8 +78,6 @@ void canvas::load_image(const char* path)
 
 void canvas::set_pixel(size_t x, size_t y, rgb color)
 {
-    if (x >= width || y >= height)
-        return;
 
     rgb& pixel = pixels.at(y * width + x);
     pixel      = color;
@@ -93,6 +91,16 @@ rgb canvas::get_pixel(size_t x, size_t y) const
 std::vector<rgb>& canvas::get_pixels()
 {
     return pixels;
+}
+
+size_t canvas::get_width() const
+{
+    return width;
+}
+
+size_t canvas::get_height() const
+{
+    return height;
 }
 
 bool canvas::operator==(const canvas& other) const

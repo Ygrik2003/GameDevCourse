@@ -20,8 +20,11 @@ class irender
 {
 public:
     virtual void   clear(rgb)                                     = 0;
-    virtual void   set_pixel(position, rgb)                       = 0;
+    virtual void   set_pixel(position, double, rgb)               = 0;
     virtual pixels pixels_positions(position start, position end) = 0;
 
     virtual ~irender();
+
+protected:
+    std::vector<double> z_buffer;
 };

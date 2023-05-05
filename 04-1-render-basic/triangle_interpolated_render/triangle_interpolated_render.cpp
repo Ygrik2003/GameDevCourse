@@ -65,14 +65,24 @@ void triangle_interpolated_redner::draw_triangles(
         const vertex v2_ = program->vertex_shader(v2);
         const vertex v3_ = program->vertex_shader(v3);
 
+        if (v1_.x < -200 || v2_.x < -200 || v3_.x < -200 || v1_.y < -200 ||
+            v2_.y < -200 || v3_.y < -200 || v1_.x > 1200 || v2_.x > 1200 ||
+            v3_.x > 1200 || v1_.y > 1200 || v2_.y > 1200 || v3_.y > 1200)
+            return;
+
         std::vector<vertex> triangle = rasterize_triangle(v1_, v2_, v3_);
 
         for (auto pixel : triangle)
         {
             rgb color = program->fragment_shader(pixel);
-            set_pixel({ static_cast<int32_t>(std::round(pixel.x)),
-                        static_cast<int32_t>(std::round(pixel.y)) },
-                      color);
+
+            set_pixel(
+                {
+                    static_cast<int32_t>(std::round(pixel.x)),
+                    static_cast<int32_t>(std::round(pixel.y)),
+                },
+                pixel.z,
+                color);
         }
         if (pen_used)
         {
