@@ -12,7 +12,7 @@ void object::set_discretization(float d_phi, float d_theta)
     d2 = d_theta;
 }
 
-sphere_game::sphere_game(engine& e) {}
+sphere_game::sphere_game(engine* e) {}
 
 void sphere_game::add_object(const object& obj)
 {

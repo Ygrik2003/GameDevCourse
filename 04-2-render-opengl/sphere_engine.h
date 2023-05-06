@@ -13,9 +13,9 @@ public:
 
     GLuint load_shader(const char* path, int type) override;
 
-private:
     void render_triangle(const triangle&) override;
 
+private:
     config        _config;
     SDL_Window*   window;
     SDL_GLContext gl_context;

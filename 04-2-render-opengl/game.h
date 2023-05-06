@@ -45,7 +45,7 @@ protected:
 class sphere_game : public game
 {
 public:
-    sphere_game(engine& e);
+    sphere_game(engine* e);
 
     void   add_object(const object& obj) override;
     void   remove_object(size_t index) override;
