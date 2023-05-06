@@ -3,10 +3,10 @@
 
 sphere::sphere(int radius) {}
 
-void sphere::set_rotate(double alpha, double beta, double gamma) {}
-void sphere::set_translate(double dx, double dy, double dz) {}
-void sphere::set_scale(double scale_x, double scale_y, double scale_z) {}
-void sphere::set_discretization(double d_phi, double d_theta)
+void object::set_rotate(float alpha, float beta, float gamma) {}
+void object::set_translate(float dx, float dy, float dz) {}
+void object::set_scale(float scale_x, float scale_y, float scale_z) {}
+void object::set_discretization(float d_phi, float d_theta)
 {
     d1 = d_phi;
     d2 = d_theta;
