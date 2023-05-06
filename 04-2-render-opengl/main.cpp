@@ -5,12 +5,15 @@
 
 int main()
 {
-    sphere_engine* my_engine = new sphere_engine();
+    engine* my_engine = new sphere_engine();
     my_engine->initialize(config{});
 
     sphere_game my_game = sphere_game(my_engine);
 
     bool loop = true;
+
+    sphere sphere_1(1);
+    my_game.add_object(sphere_1);
 
     event e;
     while (loop)
@@ -23,9 +26,10 @@ int main()
                 break;
             }
         }
-        my_engine->render_triangle(triangle{
-            vertex{ 0, 0, 0 }, vertex{ 0.1, 0.1, 0 }, vertex{ 0, 0.2, 0 } });
-
+        for (auto it = my_game.begin(); it != my_game.end(); it++)
+        {
+            (*it).render(my_engine);
+        }
         my_engine->swap_buffers();
     }
 

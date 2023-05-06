@@ -13,8 +13,15 @@ public:
     virtual void set_scale(float x, float y, float z);
     virtual void set_discretization(float, float);
 
+    virtual void render(engine* _engine);
+
+    uint     size() const;
+    triangle get_triangle(const uint index);
+
 protected:
-    vertexes vertexes_object;
+    vertexes          _vertexes;
+    std::vector<uint> indexes;
+    uint              count_triangles = 0;
 
     // Step of discrete parameters
     float d1 = M_PI / 25;
@@ -25,10 +32,16 @@ protected:
     float mat_scale[4][4]{ 0 };
 };
 
+using objects = std::vector<object>;
+
 class sphere : public object
 {
 public:
-    sphere(int radius);
+    sphere(uint radius);
+
+private:
+    uint   get_index(int phi_c, int theta_c);
+    vertex get_sphere(double phi, double theta, uint r);
 };
 
 class game
@@ -38,8 +51,12 @@ public:
     virtual void   remove_object(size_t index)   = 0;
     virtual object get_object(size_t index)      = 0;
 
+    auto begin() { return _objects.begin(); }
+    auto end() { return _objects.end(); }
+
 protected:
-    std::vector<object> objects;
+    objects _objects;
+    engine* _engine;
 };
 
 class sphere_game : public game

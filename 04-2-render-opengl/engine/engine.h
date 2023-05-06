@@ -76,12 +76,16 @@ using triangles = std::vector<triangle>;
 class engine
 {
 public:
-    virtual ~engine() = default;
+    virtual int  initialize(config _config) = 0;
+    virtual void uninitialize()             = 0;
 
-    virtual int    initialize(config _config)              = 0;
-    virtual void   uninitialize()                          = 0;
-    virtual bool   event_keyboard(event&)                  = 0;
-    virtual void   render_triangle(const triangle&)        = 0;
+    virtual void update()                 = 0;
+    virtual void render(const triangles&) = 0;
+
+    virtual bool event_keyboard(event&) = 0;
+
+    virtual void render_triangle(const triangle&) = 0;
+    virtual void swap_buffers()                   = 0;
+
     virtual GLuint load_shader(const char* path, int type) = 0;
-    virtual void   swap_buffers()                          = 0;
 };

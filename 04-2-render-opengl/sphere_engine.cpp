@@ -162,15 +162,11 @@ int sphere_engine::initialize(config _config)
         GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 #endif
 
-    GLuint vertex_shader =
-        load_shader("/home/ygrik/shared/Projects/GameDevCourse/"
-                    "04-2-render-opengl/shaders/shader.vert",
-                    GL_VERTEX_SHADER);
+    GLuint vertex_shader = load_shader(
+        "./04-2-render-opengl/shaders/shader.vert", GL_VERTEX_SHADER);
 
-    GLuint fragment_shader =
-        load_shader("/home/ygrik/shared/Projects/GameDevCourse/"
-                    "04-2-render-opengl/shaders/shader.frag",
-                    GL_FRAGMENT_SHADER);
+    GLuint fragment_shader = load_shader(
+        "./04-2-render-opengl/shaders/shader.frag", GL_FRAGMENT_SHADER);
 
     handle_program = glCreateProgram();
     GL_CHECK_ERRORS()
@@ -252,6 +248,7 @@ bool sphere_engine::event_keyboard(event& e)
         }
         else if (sdl_event.type == SDL_EVENT_MOUSE_MOTION)
         {
+
             e.motion.x = sdl_event.motion.x;
             e.motion.y = sdl_event.motion.y;
             return true;
@@ -265,6 +262,16 @@ void sphere_engine::uninitialize()
     SDL_GL_DeleteContext(gl_context);
     SDL_DestroyWindow(window);
     SDL_Quit();
+}
+
+void sphere_engine::update() {}
+
+void sphere_engine::render(const triangles& trs)
+{
+    for (auto it = trs.begin(); it != trs.end(); it++)
+    {
+        render_triangle(*it);
+    }
 }
 
 GLuint sphere_engine::load_shader(const char* path, int type)
