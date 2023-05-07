@@ -73,6 +73,20 @@ struct triangle
 
 using triangles = std::vector<triangle>;
 
+struct transformation_object
+{
+    float rotate[3][3]{ 0 };
+    float scale[3]{ 0 };
+    float translate[3]{ 0 };
+};
+struct transformation_camera
+{
+    float rotate[4][4]{ 0 };
+    float scale[4][4]{ 0 };
+    float translate[4][4]{ 0 };
+    float projection[4][4]{ 0 };
+};
+
 class engine
 {
 public:
@@ -84,8 +98,9 @@ public:
 
     virtual bool event_keyboard(event&) = 0;
 
-    virtual void render_triangle(const triangle&) = 0;
-    virtual void swap_buffers()                   = 0;
+    virtual void render_triangle(const triangle&        tr,
+                                 transformation_object& uniforms) = 0;
+    virtual void swap_buffers()                                   = 0;
 
     virtual GLuint load_shader(const char* path, int type) = 0;
 };

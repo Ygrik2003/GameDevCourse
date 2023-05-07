@@ -162,11 +162,10 @@ int sphere_engine::initialize(config _config)
         GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 #endif
 
-    GLuint vertex_shader = load_shader(
-        "./04-2-render-opengl/shaders/shader.vert", GL_VERTEX_SHADER);
+    GLuint vertex_shader = load_shader(_config.vertex_shader, GL_VERTEX_SHADER);
 
-    GLuint fragment_shader = load_shader(
-        "./04-2-render-opengl/shaders/shader.frag", GL_FRAGMENT_SHADER);
+    GLuint fragment_shader =
+        load_shader(_config.fragment_shader, GL_FRAGMENT_SHADER);
 
     handle_program = glCreateProgram();
     GL_CHECK_ERRORS()
@@ -180,6 +179,7 @@ int sphere_engine::initialize(config _config)
 
     glAttachShader(handle_program, vertex_shader);
     GL_CHECK_ERRORS()
+
     glAttachShader(handle_program, fragment_shader);
     GL_CHECK_ERRORS()
 
@@ -188,6 +188,9 @@ int sphere_engine::initialize(config _config)
 
     glLinkProgram(handle_program);
     GL_CHECK_ERRORS()
+
+    // uniform_tr_obj = glGetUniformLocation(handle_program, "tr_obj");
+    // GL_CHECK_ERRORS()
 
     glGetProgramiv(handle_program, GL_LINK_STATUS, &result);
     GL_CHECK_ERRORS()
@@ -266,13 +269,7 @@ void sphere_engine::uninitialize()
 
 void sphere_engine::update() {}
 
-void sphere_engine::render(const triangles& trs)
-{
-    for (auto it = trs.begin(); it != trs.end(); it++)
-    {
-        render_triangle(*it);
-    }
-}
+void sphere_engine::render(const triangles& trs) {}
 
 GLuint sphere_engine::load_shader(const char* path, int type)
 {
@@ -320,8 +317,22 @@ GLuint sphere_engine::load_shader(const char* path, int type)
     return handle;
 }
 
-void sphere_engine::render_triangle(const triangle& tr)
+void sphere_engine::render_triangle(const triangle&        tr,
+                                    transformation_object& uniforms)
 {
+    uniform_tr_obj = glGetUniformLocation(handle_program, "tr_obj");
+    GL_CHECK_ERRORS()
+
+    glUniformMatrix3fv(uniform_tr_obj + 1,
+                       1,
+                       GL_FALSE,
+                       reinterpret_cast<float*>(&uniforms.rotate));
+    GL_CHECK_ERRORS()
+    glUniform3fv(uniform_tr_obj + 2, 1, uniforms.scale);
+    GL_CHECK_ERRORS()
+    glUniform3fv(uniform_tr_obj + 3, 1, uniforms.translate);
+    GL_CHECK_ERRORS()
+
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), &tr.v[0]);
     GL_CHECK_ERRORS()
 

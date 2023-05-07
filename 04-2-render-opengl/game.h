@@ -13,10 +13,14 @@ public:
     virtual void set_scale(float x, float y, float z);
     virtual void set_discretization(float, float);
 
+    virtual void calculate(){};
+
     virtual void render(engine* _engine);
 
     uint     size() const;
     triangle get_triangle(const uint index);
+
+    transformation_object get_transform() const { return tr_obj; }
 
 protected:
     vertexes          _vertexes;
@@ -27,9 +31,7 @@ protected:
     float d1 = M_PI / 25;
     float d2 = M_PI / 25;
 
-    float mat_rotate[4][4]{ 0 };
-    float mat_translate[4][4]{ 0 };
-    float mat_scale[4][4]{ 0 };
+    transformation_object tr_obj;
 };
 
 using objects = std::vector<object>;
@@ -42,14 +44,17 @@ public:
 private:
     uint   get_index(int phi_c, int theta_c);
     vertex get_sphere(double phi, double theta, uint r);
+    void   calculate() override;
+
+    uint radius;
 };
 
 class game
 {
 public:
-    virtual void   add_object(const object& obj) = 0;
-    virtual void   remove_object(size_t index)   = 0;
-    virtual object get_object(size_t index)      = 0;
+    virtual void    add_object(const object& obj) = 0;
+    virtual void    remove_object(size_t index)   = 0;
+    virtual object& get_object(size_t index)      = 0;
 
     auto begin() { return _objects.begin(); }
     auto end() { return _objects.end(); }
@@ -64,7 +69,7 @@ class sphere_game : public game
 public:
     sphere_game(engine* e);
 
-    void   add_object(const object& obj) override;
-    void   remove_object(size_t index) override;
-    object get_object(size_t index) override;
+    void    add_object(const object& obj) override;
+    void    remove_object(size_t index) override;
+    object& get_object(size_t index) override;
 };

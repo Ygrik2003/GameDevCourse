@@ -15,11 +15,15 @@ public:
     void   swap_buffers() override;
     GLuint load_shader(const char* path, int type) override;
 
-    void render_triangle(const triangle&) override;
+    void render_triangle(const triangle&        tr,
+                         transformation_object& uniforms) override;
 
 private:
     config        _config;
     SDL_Window*   window;
     SDL_GLContext gl_context;
     GLuint        handle_program;
+
+    GLuint uniform_tr_obj;
+    GLuint uniform_tr_cam;
 };
