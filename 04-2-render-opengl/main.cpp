@@ -16,9 +16,18 @@ int main()
     camera      _camera = camera(1., 30., M_PI / 2, 16. / 9.);
 
     sphere sphere_1(1);
+
+    sphere_1.set_scale(1. / 2, 1. / 2, 1. / 2);
+    sphere_1.set_translate(0, 0, 1);
     sphere_1.set_discretization(M_PI / 10, M_PI / 10);
-    // sphere_1.set_scale(9. / 16., 1., 1.);
     my_game.add_object(sphere_1);
+
+    sphere sphere_2(1);
+
+    sphere_2.set_scale(1. / 2, 1. / 2, 1. / 2);
+    sphere_2.set_translate(0, 0, -1);
+    sphere_2.set_discretization(M_PI / 10, M_PI / 10);
+    my_game.add_object(sphere_2);
 
     double phi;
     event  e;

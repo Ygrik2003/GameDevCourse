@@ -6,8 +6,8 @@
 sphere::sphere(uint r)
 {
     set_rotate(0, 0, 0);
-    set_scale(1. / 2, 1. / 2, 1. / 2);
-    set_translate(0, 0, 2);
+    set_scale(1.f, 1.f, 1.f);
+    set_translate(0, 0, 0);
     radius = r;
     calculate();
 }
