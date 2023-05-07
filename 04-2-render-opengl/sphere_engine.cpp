@@ -132,7 +132,7 @@ int sphere_engine::initialize(config _config)
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, gl_minor_v);
 
     gl_context = SDL_GL_CreateContext(window);
-
+    SDL_SetRelativeMouseMode(SDL_TRUE);
     if (gl_context == nullptr)
     {
         std::cerr << SDL_GetError();
@@ -209,6 +209,9 @@ int sphere_engine::initialize(config _config)
         glGetUniformLocation(handle_program, "tr_cam.projection");
     GL_CHECK_ERRORS()
 
+    uniform_color = glGetUniformLocation(handle_program, "triangle_color");
+    GL_CHECK_ERRORS()
+
     glGetProgramiv(handle_program, GL_LINK_STATUS, &result);
     GL_CHECK_ERRORS()
     if (result == 0)
@@ -237,6 +240,7 @@ int sphere_engine::initialize(config _config)
 bool sphere_engine::event_keyboard(event& e)
 {
     e.clear();
+    bool      is_event = false;
     SDL_Event sdl_event;
 
     if (SDL_PollEvent(&sdl_event))
@@ -244,7 +248,7 @@ bool sphere_engine::event_keyboard(event& e)
         if (sdl_event.type == SDL_EVENT_QUIT)
         {
             e.action.quit = true;
-            return true;
+            is_event      = true;
         }
         else if (sdl_event.type == SDL_EVENT_KEY_DOWN)
         {
@@ -254,7 +258,7 @@ bool sphere_engine::event_keyboard(event& e)
             if (sdl_event.key.keysym.sym == SDLK_a) e.keyboard.left_clicked  = 1;
             if (sdl_event.key.keysym.sym == SDLK_d) e.keyboard.right_clicked = 1;
             // clang-format on
-            return true;
+            is_event = true;
         }
         else if (sdl_event.type == SDL_EVENT_KEY_UP)
         {
@@ -264,17 +268,16 @@ bool sphere_engine::event_keyboard(event& e)
             if (sdl_event.key.keysym.sym == SDLK_a) e.keyboard.left_released  = 1;
             if (sdl_event.key.keysym.sym == SDLK_d) e.keyboard.right_released = 1;
             // clang-format on
-            return true;
+            is_event = true;
         }
         else if (sdl_event.type == SDL_EVENT_MOUSE_MOTION)
         {
-
-            e.motion.x = sdl_event.motion.x;
-            e.motion.y = sdl_event.motion.y;
-            return true;
+            e.motion.x = sdl_event.motion.xrel;
+            e.motion.y = sdl_event.motion.yrel;
+            is_event   = true;
         }
     }
-    return false;
+    return is_event;
 }
 
 void sphere_engine::uninitialize()
@@ -347,18 +350,20 @@ void sphere_engine::render_triangle(const triangle&        tr,
     GL_CHECK_ERRORS()
 
     glUniformMatrix4fv(
-        uniform_tr_cam_rotate, 1, GL_FALSE, &uniforms_2.rotate[0][0]);
+        uniform_tr_cam_rotate, 1, GL_TRUE, &uniforms_2.rotate[0][0]);
     GL_CHECK_ERRORS()
     glUniformMatrix4fv(
         uniform_tr_cam_scale, 1, GL_FALSE, &uniforms_2.scale[0][0]);
     GL_CHECK_ERRORS()
     glUniformMatrix4fv(
-        uniform_tr_cam_translate, 1, GL_FALSE, &uniforms_2.translate[0][0]);
+        uniform_tr_cam_translate, 1, GL_TRUE, &uniforms_2.translate[0][0]);
     GL_CHECK_ERRORS()
     glUniformMatrix4fv(
         uniform_tr_cam_projection, 1, GL_FALSE, &uniforms_2.projection[0][0]);
     GL_CHECK_ERRORS()
 
+    glUniform3fv(uniform_color, 1, &tr.v[0].color.r);
+    GL_CHECK_ERRORS()
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), &tr.v[0]);
     GL_CHECK_ERRORS()
 

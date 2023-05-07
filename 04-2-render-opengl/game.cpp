@@ -3,12 +3,10 @@
 
 #include <iostream>
 
-camera _camera = camera(2.2, 3., M_PI / 2, 9. / 16.);
-
 sphere::sphere(uint r)
 {
     set_rotate(0, 0, 0);
-    set_scale(0.5 * 9. / 16., 0.5, 0.5);
+    set_scale(1. / 2, 1. / 2, 1. / 2);
     set_translate(0, 0, 2);
     radius = r;
     calculate();
@@ -100,7 +98,10 @@ vertex sphere::get_sphere(double phi, double theta, uint r)
 
     return vertex{ static_cast<float>(r * (cos(phi) * sin(theta))),
                    static_cast<float>(r * (sin(phi) * sin(theta))),
-                   static_cast<float>(r * (cos(theta))) };
+                   static_cast<float>(r * (cos(theta))),
+                   static_cast<float>(std::pow(std::cos(theta), 2)),
+                   0,
+                   0 };
 }
 
 void object::set_rotate(float alpha, float beta, float gamma)
@@ -140,7 +141,7 @@ void object::set_discretization(float d_phi, float d_theta)
     calculate();
 }
 
-void object::render(engine* _engine)
+void object::render(engine* _engine, camera& _camera)
 {
     for (uint i = 0; i < size(); i++)
     {

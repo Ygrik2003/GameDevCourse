@@ -5,6 +5,26 @@
 #include <cstdint>
 #include <vector>
 
+class camera
+{
+public:
+    camera(float front, float back, float fovy, float aspect);
+    void set_rotate(float alpha, float beta, float gamma);
+    void set_scale(float x, float y, float z);
+
+    void                   move(float dx, float dy, float dz);
+    transformation_camera& get_transform();
+
+private:
+    void set_translate(float dx, float dy, float dz);
+
+    transformation_camera tr_cam;
+    struct
+    {
+        float x{}, y{}, z{};
+    } pos;
+};
+
 class object
 {
 public:
@@ -15,7 +35,7 @@ public:
 
     virtual void calculate(){};
 
-    virtual void render(engine* _engine);
+    virtual void render(engine* _engine, camera& _camera);
 
     uint     size() const;
     triangle get_triangle(const uint index);
@@ -47,26 +67,6 @@ private:
     void   calculate() override;
 
     uint radius;
-};
-
-class camera
-{
-public:
-    camera(float front, float back, float fovy, float aspect);
-    void set_rotate(float alpha, float beta, float gamma);
-    void set_scale(float x, float y, float z);
-
-    void                   move(float dx, float dy, float dz);
-    transformation_camera& get_transform();
-
-private:
-    void set_translate(float dx, float dy, float dz);
-
-    transformation_camera tr_cam;
-    struct
-    {
-        float x{}, y{}, z{};
-    } pos;
 };
 
 class game

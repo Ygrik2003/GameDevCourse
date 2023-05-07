@@ -33,4 +33,6 @@ private:
     GLuint uniform_tr_cam_scale;
     GLuint uniform_tr_cam_translate;
     GLuint uniform_tr_cam_projection;
+
+    GLint uniform_color;
 };

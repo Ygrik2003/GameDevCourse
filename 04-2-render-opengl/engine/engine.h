@@ -40,9 +40,9 @@
 
 struct rgb
 {
-    uint8_t r;
-    uint8_t g;
-    uint8_t b;
+    float r;
+    float g;
+    float b;
 };
 
 struct vertex
@@ -50,6 +50,8 @@ struct vertex
     float x = 0.f;
     float y = 0.f;
     float z = 0.f;
+
+    rgb color;
 };
 
 using vertexes = std::vector<vertex>;
