@@ -49,6 +49,26 @@ private:
     uint radius;
 };
 
+class camera
+{
+public:
+    camera(float front, float back, float fovy, float aspect);
+    void set_rotate(float alpha, float beta, float gamma);
+    void set_scale(float x, float y, float z);
+
+    void                   move(float dx, float dy, float dz);
+    transformation_camera& get_transform();
+
+private:
+    void set_translate(float dx, float dy, float dz);
+
+    transformation_camera tr_cam;
+    struct
+    {
+        float x{}, y{}, z{};
+    } pos;
+};
+
 class game
 {
 public:

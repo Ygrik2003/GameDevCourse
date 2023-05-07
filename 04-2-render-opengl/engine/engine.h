@@ -99,8 +99,9 @@ public:
     virtual bool event_keyboard(event&) = 0;
 
     virtual void render_triangle(const triangle&        tr,
-                                 transformation_object& uniforms) = 0;
-    virtual void swap_buffers()                                   = 0;
+                                 transformation_object& uniforms_1,
+                                 transformation_camera& uniforms_2) = 0;
+    virtual void swap_buffers()                                     = 0;
 
     virtual GLuint load_shader(const char* path, int type) = 0;
 };

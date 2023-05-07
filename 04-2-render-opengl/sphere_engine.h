@@ -16,7 +16,8 @@ public:
     GLuint load_shader(const char* path, int type) override;
 
     void render_triangle(const triangle&        tr,
-                         transformation_object& uniforms) override;
+                         transformation_object& uniforms_1,
+                         transformation_camera& uniforms_2) override;
 
 private:
     config        _config;
@@ -24,6 +25,12 @@ private:
     SDL_GLContext gl_context;
     GLuint        handle_program;
 
-    GLuint uniform_tr_obj;
-    GLuint uniform_tr_cam;
+    GLuint uniform_tr_obj_rotate;
+    GLuint uniform_tr_obj_scale;
+    GLuint uniform_tr_obj_translate;
+
+    GLuint uniform_tr_cam_rotate;
+    GLuint uniform_tr_cam_scale;
+    GLuint uniform_tr_cam_translate;
+    GLuint uniform_tr_cam_projection;
 };

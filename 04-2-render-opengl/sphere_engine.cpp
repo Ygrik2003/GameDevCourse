@@ -189,8 +189,25 @@ int sphere_engine::initialize(config _config)
     glLinkProgram(handle_program);
     GL_CHECK_ERRORS()
 
-    // uniform_tr_obj = glGetUniformLocation(handle_program, "tr_obj");
-    // GL_CHECK_ERRORS()
+    uniform_tr_obj_rotate =
+        glGetUniformLocation(handle_program, "tr_obj.rotate");
+    GL_CHECK_ERRORS()
+    uniform_tr_obj_scale = glGetUniformLocation(handle_program, "tr_obj.scale");
+    GL_CHECK_ERRORS()
+    uniform_tr_obj_translate =
+        glGetUniformLocation(handle_program, "tr_obj.translate");
+    GL_CHECK_ERRORS()
+    uniform_tr_cam_rotate =
+        glGetUniformLocation(handle_program, "tr_cam.rotate");
+    GL_CHECK_ERRORS()
+    uniform_tr_cam_scale = glGetUniformLocation(handle_program, "tr_cam.scale");
+    GL_CHECK_ERRORS()
+    uniform_tr_cam_translate =
+        glGetUniformLocation(handle_program, "tr_cam.translate");
+    GL_CHECK_ERRORS()
+    uniform_tr_cam_projection =
+        glGetUniformLocation(handle_program, "tr_cam.projection");
+    GL_CHECK_ERRORS()
 
     glGetProgramiv(handle_program, GL_LINK_STATUS, &result);
     GL_CHECK_ERRORS()
@@ -318,19 +335,28 @@ GLuint sphere_engine::load_shader(const char* path, int type)
 }
 
 void sphere_engine::render_triangle(const triangle&        tr,
-                                    transformation_object& uniforms)
+                                    transformation_object& uniforms_1,
+                                    transformation_camera& uniforms_2)
 {
-    uniform_tr_obj = glGetUniformLocation(handle_program, "tr_obj");
+    glUniformMatrix3fv(
+        uniform_tr_obj_rotate, 1, GL_FALSE, &uniforms_1.rotate[0][0]);
+    GL_CHECK_ERRORS()
+    glUniform3fv(uniform_tr_obj_scale, 1, uniforms_1.scale);
+    GL_CHECK_ERRORS()
+    glUniform3fv(uniform_tr_obj_translate, 1, uniforms_1.translate);
     GL_CHECK_ERRORS()
 
-    glUniformMatrix3fv(uniform_tr_obj + 1,
-                       1,
-                       GL_FALSE,
-                       reinterpret_cast<float*>(&uniforms.rotate));
+    glUniformMatrix4fv(
+        uniform_tr_cam_rotate, 1, GL_FALSE, &uniforms_2.rotate[0][0]);
     GL_CHECK_ERRORS()
-    glUniform3fv(uniform_tr_obj + 2, 1, uniforms.scale);
+    glUniformMatrix4fv(
+        uniform_tr_cam_scale, 1, GL_FALSE, &uniforms_2.scale[0][0]);
     GL_CHECK_ERRORS()
-    glUniform3fv(uniform_tr_obj + 3, 1, uniforms.translate);
+    glUniformMatrix4fv(
+        uniform_tr_cam_translate, 1, GL_FALSE, &uniforms_2.translate[0][0]);
+    GL_CHECK_ERRORS()
+    glUniformMatrix4fv(
+        uniform_tr_cam_projection, 1, GL_FALSE, &uniforms_2.projection[0][0]);
     GL_CHECK_ERRORS()
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), &tr.v[0]);
