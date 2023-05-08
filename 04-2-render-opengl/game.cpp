@@ -83,9 +83,8 @@ uint sphere::get_index(int phi_c, int theta_c)
     }
     else if (theta_c == static_cast<int>(M_PI / d2) + 1)
     {
-        return (static_cast<int>(M_PI / d2)) *
-                   (static_cast<int>(2 * M_PI / d1) + 1) +
-               1;
+        return 1 + (static_cast<int>(M_PI / d2)) *
+                       (static_cast<int>(2 * M_PI / d1) + 1);
     }
     else
     {
@@ -100,8 +99,9 @@ vertex sphere::get_sphere(double phi, double theta, uint r)
                    static_cast<float>(r * (sin(phi) * sin(theta))),
                    static_cast<float>(r * (cos(theta))),
                    static_cast<float>(std::pow(std::cos(theta), 2)),
-                   0,
-                   0 };
+                   0.,
+                   0.,
+                   1. };
 }
 
 void object::set_rotate(float alpha, float beta, float gamma)

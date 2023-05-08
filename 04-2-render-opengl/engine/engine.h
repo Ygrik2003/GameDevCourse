@@ -52,7 +52,10 @@ struct vertex
     float y = 0.f;
     float z = 0.f;
 
-    rgba color;
+    float r = 0.f;
+    float g = 0.f;
+    float b = 0.f;
+    float a = 0.f;
 };
 
 using vertexes = std::vector<vertex>;
