@@ -385,7 +385,7 @@ void sphere_engine::render_triangle(const triangle&        tr,
     glEnableVertexAttribArray(1);
     GL_CHECK_ERRORS()
     glVertexAttribPointer(
-        1, 4, GL_FLOAT, GL_FALSE, sizeof(vertex), &tr.v[0] + 7 * sizeof(float));
+        1, 4, GL_FLOAT, GL_FALSE, sizeof(vertex), &tr.v[0] + 4 * sizeof(float));
     GL_CHECK_ERRORS()
 
     glDrawArrays(GL_TRIANGLES, 0, 3);
