@@ -209,7 +209,10 @@ int sphere_engine::initialize(config _config)
         glGetUniformLocation(handle_program, "tr_cam.projection");
     GL_CHECK_ERRORS()
 
-    uniform_color = glGetUniformLocation(handle_program, "triangle_color");
+    // vertex_color = glGetUniformLocation(handle_program, "a_color");
+    // GL_CHECK_ERRORS()
+
+    uniform_time = glGetUniformLocation(handle_program, "iTime");
     GL_CHECK_ERRORS()
 
     glGetProgramiv(handle_program, GL_LINK_STATUS, &result);
@@ -253,20 +256,22 @@ bool sphere_engine::event_keyboard(event& e)
         else if (sdl_event.type == SDL_EVENT_KEY_DOWN)
         {
             // clang-format off
-            if (sdl_event.key.keysym.sym == SDLK_w) e.keyboard.up_clicked    = 1;
-            if (sdl_event.key.keysym.sym == SDLK_s) e.keyboard.down_clicked  = 1;
-            if (sdl_event.key.keysym.sym == SDLK_a) e.keyboard.left_clicked  = 1;
-            if (sdl_event.key.keysym.sym == SDLK_d) e.keyboard.right_clicked = 1;
+            if (sdl_event.key.keysym.sym == SDLK_w) e.keyboard.up_clicked        = 1;
+            if (sdl_event.key.keysym.sym == SDLK_s) e.keyboard.down_clicked      = 1;
+            if (sdl_event.key.keysym.sym == SDLK_a) e.keyboard.left_clicked      = 1;
+            if (sdl_event.key.keysym.sym == SDLK_d) e.keyboard.right_clicked     = 1;
+            if (sdl_event.key.keysym.sym == SDLK_SPACE) e.keyboard.space_clicked = 1;
             // clang-format on
             is_event = true;
         }
         else if (sdl_event.type == SDL_EVENT_KEY_UP)
         {
             // clang-format off
-            if (sdl_event.key.keysym.sym == SDLK_w) e.keyboard.up_released    = 1;
-            if (sdl_event.key.keysym.sym == SDLK_s) e.keyboard.down_released  = 1;
-            if (sdl_event.key.keysym.sym == SDLK_a) e.keyboard.left_released  = 1;
-            if (sdl_event.key.keysym.sym == SDLK_d) e.keyboard.right_released = 1;
+            if (sdl_event.key.keysym.sym == SDLK_w) e.keyboard.up_released        = 1;
+            if (sdl_event.key.keysym.sym == SDLK_s) e.keyboard.down_released      = 1;
+            if (sdl_event.key.keysym.sym == SDLK_a) e.keyboard.left_released      = 1;
+            if (sdl_event.key.keysym.sym == SDLK_d) e.keyboard.right_released     = 1;
+            if (sdl_event.key.keysym.sym == SDLK_SPACE) e.keyboard.space_released = 1;
             // clang-format on
             is_event = true;
         }
@@ -341,6 +346,7 @@ void sphere_engine::render_triangle(const triangle&        tr,
                                     transformation_object& uniforms_1,
                                     transformation_camera& uniforms_2)
 {
+
     glUniformMatrix3fv(
         uniform_tr_obj_rotate, 1, GL_FALSE, &uniforms_1.rotate[0][0]);
     GL_CHECK_ERRORS()
@@ -362,12 +368,24 @@ void sphere_engine::render_triangle(const triangle&        tr,
         uniform_tr_cam_projection, 1, GL_FALSE, &uniforms_2.projection[0][0]);
     GL_CHECK_ERRORS()
 
-    glUniform3fv(uniform_color, 1, &tr.v[0].color.r);
+    // glUniform3fv(uniform_color, 1, &tr.v[0].color.r);
+    // GL_CHECK_ERRORS()
+
+    glUniform1f(uniform_time, (rand() & 100) / 100.);
+    GL_CHECK_ERRORS()
+
+    // glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex),
+    // &tr.v[0]); GL_CHECK_ERRORS()
+
+    glEnableVertexAttribArray(0);
     GL_CHECK_ERRORS()
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), &tr.v[0]);
     GL_CHECK_ERRORS()
 
-    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    GL_CHECK_ERRORS()
+    glVertexAttribPointer(
+        1, 4, GL_FLOAT, GL_FALSE, sizeof(vertex), &tr.v[0] + 7 * sizeof(float));
     GL_CHECK_ERRORS()
 
     glDrawArrays(GL_TRIANGLES, 0, 3);

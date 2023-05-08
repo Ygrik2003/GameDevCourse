@@ -13,7 +13,7 @@ int main()
                                   "./04-2-render-opengl/shaders/shader.frag" });
 
     sphere_game my_game = sphere_game(my_engine);
-    camera      _camera = camera(1., 30., M_PI / 2, 16. / 9.);
+    camera      _camera = camera(0.1, 30., M_PI / 2, 16. / 9.);
 
     sphere sphere_1(1);
 
@@ -47,13 +47,15 @@ int main()
             }
             else if (e.keyboard.up_clicked)
             {
-                _camera.move(
-                    speed * std::sin(rotate_x), 0, -speed * std::cos(rotate_x));
+                _camera.move(speed * std::sin(rotate_x) * std::cos(rotate_y),
+                             speed * std::sin(rotate_x) * std::sin(rotate_y),
+                             -speed * std::cos(rotate_x));
             }
             else if (e.keyboard.down_clicked)
             {
-                _camera.move(
-                    -speed * std::sin(rotate_x), 0, speed * std::cos(rotate_x));
+                _camera.move(-speed * std::sin(rotate_x) * std::cos(rotate_y),
+                             -speed * std::sin(rotate_x) * std::sin(rotate_y),
+                             speed * std::cos(rotate_x));
             }
             else if (e.keyboard.left_clicked)
             {
@@ -73,8 +75,11 @@ int main()
                 rotate_y -= e.motion.y / 200;
                 _camera.set_rotate(0., -rotate_x, rotate_y);
             }
+            else if (e.keyboard.space_clicked)
+            {
+            }
         }
-        // my_game.get_object(0).set_rotate(0.f, phi, 0.f);
+        my_game.get_object(0).set_rotate(0.f, phi, 0.f);
 
         for (auto it = my_game.begin(); it != my_game.end(); it++)
         {
@@ -82,7 +87,7 @@ int main()
         }
         my_engine->swap_buffers();
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000 / 60));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000 / 120));
         phi += M_PI / 400;
     }
 

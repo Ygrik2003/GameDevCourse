@@ -1,12 +1,12 @@
 #version 320 es
 precision mediump float;
 
-in vec4      v_position;
-uniform vec3 triangle_color;
+in vec4 v_position;
+in vec4 v_color;
 
-out vec4 frag_color;
+out vec4 o_color;
 
 void main()
 {
-    frag_color = vec4(triangle_color, 1.f);
+    o_color = v_color;
 }

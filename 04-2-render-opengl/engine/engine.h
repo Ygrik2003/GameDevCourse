@@ -38,11 +38,12 @@
         }                                                                      \
     }
 
-struct rgb
+struct rgba
 {
     float r;
     float g;
     float b;
+    float a = 1.f;
 };
 
 struct vertex
@@ -51,7 +52,7 @@ struct vertex
     float y = 0.f;
     float z = 0.f;
 
-    rgb color;
+    rgba color;
 };
 
 using vertexes = std::vector<vertex>;

@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-sphere::sphere(uint r)
+sphere::sphere(float r)
 {
     set_rotate(0, 0, 0);
     set_scale(1.f, 1.f, 1.f);
@@ -145,8 +145,8 @@ void object::render(engine* _engine, camera& _camera)
 {
     for (uint i = 0; i < size(); i++)
     {
-        _engine->render_triangle(
-            get_triangle(i), tr_obj, _camera.get_transform());
+        triangle tr = get_triangle(i);
+        _engine->render_triangle(tr, tr_obj, _camera.get_transform());
     }
 }
 
@@ -208,6 +208,7 @@ camera::camera(float front, float back, float fovy, float aspect)
 
 void camera::set_translate(float dx, float dy, float dz)
 {
+    std::cout << pos.x << " " << pos.y << " " << pos.z << std::endl;
     tr_cam.translate[3][0] = dx;
     tr_cam.translate[3][1] = dy;
     tr_cam.translate[3][2] = dz;

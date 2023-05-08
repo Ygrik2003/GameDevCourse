@@ -59,14 +59,14 @@ using objects = std::vector<object>;
 class sphere : public object
 {
 public:
-    sphere(uint radius);
+    sphere(float radius);
 
 private:
     uint   get_index(int phi_c, int theta_c);
     vertex get_sphere(double phi, double theta, uint r);
     void   calculate() override;
 
-    uint radius;
+    float radius;
 };
 
 class game

@@ -14,10 +14,14 @@ struct transformation_camera
     mat4 projection;
 };
 
-in vec3                       a_position;
+layout(location = 0) in vec3 a_position;
+layout(location = 1) in vec4 a_color;
+
 uniform transformation_object tr_obj;
 uniform transformation_camera tr_cam;
-out vec4                      v_position;
+
+out vec4 v_position;
+out vec4 v_color;
 
 void main()
 {
@@ -27,4 +31,6 @@ void main()
     v_position = v_position * tr_cam.scale * tr_cam.translate * tr_cam.rotate *
                  tr_cam.projection;
     gl_Position = v_position;
+
+    v_color = a_color;
 }
