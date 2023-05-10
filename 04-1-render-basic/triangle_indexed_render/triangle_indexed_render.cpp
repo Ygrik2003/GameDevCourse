@@ -28,9 +28,9 @@ void triangle_indexed_render::draw_triangles(pixels&            vertexes,
 
     for (int i = 0; i < indexes.size(); i += 3)
     {
-        uint p1 = indexes[i + 0];
-        uint p2 = indexes[i + 1];
-        uint p3 = indexes[i + 2];
+        uint32_t p1 = indexes[i + 0];
+        uint32_t p2 = indexes[i + 1];
+        uint32_t p3 = indexes[i + 2];
 
         position vertex1 = vertexes.at(p1);
         position vertex2 = vertexes.at(p2);

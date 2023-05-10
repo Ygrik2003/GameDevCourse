@@ -19,6 +19,7 @@ layout(location = 1) in vec4 a_color;
 
 uniform transformation_object tr_obj;
 uniform transformation_camera tr_cam;
+uniform float                 i_time;
 
 out vec4 v_position;
 out vec4 v_color;

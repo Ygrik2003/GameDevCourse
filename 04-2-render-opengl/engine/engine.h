@@ -1,6 +1,7 @@
 #pragma once
 #include "core/config.h"
 #include "core/event.h"
+#include "objects/camera.h"
 
 #include "KHR/khrplatform.h"
 #include "glad/glad.h"
@@ -78,20 +79,6 @@ struct triangle
 };
 
 using triangles = std::vector<triangle>;
-
-struct transformation_object
-{
-    float rotate[3][3]{ 0 };
-    float scale[3]{ 0 };
-    float translate[3]{ 0 };
-};
-struct transformation_camera
-{
-    float rotate[4][4]{ 0 };
-    float scale[4][4]{ 0 };
-    float translate[4][4]{ 0 };
-    float projection[4][4]{ 0 };
-};
 
 class engine
 {

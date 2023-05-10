@@ -53,9 +53,9 @@ void triangle_interpolated_redner::draw_triangles(
 {
     for (int i = 0; i < indexes.size(); i += 3)
     {
-        const uint i1 = indexes[i + 0];
-        const uint i2 = indexes[i + 1];
-        const uint i3 = indexes[i + 2];
+        const uint32_t i1 = indexes[i + 0];
+        const uint32_t i2 = indexes[i + 1];
+        const uint32_t i3 = indexes[i + 2];
 
         const vertex v1 = vertexes.at(i1);
         const vertex v2 = vertexes.at(i2);
@@ -183,7 +183,7 @@ std::vector<vertex> triangle_interpolated_redner::raster_horizontal_triangle(
 {
     std::vector<vertex> out;
 
-    uint lines_count = std::ceil(std::abs(single.y - left.y)) + 1;
+    uint32_t lines_count = std::ceil(std::abs(single.y - left.y)) + 1;
 
     for (int i = 0; i <= lines_count; i++)
     {
@@ -202,7 +202,8 @@ void triangle_interpolated_redner::raster_one_horizontal_line(
     const vertex&        right_vertex,
     std::vector<vertex>& out)
 {
-    uint pixels_count = std::ceil(std::abs(left_vertex.x - right_vertex.x)) + 1;
+    uint32_t pixels_count =
+        std::ceil(std::abs(left_vertex.x - right_vertex.x)) + 1;
 
     if (pixels_count > 0)
     {

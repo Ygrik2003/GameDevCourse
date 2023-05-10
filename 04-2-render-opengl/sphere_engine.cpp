@@ -184,12 +184,12 @@ int sphere_engine::initialize(config _config)
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
     GL_CHECK_ERRORS()
     GLuint vertex_array_object = 0;
-    glGenVertexArrays(1, &vertex_array_object);
-    GL_CHECK_ERRORS()
-    glBindVertexArray(vertex_array_object);
-    GL_CHECK_ERRORS()
-
+    // glGenVertexArrays(1, &vertex_array_object);
+    // GL_CHECK_ERRORS()
+    // glBindVertexArray(vertex_array_object);
+    // GL_CHECK_ERRORS()
     ////
+
     glAttachShader(handle_program, vertex_shader);
     GL_CHECK_ERRORS()
 
@@ -222,10 +222,7 @@ int sphere_engine::initialize(config _config)
         glGetUniformLocation(handle_program, "tr_cam.projection");
     GL_CHECK_ERRORS()
 
-    // vertex_color = glGetUniformLocation(handle_program, "a_color");
-    // GL_CHECK_ERRORS()
-
-    uniform_time = glGetUniformLocation(handle_program, "iTime");
+    uniform_time = glGetUniformLocation(handle_program, "i_time");
     GL_CHECK_ERRORS()
 
     glGetProgramiv(handle_program, GL_LINK_STATUS, &result);
@@ -381,14 +378,8 @@ void sphere_engine::render_triangle(const triangle&        tr,
         uniform_tr_cam_projection, 1, GL_FALSE, &uniforms_2.projection[0][0]);
     GL_CHECK_ERRORS()
 
-    // glUniform3fv(uniform_color, 1, &tr.v[0].color.r);
-    // GL_CHECK_ERRORS()
-
-    // glUniform1f(uniform_time, (rand() & 100) / 100.);
-    // GL_CHECK_ERRORS()
-
-    // glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex),
-    // &tr.v[0]); GL_CHECK_ERRORS()
+    glUniform1f(uniform_time, 1.f);
+    GL_CHECK_ERRORS()
 
     glBufferData(GL_ARRAY_BUFFER, sizeof(triangle), &tr, GL_STATIC_DRAW);
     GL_CHECK_ERRORS()
@@ -407,17 +398,6 @@ void sphere_engine::render_triangle(const triangle&        tr,
                           sizeof(vertex),
                           reinterpret_cast<void*>(3 * sizeof(float)));
     GL_CHECK_ERRORS()
-
-    // glEnableVertexAttribArray(0);
-    // GL_CHECK_ERRORS()
-    // glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex),
-    // &tr.v[0]); GL_CHECK_ERRORS()
-
-    // glEnableVertexAttribArray(1);
-    // GL_CHECK_ERRORS()
-    // glVertexAttribPointer(
-    //     1, 4, GL_FLOAT, GL_TRUE, sizeof(vertex), &tr + 3 * sizeof(float));
-    // GL_CHECK_ERRORS()
 
     glDrawArrays(GL_TRIANGLES, 0, 3);
     GL_CHECK_ERRORS()
