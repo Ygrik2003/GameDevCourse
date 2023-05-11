@@ -69,14 +69,13 @@ int main()
             else if (e.keyboard.left_clicked)
             {
                 _camera.move(
-                    speed * std::cos(rotate_x), 0, speed * std::sin(rotate_x));
+                    speed * std::cos(rotate_x), 0, -speed * std::sin(rotate_x));
             }
             else if (e.keyboard.right_clicked)
             {
 
-                _camera.move(-speed * std::cos(rotate_x),
-                             0,
-                             -speed * std::sin(rotate_x));
+                _camera.move(
+                    -speed * std::cos(rotate_x), 0, speed * std::sin(rotate_x));
             }
             else if (e.motion.x || e.motion.y)
             {

@@ -13,7 +13,6 @@ culinder::culinder(float r, float h)
 
 vertex culinder::get_vertex(double phi, double h, rgba color)
 {
-
     return vertex{ static_cast<float>(radius * cos(phi)),
                    static_cast<float>(radius * sin(phi)),
                    static_cast<float>(h),
@@ -49,7 +48,7 @@ void culinder::calculate()
     _vertexes.resize(0);
     indexes.resize(0);
 
-    _vertexes.push_back(get_vertex(0, 0, rgba{ 0, 0, 0, 1 }));
+    _vertexes.push_back(vertex{ 0, 0, 0, 0, 0, 0, 1. });
     for (int h_counter = 0; h_counter <= height / d2; h_counter++)
     {
         phi = 0;
@@ -88,6 +87,6 @@ void culinder::calculate()
         }
         h += d2;
     }
-    _vertexes.push_back(get_vertex(0, h, rgba{}));
+    _vertexes.push_back(vertex{ 0, 0, static_cast<float>(h) });
     count_triangles = indexes.size() / 3;
 }
