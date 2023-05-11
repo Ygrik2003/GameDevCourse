@@ -20,6 +20,7 @@ layout(location = 1) in vec4 a_color;
 uniform transformation_object tr_obj;
 uniform transformation_camera tr_cam;
 uniform float                 i_time;
+uniform float                 i_rand;
 
 out vec4 v_position;
 out vec4 v_color;
@@ -27,8 +28,10 @@ out vec4 v_color;
 void main()
 {
 
-    v_position =
-        vec4(a_position * tr_obj.rotate * tr_obj.scale + tr_obj.translate, 1.0);
+    v_position = vec4(
+        a_position * tr_obj.rotate * tr_obj.scale +
+            /*vec3(5. * cos(i_rand), 5. * sin(i_rand), 0) +*/ tr_obj.translate,
+        1.0);
     v_position = v_position * tr_cam.scale * tr_cam.translate * tr_cam.rotate *
                  tr_cam.projection;
     gl_Position = v_position;

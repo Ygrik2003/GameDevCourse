@@ -162,13 +162,11 @@ int sphere_engine::initialize(config _config)
         GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 #endif
 
-    GLuint vertex_shader = load_shader(_config.vertex_shader, GL_VERTEX_SHADER);
-
-    GLuint fragment_shader =
-        load_shader(_config.fragment_shader, GL_FRAGMENT_SHADER);
-
     handle_program = glCreateProgram();
     GL_CHECK_ERRORS()
+
+    load_shader(_config.vertex_shader, GL_VERTEX_SHADER);
+    load_shader(_config.fragment_shader, GL_FRAGMENT_SHADER);
 
     if (handle_program == 0)
     {
@@ -184,17 +182,11 @@ int sphere_engine::initialize(config _config)
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
     GL_CHECK_ERRORS()
     GLuint vertex_array_object = 0;
-    // glGenVertexArrays(1, &vertex_array_object);
-    // GL_CHECK_ERRORS()
-    // glBindVertexArray(vertex_array_object);
-    // GL_CHECK_ERRORS()
+    glGenVertexArrays(1, &vertex_array_object);
+    GL_CHECK_ERRORS()
+    glBindVertexArray(vertex_array_object);
+    GL_CHECK_ERRORS()
     ////
-
-    glAttachShader(handle_program, vertex_shader);
-    GL_CHECK_ERRORS()
-
-    glAttachShader(handle_program, fragment_shader);
-    GL_CHECK_ERRORS()
 
     glBindAttribLocation(handle_program, 0, "a_position");
     GL_CHECK_ERRORS()
@@ -223,6 +215,8 @@ int sphere_engine::initialize(config _config)
     GL_CHECK_ERRORS()
 
     uniform_time = glGetUniformLocation(handle_program, "i_time");
+    GL_CHECK_ERRORS()
+    uniform_rand = glGetUniformLocation(handle_program, "i_rand");
     GL_CHECK_ERRORS()
 
     glGetProgramiv(handle_program, GL_LINK_STATUS, &result);
@@ -306,8 +300,13 @@ void sphere_engine::update() {}
 
 void sphere_engine::render(const triangles& trs) {}
 
-GLuint sphere_engine::load_shader(const char* path, int type)
+void sphere_engine::load_shader(const char* path, int type)
 {
+    if (type == GL_VERTEX_SHADER && shader_vertex != 0)
+        glDetachShader(handle_program, shader_vertex);
+    else if (type == GL_FRAGMENT_SHADER && shader_fragment != 0)
+        glDetachShader(handle_program, shader_fragment);
+
     if (!std::filesystem::exists(path))
         throw std::runtime_error("No file");
 
@@ -325,6 +324,7 @@ GLuint sphere_engine::load_shader(const char* path, int type)
                   std::istreambuf_iterator<char>());
 
     const char* c_buffer = buffer.data();
+    file.close();
     glShaderSource(handle, 1, &c_buffer, nullptr);
     GL_CHECK_ERRORS()
 
@@ -348,8 +348,13 @@ GLuint sphere_engine::load_shader(const char* path, int type)
 
         throw std::runtime_error(log.data());
     }
+    glAttachShader(handle_program, handle);
+    GL_CHECK_ERRORS()
 
-    return handle;
+    if (type == GL_VERTEX_SHADER)
+        shader_vertex = handle;
+    else if (type == GL_FRAGMENT_SHADER)
+        shader_fragment = handle;
 }
 
 void sphere_engine::render_triangle(const triangle&        tr,
@@ -378,7 +383,10 @@ void sphere_engine::render_triangle(const triangle&        tr,
         uniform_tr_cam_projection, 1, GL_FALSE, &uniforms_2.projection[0][0]);
     GL_CHECK_ERRORS()
 
-    glUniform1f(uniform_time, 1.f);
+    glUniform1f(uniform_time, time(NULL) / 10.);
+    GL_CHECK_ERRORS()
+
+    glUniform1f(uniform_rand, (rand() % 10000) / 10000.);
     GL_CHECK_ERRORS()
 
     glBufferData(GL_ARRAY_BUFFER, sizeof(triangle), &tr, GL_STATIC_DRAW);

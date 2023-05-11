@@ -10,16 +10,16 @@ sphere::sphere(float r)
     calculate();
 }
 
-vertex sphere::get_sphere(double phi, double theta, uint32_t r)
+vertex sphere::get_vertex(double phi, double theta, rgba color)
 {
 
-    return vertex{ static_cast<float>(r * (cos(phi) * sin(theta))),
-                   static_cast<float>(r * (sin(phi) * sin(theta))),
-                   static_cast<float>(r * (cos(theta))),
-                   static_cast<float>(std::pow(std::cos(theta), 2)),
-                   0.,
-                   0.,
-                   1. };
+    return vertex{ static_cast<float>(radius * (cos(phi) * sin(theta))),
+                   static_cast<float>(radius * (sin(phi) * sin(theta))),
+                   static_cast<float>(radius * (cos(theta))),
+                   color.r,
+                   color.g,
+                   color.b,
+                   color.a };
 }
 
 uint32_t sphere::get_index(int phi_c, int theta_c)
@@ -48,14 +48,17 @@ void sphere::calculate()
     _vertexes.resize(0);
     indexes.resize(0);
 
-    _vertexes.push_back(get_sphere(0, 0, radius));
+    _vertexes.push_back(get_vertex(0, 0, rgba{ 1 }));
     for (int theta_counter = 0; theta_counter <= M_PI / d2; theta_counter++)
     {
         phi = 0;
         for (int phi_counter = 0; phi_counter <= 2 * M_PI / d1; phi_counter++)
         {
             if (theta_counter != 0)
-                _vertexes.push_back(get_sphere(phi, theta, radius));
+                _vertexes.push_back(get_vertex(
+                    phi,
+                    theta,
+                    rgba{ static_cast<float>(std::pow(std::cos(theta), 2)) }));
 
             if (theta_counter == 0)
             {
@@ -87,6 +90,6 @@ void sphere::calculate()
         }
         theta += d2;
     }
-    _vertexes.push_back(get_sphere(0, M_PI, radius));
+    _vertexes.push_back(get_vertex(0, M_PI, rgba{ 1 }));
     count_triangles = indexes.size() / 3;
 }

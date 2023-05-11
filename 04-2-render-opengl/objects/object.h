@@ -9,7 +9,8 @@ public:
     virtual void set_scale(float x, float y, float z);
     virtual void set_discretization(float, float);
 
-    virtual void calculate(){};
+    virtual void   calculate() {}
+    virtual vertex get_vertex(double, double, rgba) { return vertex{}; }
 
     virtual void render(engine* _engine, camera& _camera);
 

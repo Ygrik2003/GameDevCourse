@@ -12,8 +12,8 @@ public:
     void update() override;
     void render(const triangles&) override;
 
-    void   swap_buffers() override;
-    GLuint load_shader(const char* path, int type) override;
+    void swap_buffers() override;
+    void load_shader(const char* path, int type) override;
 
     void render_triangle(const triangle&        tr,
                          transformation_object& uniforms_1,
@@ -25,6 +25,9 @@ private:
     SDL_GLContext gl_context;
     GLuint        handle_program;
 
+    GLuint shader_vertex{};
+    GLuint shader_fragment{};
+
     GLuint uniform_tr_obj_rotate;
     GLuint uniform_tr_obj_scale;
     GLuint uniform_tr_obj_translate;
@@ -34,7 +37,6 @@ private:
     GLuint uniform_tr_cam_translate;
     GLuint uniform_tr_cam_projection;
 
-    // GLint vertex_color;
-
     GLint uniform_time;
+    GLint uniform_rand;
 };

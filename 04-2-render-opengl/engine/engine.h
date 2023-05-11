@@ -96,5 +96,5 @@ public:
                                  transformation_camera& uniforms_2) = 0;
     virtual void swap_buffers()                                     = 0;
 
-    virtual GLuint load_shader(const char* path, int type) = 0;
+    virtual void load_shader(const char* path, int type) = 0;
 };

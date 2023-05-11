@@ -8,7 +8,7 @@ public:
 
 private:
     uint32_t get_index(int phi_c, int theta_c);
-    vertex   get_sphere(double phi, double theta, uint32_t r);
+    vertex   get_vertex(double phi, double theta, rgba color) override;
     void     calculate() override;
 
     float radius;
