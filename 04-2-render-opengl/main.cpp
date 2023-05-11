@@ -13,8 +13,9 @@ constexpr int fps = 30;
 int main()
 {
     engine* my_engine = new sphere_engine();
-    my_engine->initialize(config{ "./04-2-render-opengl/shaders/shader.vert",
-                                  "./04-2-render-opengl/shaders/shader.frag" });
+    config  _config   = config{ "./04-2-render-opengl/shaders/shader.vert",
+                             "./04-2-render-opengl/shaders/shader.frag" };
+    my_engine->initialize(_config);
 
     sphere_game my_game = sphere_game(my_engine);
     camera      _camera = camera(0.1, 30., M_PI / 2, 16. / 9.);
@@ -38,8 +39,7 @@ int main()
 
     double phi;
     event  e;
-    bool   loop = true;
-    float  last_pos_x{};
+    bool   loop     = true;
     float  rotate_x = 0;
     float  rotate_y = 0;
     float  speed    = 0.05;
@@ -81,18 +81,21 @@ int main()
             {
                 rotate_x += e.motion.x / 100;
                 rotate_y += e.motion.y / 100;
-                std::cout << rotate_x << " " << rotate_y << std::endl;
                 _camera.set_rotate(0., rotate_x, rotate_y);
             }
             else if (e.keyboard.space_clicked)
             {
+                std::cout << 1 << std::endl;
+                my_engine->load_shader(_config.vertex_shader, GL_VERTEX_SHADER);
+                my_engine->load_shader(_config.fragment_shader,
+                                       GL_FRAGMENT_SHADER);
             }
         }
         auto time_now = std::chrono::steady_clock::now();
         if ((time_now - time_last).count() > 1.e9 / fps)
         {
             time_last = time_now;
-            my_game.get_object(0).set_rotate(phi * 2, phi, phi / 2);
+            my_game.get_object(0).set_rotate(0, phi, phi / 2);
 
             for (auto it = my_game.begin(); it != my_game.end(); it++)
             {
