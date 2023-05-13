@@ -1,9 +1,9 @@
 #include "engine/engine.h"
 
-class sphere_engine : public engine
+class morphing_engine : public engine
 {
 public:
-    sphere_engine();
+    morphing_engine();
 
     int  initialize(config _config) override;
     void uninitialize() override;
@@ -16,7 +16,9 @@ public:
     void load_shader(const char* path, int type) override;
     void reload_shader(const char* path, int type) override;
 
-    void render_triangle(const triangle&        tr,
+    void render_triangle(const triangle&        tr_1,
+                         const triangle&        tr_2,
+                         const float            alpha,
                          transformation_object& uniforms_1,
                          transformation_camera& uniforms_2) override;
 
@@ -40,4 +42,5 @@ private:
 
     GLint uniform_time;
     GLint uniform_rand;
+    GLint uniform_alpha;
 };

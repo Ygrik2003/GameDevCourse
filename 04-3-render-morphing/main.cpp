@@ -1,7 +1,8 @@
 #include "game.h"
+#include "morphing_engine.h"
 #include "objects/culinder.h"
 #include "objects/sphere.h"
-#include "sphere_engine.h"
+#include "objects/sphere_culinder.h"
 
 #include <chrono>
 #include <cstdlib>
@@ -12,28 +13,17 @@ constexpr int fps = 30;
 
 int main()
 {
-    engine* my_engine = new sphere_engine();
-    config  _config   = config{ "./04-2-render-opengl/shaders/shader.vert",
-                             "./04-2-render-opengl/shaders/shader.frag" };
+    engine* my_engine = new morphing_engine();
+    config  _config =
+        config{ "./04-3-render-morphing/shaders/morphing_shader.vert",
+                "./04-3-render-morphing/shaders/morphing_shader.frag" };
     my_engine->initialize(_config);
 
     my_game _game   = my_game(my_engine);
     camera  _camera = camera(0.1, 30., M_PI / 2, 16. / 9.);
 
-    sphere sphere_1(1);
-
-    sphere_1.set_scale(1. / 2, 1. / 2, 1. / 2);
-    sphere_1.set_translate(0, 2, 0);
-    sphere_1.set_discretization(M_PI / 30, M_PI / 150);
-    _game.add_object(sphere_1);
-
-    culinder culinder_1(1, 1);
-
-    culinder_1.set_scale(1. / 2, 1. / 2, 1. / 2);
-    culinder_1.set_rotate(0, 0, M_PI / 2);
-    culinder_1.set_translate(0, 1, 0);
-    culinder_1.set_discretization(M_PI / 10, 0.1);
-    _game.add_object(culinder_1);
+    sphere_culinder _sphere_culinder = sphere_culinder(1.f, 1.f, 1.f);
+    _game.add_object(_sphere_culinder);
 
     _camera.move(0, -2, 1);
 
@@ -96,7 +86,7 @@ int main()
         if ((time_now - time_last).count() > 1.e9 / fps)
         {
             time_last = time_now;
-            _game.get_object(0).set_rotate(0, phi, phi / 2);
+            // _game.get_object(0).set_rotate(0, phi, phi / 2);
 
             _game.render(_camera);
 

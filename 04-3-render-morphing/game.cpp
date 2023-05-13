@@ -1,6 +1,6 @@
 #include "game.h"
-#include <cassert>
 
+#include <cassert>
 #include <iostream>
 
 my_game::my_game(engine* e)

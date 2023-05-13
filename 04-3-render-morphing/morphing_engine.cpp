@@ -1,4 +1,4 @@
-#include "sphere_engine.h"
+#include "morphing_engine.h"
 
 #include <cassert>
 #include <filesystem>
@@ -106,9 +106,9 @@ void* load_gl_func(const char* name)
     return reinterpret_cast<void*>(gl_pointer);
 }
 
-sphere_engine::sphere_engine() {}
+morphing_engine::morphing_engine() {}
 
-int sphere_engine::initialize(config _config)
+int morphing_engine::initialize(config _config)
 {
     this->_config = _config;
 
@@ -218,6 +218,8 @@ int sphere_engine::initialize(config _config)
     GL_CHECK_ERRORS()
     uniform_rand = glGetUniformLocation(handle_program, "i_rand");
     GL_CHECK_ERRORS()
+    uniform_alpha = glGetUniformLocation(handle_program, "u_alpha");
+    GL_CHECK_ERRORS()
 
     glGetProgramiv(handle_program, GL_LINK_STATUS, &result);
     GL_CHECK_ERRORS()
@@ -244,7 +246,7 @@ int sphere_engine::initialize(config _config)
     return 1;
 }
 
-bool sphere_engine::event_keyboard(event& e)
+bool morphing_engine::event_keyboard(event& e)
 {
     e.clear();
     bool      is_event = false;
@@ -289,18 +291,18 @@ bool sphere_engine::event_keyboard(event& e)
     return is_event;
 }
 
-void sphere_engine::uninitialize()
+void morphing_engine::uninitialize()
 {
     SDL_GL_DeleteContext(gl_context);
     SDL_DestroyWindow(window);
     SDL_Quit();
 }
 
-void sphere_engine::update() {}
+void morphing_engine::update() {}
 
-void sphere_engine::render(const triangles& trs) {}
+void morphing_engine::render(const triangles& trs) {}
 
-void sphere_engine::reload_shader(const char* path, int type)
+void morphing_engine::reload_shader(const char* path, int type)
 {
     load_shader(path, type);
     glLinkProgram(handle_program);
@@ -310,7 +312,7 @@ void sphere_engine::reload_shader(const char* path, int type)
     GL_CHECK_ERRORS()
 }
 
-void sphere_engine::load_shader(const char* path, int type)
+void morphing_engine::load_shader(const char* path, int type)
 {
     if (type == GL_VERTEX_SHADER && shader_vertex != 0)
         glDetachShader(handle_program, shader_vertex);
@@ -370,9 +372,11 @@ void sphere_engine::load_shader(const char* path, int type)
         shader_fragment = handle;
 }
 
-void sphere_engine::render_triangle(const triangle&        tr,
-                                    transformation_object& uniforms_1,
-                                    transformation_camera& uniforms_2)
+void morphing_engine::render_triangle(const triangle&        tr_1,
+                                      const triangle&        tr_2,
+                                      const float            alpha,
+                                      transformation_object& uniforms_1,
+                                      transformation_camera& uniforms_2)
 {
 
     glUniformMatrix3fv(
@@ -402,7 +406,10 @@ void sphere_engine::render_triangle(const triangle&        tr,
     glUniform1f(uniform_rand, (rand() % 10000) / 10000.);
     GL_CHECK_ERRORS()
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(triangle), &tr, GL_STATIC_DRAW);
+    glUniform1f(uniform_alpha, alpha);
+    GL_CHECK_ERRORS()
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(triangle), &tr_1, GL_STATIC_DRAW);
     GL_CHECK_ERRORS()
 
     glEnableVertexAttribArray(0);
@@ -420,11 +427,29 @@ void sphere_engine::render_triangle(const triangle&        tr,
                           reinterpret_cast<void*>(3 * sizeof(float)));
     GL_CHECK_ERRORS()
 
+    glBufferData(GL_ARRAY_BUFFER, sizeof(triangle), &tr_2, GL_STATIC_DRAW);
+    GL_CHECK_ERRORS()
+
+    // glEnableVertexAttribArray(2);
+    // GL_CHECK_ERRORS()
+    // glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), 0);
+    // GL_CHECK_ERRORS()
+
+    // glEnableVertexAttribArray(3);
+    // GL_CHECK_ERRORS()
+    // glVertexAttribPointer(3,
+    //                       4,
+    //                       GL_FLOAT,
+    //                       GL_FALSE,
+    //                       sizeof(vertex),
+    //                       reinterpret_cast<void*>(3 * sizeof(float)));
+    // GL_CHECK_ERRORS()
+
     glDrawArrays(GL_TRIANGLES, 0, 3);
     GL_CHECK_ERRORS()
 }
 
-void sphere_engine::swap_buffers()
+void morphing_engine::swap_buffers()
 {
     SDL_GL_SwapWindow(window);
 

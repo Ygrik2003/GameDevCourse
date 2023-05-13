@@ -91,7 +91,9 @@ public:
 
     virtual bool event_keyboard(event&) = 0;
 
-    virtual void render_triangle(const triangle&        tr,
+    virtual void render_triangle(const triangle&        tr_1,
+                                 const triangle&        tr_2,
+                                 const float            alpha,
                                  transformation_object& uniforms_1,
                                  transformation_camera& uniforms_2) = 0;
     virtual void swap_buffers()                                     = 0;

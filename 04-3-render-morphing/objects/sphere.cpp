@@ -61,7 +61,7 @@ void sphere::calculate()
                     rgba{ static_cast<float>(std::pow(std::cos(theta), 2)),
                           0.,
                           0.,
-                          1. }));
+                          0.5 }));
 
             if (theta_counter == 0)
             {

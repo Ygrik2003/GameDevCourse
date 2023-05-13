@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8) 
+cmake_minimum_required(VERSION 3.25) 
 
 project(GameDevCourse)
 
@@ -15,4 +15,5 @@ endif()
 # add_subdirectory(03-1-sdl-hot-reload)
 # add_subdirectory(04-1-render-basic)
 add_subdirectory(04-2-render-opengl)
+add_subdirectory(04-3-render-morphing)
 add_subdirectory(99-game)

@@ -28,10 +28,10 @@ out vec4 v_color;
 void main()
 {
 
-    v_position = vec4(
-        a_position * tr_obj.rotate * tr_obj.scale +
-            /*vec3(5. * cos(i_rand), 5. * sin(i_rand), 0) +*/ tr_obj.translate,
-        1.0);
+    v_position =
+        vec4(a_position * tr_obj.rotate * tr_obj.scale +
+                 0.1 * vec3(cos(i_rand), sin(i_rand), 0) + tr_obj.translate,
+             1.0);
     v_position = v_position * tr_cam.scale * tr_cam.translate * tr_cam.rotate *
                  tr_cam.projection;
     gl_Position = v_position;
