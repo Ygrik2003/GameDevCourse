@@ -1,9 +1,9 @@
 #include "engine/engine.h"
 
-class sphere_engine : public engine
+class engine_impl : public engine
 {
 public:
-    sphere_engine();
+    engine_impl();
 
     int  initialize(config _config) override;
     void uninitialize() override;

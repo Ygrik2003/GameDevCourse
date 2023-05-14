@@ -12,7 +12,7 @@ constexpr int fps = 30;
 
 int main()
 {
-    engine* my_engine = new sphere_engine();
+    engine* my_engine = new engine_impl();
     config  _config   = config{ "./04-2-render-opengl/shaders/shader.vert",
                              "./04-2-render-opengl/shaders/shader.frag" };
     my_engine->initialize(_config);

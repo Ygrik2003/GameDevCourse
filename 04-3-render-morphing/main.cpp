@@ -15,14 +15,16 @@ int main()
 {
     engine* my_engine = new morphing_engine();
     config  _config =
-        config{ "./04-3-render-morphing/shaders/morphing_shader.vert",
-                "./04-3-render-morphing/shaders/morphing_shader.frag" };
+        config{ "/home/ygrik/shared/Projects/GameDevCourse/"
+                "04-3-render-morphing/shaders/morphing_shader.vert",
+                "/home/ygrik/shared/Projects/GameDevCourse/"
+                "04-3-render-morphing/shaders/morphing_shader.frag" };
     my_engine->initialize(_config);
 
     my_game _game   = my_game(my_engine);
     camera  _camera = camera(0.1, 30., M_PI / 2, 16. / 9.);
 
-    sphere_culinder _sphere_culinder = sphere_culinder(1.f, 1.f, 1.f);
+    sphere_culinder* _sphere_culinder = new sphere_culinder(1.f, 1.f, 1.f);
     _game.add_object(_sphere_culinder);
 
     _camera.move(0, -2, 1);

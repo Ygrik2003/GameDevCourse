@@ -106,9 +106,9 @@ void* load_gl_func(const char* name)
     return reinterpret_cast<void*>(gl_pointer);
 }
 
-sphere_engine::sphere_engine() {}
+engine_impl::engine_impl() {}
 
-int sphere_engine::initialize(config _config)
+int engine_impl::initialize(config _config)
 {
     this->_config = _config;
 
@@ -244,7 +244,7 @@ int sphere_engine::initialize(config _config)
     return 1;
 }
 
-bool sphere_engine::event_keyboard(event& e)
+bool engine_impl::event_keyboard(event& e)
 {
     e.clear();
     bool      is_event = false;
@@ -289,18 +289,18 @@ bool sphere_engine::event_keyboard(event& e)
     return is_event;
 }
 
-void sphere_engine::uninitialize()
+void engine_impl::uninitialize()
 {
     SDL_GL_DeleteContext(gl_context);
     SDL_DestroyWindow(window);
     SDL_Quit();
 }
 
-void sphere_engine::update() {}
+void engine_impl::update() {}
 
-void sphere_engine::render(const triangles& trs) {}
+void engine_impl::render(const triangles& trs) {}
 
-void sphere_engine::reload_shader(const char* path, int type)
+void engine_impl::reload_shader(const char* path, int type)
 {
     load_shader(path, type);
     glLinkProgram(handle_program);
@@ -310,7 +310,7 @@ void sphere_engine::reload_shader(const char* path, int type)
     GL_CHECK_ERRORS()
 }
 
-void sphere_engine::load_shader(const char* path, int type)
+void engine_impl::load_shader(const char* path, int type)
 {
     if (type == GL_VERTEX_SHADER && shader_vertex != 0)
         glDetachShader(handle_program, shader_vertex);
@@ -370,9 +370,9 @@ void sphere_engine::load_shader(const char* path, int type)
         shader_fragment = handle;
 }
 
-void sphere_engine::render_triangle(const triangle&        tr,
-                                    transformation_object& uniforms_1,
-                                    transformation_camera& uniforms_2)
+void engine_impl::render_triangle(const triangle&        tr,
+                                  transformation_object& uniforms_1,
+                                  transformation_camera& uniforms_2)
 {
 
     glUniformMatrix3fv(
@@ -424,7 +424,7 @@ void sphere_engine::render_triangle(const triangle&        tr,
     GL_CHECK_ERRORS()
 }
 
-void sphere_engine::swap_buffers()
+void engine_impl::swap_buffers()
 {
     SDL_GL_SwapWindow(window);
 

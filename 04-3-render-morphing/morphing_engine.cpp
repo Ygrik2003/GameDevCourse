@@ -114,8 +114,10 @@ int morphing_engine::initialize(config _config)
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 
-    window = SDL_CreateWindow(
-        "Sphere Render", 100, 100, SDL_WINDOW_FULLSCREEN | SDL_WINDOW_OPENGL);
+    window = SDL_CreateWindow("Sphere Render",
+                              500,
+                              500,
+                              /*SDL_WINDOW_FULLSCREEN |*/ SDL_WINDOW_OPENGL);
 
     if (window == nullptr)
     {
@@ -132,7 +134,7 @@ int morphing_engine::initialize(config _config)
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, gl_minor_v);
 
     gl_context = SDL_GL_CreateContext(window);
-    SDL_SetRelativeMouseMode(SDL_TRUE);
+    // SDL_SetRelativeMouseMode(SDL_TRUE);
     if (gl_context == nullptr)
     {
         std::cerr << SDL_GetError();
@@ -430,20 +432,20 @@ void morphing_engine::render_triangle(const triangle&        tr_1,
     glBufferData(GL_ARRAY_BUFFER, sizeof(triangle), &tr_2, GL_STATIC_DRAW);
     GL_CHECK_ERRORS()
 
-    // glEnableVertexAttribArray(2);
-    // GL_CHECK_ERRORS()
-    // glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), 0);
-    // GL_CHECK_ERRORS()
+    glEnableVertexAttribArray(2);
+    GL_CHECK_ERRORS()
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), 0);
+    GL_CHECK_ERRORS()
 
-    // glEnableVertexAttribArray(3);
-    // GL_CHECK_ERRORS()
-    // glVertexAttribPointer(3,
-    //                       4,
-    //                       GL_FLOAT,
-    //                       GL_FALSE,
-    //                       sizeof(vertex),
-    //                       reinterpret_cast<void*>(3 * sizeof(float)));
-    // GL_CHECK_ERRORS()
+    glEnableVertexAttribArray(3);
+    GL_CHECK_ERRORS()
+    glVertexAttribPointer(3,
+                          4,
+                          GL_FLOAT,
+                          GL_FALSE,
+                          sizeof(vertex),
+                          reinterpret_cast<void*>(3 * sizeof(float)));
+    GL_CHECK_ERRORS()
 
     glDrawArrays(GL_TRIANGLES, 0, 3);
     GL_CHECK_ERRORS()

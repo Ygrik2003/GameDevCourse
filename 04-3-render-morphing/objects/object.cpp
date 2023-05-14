@@ -1,5 +1,7 @@
 #include "object.h"
 
+#include <iostream>
+
 triangle object::get_triangle(const uint32_t index)
 {
     return triangle(_vertexes[indexes[3 * index + 0]],
@@ -54,6 +56,7 @@ void object::render(engine* _engine, camera& _camera)
     for (uint32_t i = 0; i < size(); i++)
     {
         triangle tr = get_triangle(i);
+        std::cout << 2 << std::endl;
         _engine->render_triangle(tr, tr, 1.f, tr_obj, _camera.get_transform());
     }
 }
