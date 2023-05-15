@@ -36,31 +36,31 @@ out vec2 v_tex_coord;
 
 uniform uniforms u_uniforms;
 
-const float front = 0.1f;
+const float front = 0.01f;
 const float back  = 30.f;
 float       fovy  = 3.14159 / 2.;
 
 mat4 rotate_matrix(float alpha, float beta, float gamma)
 {
     return mat4(
-        vec4(cos(alpha) * cos(beta),
-             cos(alpha) * sin(beta) * sin(gamma) - sin(alpha) * cos(gamma),
-             cos(alpha) * sin(beta) * cos(gamma) + sin(alpha) * sin(gamma),
-             0.),
-        vec4(sin(alpha) * cos(beta),
+        vec4(cos(alpha) * cos(beta), sin(alpha) * cos(beta), -sin(beta), 0),
+        vec4(cos(alpha) * sin(beta) * sin(gamma) - sin(alpha) * cos(gamma),
              sin(alpha) * sin(beta) * sin(gamma) + cos(alpha) * cos(gamma),
+             cos(beta) * sin(gamma),
+             0),
+        vec4(cos(alpha) * sin(beta) * cos(gamma) + sin(alpha) * sin(gamma),
              sin(alpha) * sin(beta) * cos(gamma) - cos(alpha) * sin(gamma),
-             0.),
-        vec4(-sin(beta), cos(beta) * sin(gamma), cos(beta) * cos(gamma), 0.),
+             cos(beta) * cos(gamma),
+             0),
         vec4(0., 0., 0., 1.));
 }
 
 mat4 translate_matrix(float dx, float dy, float dz)
 {
-    return mat4(vec4(1., 0., 0., 0.),
-                vec4(0., 1., 0., 0.),
-                vec4(0., 0., 1., 0.),
-                vec4(dx, dy, dz, 1.));
+    return mat4(vec4(1., 0., 0., dx),
+                vec4(0., 1., 0., dy),
+                vec4(0., 0., 1., dz),
+                vec4(0., 0., 0., 1.));
 }
 
 mat4 scale_matrix(float sx, float sy, float sz)
@@ -102,14 +102,14 @@ void main()
                                   u_uniforms.translate_y_obj,
                                   u_uniforms.translate_z_obj);
 
-    // v_position = v_position *
-    //              translate_matrix(u_uniforms.translate_x_camera,
-    //                               u_uniforms.translate_y_camera,
-    //                               u_uniforms.translate_z_camera) *
-    //              rotate_matrix(u_uniforms.rotate_alpha_camera,
-    //                            u_uniforms.rotate_beta_camera,
-    //                            u_uniforms.rotate_gamma_camera) *
-    //              projection;
+    v_position = v_position *
+                 translate_matrix(u_uniforms.translate_x_camera,
+                                  u_uniforms.translate_y_camera,
+                                  u_uniforms.translate_z_camera) *
+                 rotate_matrix(u_uniforms.rotate_alpha_camera,
+                               u_uniforms.rotate_beta_camera,
+                               u_uniforms.rotate_gamma_camera) *
+                 projection;
 
     gl_Position = v_position;
 }

@@ -12,5 +12,5 @@ struct config
     bool        is_full_sreen = false;
 
     float camera_speed_rotate = 1. / 100.;
-    float camera_speed        = 0.5;
+    float camera_speed        = 0.05;
 };

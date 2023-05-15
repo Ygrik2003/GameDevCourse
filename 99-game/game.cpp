@@ -10,7 +10,7 @@ int game_checkers::initialize(config cfg)
 
     cam = camera();
     cam.uniform_link(uniforms);
-    cam.move(0, 0, -5);
+    cam.move(0, 0, 0);
 
     my_engine = new engine_checkers();
     my_engine->set_uniform(uniforms);
