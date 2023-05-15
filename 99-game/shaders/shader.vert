@@ -102,14 +102,14 @@ void main()
                                   u_uniforms.translate_y_obj,
                                   u_uniforms.translate_z_obj);
 
-    v_position = v_position *
-                 translate_matrix(u_uniforms.translate_x_camera,
-                                  u_uniforms.translate_y_camera,
-                                  u_uniforms.translate_z_camera) *
-                 rotate_matrix(u_uniforms.rotate_alpha_camera,
-                               u_uniforms.rotate_beta_camera,
-                               u_uniforms.rotate_gamma_camera) *
-                 projection;
+    // v_position = v_position *
+    //              translate_matrix(u_uniforms.translate_x_camera,
+    //                               u_uniforms.translate_y_camera,
+    //                               u_uniforms.translate_z_camera) *
+    //              rotate_matrix(u_uniforms.rotate_alpha_camera,
+    //                            u_uniforms.rotate_beta_camera,
+    //                            u_uniforms.rotate_gamma_camera) *
+    //              projection;
 
     gl_Position = v_position;
 }

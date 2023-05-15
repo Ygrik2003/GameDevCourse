@@ -20,8 +20,8 @@ public:
 
     virtual bool event_keyboard(event&) = 0;
 
-    virtual void render_triangle(const triangle<vertex>& tr) = 0;
-    virtual void swap_buffers()                              = 0;
+    virtual void render_triangle(const triangle<vertex_textured>& tr) = 0;
+    virtual void swap_buffers()                                       = 0;
 
     virtual void load_shader(const char* path, int type)   = 0;
     virtual void reload_shader(const char* path, int type) = 0;
@@ -40,7 +40,7 @@ public:
 
     bool event_keyboard(event&) override;
 
-    void render_triangle(const triangle<vertex>& tr) override;
+    void render_triangle(const triangle<vertex_textured>& tr) override;
     void swap_buffers() override;
 
     void reload_shader(const char* path, int type) override;

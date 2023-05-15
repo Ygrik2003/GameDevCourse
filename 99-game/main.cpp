@@ -1,6 +1,5 @@
 #include "game.h"
 #include "objects/chessboard_cells.h"
-#include "objects/sphere.h"
 
 #include <chrono>
 #include <cmath>
@@ -35,7 +34,7 @@ int main()
         auto time_now = std::chrono::steady_clock::now();
         if ((time_now - time_last).count() > 1.e9 / fps)
         {
-            // obj_cells.set_rotate(0, phi, 0);
+            obj_cells.set_rotate(0, phi, 0);
 
             my_game.update();
             my_game.render();

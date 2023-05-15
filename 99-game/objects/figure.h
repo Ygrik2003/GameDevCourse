@@ -29,8 +29,8 @@ public:
     }
 
 protected:
-    std::vector<vertex>   vertexes;
-    std::vector<uint32_t> indexes;
+    std::vector<vertex_textured> vertexes;
+    std::vector<uint32_t>        indexes;
 
     size_t count;
 };

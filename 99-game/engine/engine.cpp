@@ -357,7 +357,7 @@ bool engine_checkers::event_keyboard(event& e)
     return is_event;
 }
 
-void engine_checkers::render_triangle(const triangle<vertex>& tr)
+void engine_checkers::render_triangle(const triangle<vertex_textured>& tr)
 {
 
     glUniform1f(glGetUniformLocation(program, "u_uniforms.width"),
