@@ -1,11 +1,11 @@
-#include "engine/engine.h"
 #include "game.h"
+#include "objects/chessboard_cells.h"
+#include "objects/sphere.h"
 
 #include <chrono>
 #include <cmath>
 #include <cstdlib>
-
-constexpr uint32_t fps = 60;
+#include <iostream>
 
 int main()
 {
@@ -15,62 +15,31 @@ int main()
     cfg.shader_fragment_chessboard_cells =
         "./99-game/shaders/chessboard_cells.frag";
     cfg.shader_vertex = "./99-game/shaders/shader.vert";
-    cfg.texture_cells = "./99-game/textures/chessboard_texture.png";
+    cfg.texture_cells = "./99-game/textures/chessboard_texture1.png";
 
-    uniform uniforms;
-    uniforms.width  = cfg.width;
-    uniforms.height = cfg.height;
+    game_checkers my_game;
+    my_game.initialize(cfg);
 
-    engine_checker* my_engine = new engine_checker();
-    my_engine->set_uniform(uniforms);
-    my_engine->initialize(cfg);
+    chessboard_cells obj_cells;
+    my_game.add_figure(obj_cells);
+
+    // sphere obj_sphere(2);
+    // my_game.add_figure(obj_sphere);
 
     event e;
-    bool  loop     = true;
-    float rotate_x = 0;
-    float rotate_y = 0;
-    float speed    = 0.05;
+    float phi      = 0;
     auto time_last = std::chrono::steady_clock::now() - std::chrono::seconds(1);
-    while (loop)
+    while (my_game.event_listener(e))
     {
-        while (my_engine->event_keyboard(e))
-        {
-            if (e.action.quit)
-            {
-                loop = false;
-                break;
-            }
-            else if (e.keyboard.up_clicked)
-            {
-            }
-            else if (e.keyboard.down_clicked)
-            {
-            }
-            else if (e.keyboard.left_clicked)
-            {
-            }
-            else if (e.keyboard.right_clicked)
-            {
-            }
-            else if (e.motion.x || e.motion.y)
-            {
-            }
-            else if (e.keyboard.space_clicked)
-            {
-            }
-        }
+
         auto time_now = std::chrono::steady_clock::now();
         if ((time_now - time_last).count() > 1.e9 / fps)
         {
-            my_engine->render_triangle(
-                triangle(vertex_textured(vertex(-1, -1, 0), 0, 0),
-                         vertex_textured(vertex(-1, 1, 0), 0, 8),
-                         vertex_textured(vertex(1, -1, 0), 8, 0)));
-            my_engine->render_triangle(
-                triangle(vertex_textured(vertex(1, 1, 0), 8, 8),
-                         vertex_textured(vertex(-1, 1, 0), 0, 8),
-                         vertex_textured(vertex(1, -1, 0), 8, 0)));
-            my_engine->swap_buffers();
+            // obj_cells.set_rotate(0, phi, 0);
+
+            my_game.update();
+            my_game.render();
+            phi += 0.1;
         }
     }
 

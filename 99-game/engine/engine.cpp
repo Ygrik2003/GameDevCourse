@@ -8,6 +8,35 @@
 
 #define GL_DEBUG_OUTPUT_USE
 
+PFNGLCREATESHADERPROC            glCreateShader            = nullptr;
+PFNGLSHADERSOURCEPROC            glShaderSource            = nullptr;
+PFNGLCOMPILESHADERPROC           glCompileShader           = nullptr;
+PFNGLGETSHADERIVPROC             glGetShaderiv             = nullptr;
+PFNGLGETSHADERINFOLOGPROC        glGetShaderInfoLog        = nullptr;
+PFNGLDELETESHADERPROC            glDeleteShader            = nullptr;
+PFNGLCREATEPROGRAMPROC           glCreateProgram           = nullptr;
+PFNGLATTACHSHADERPROC            glAttachShader            = nullptr;
+PFNGLBINDATTRIBLOCATIONPROC      glBindAttribLocation      = nullptr;
+PFNGLLINKPROGRAMPROC             glLinkProgram             = nullptr;
+PFNGLGETPROGRAMIVPROC            glGetProgramiv            = nullptr;
+PFNGLGETPROGRAMINFOLOGPROC       glGetProgramInfoLog       = nullptr;
+PFNGLDELETEPROGRAMPROC           glDeleteProgram           = nullptr;
+PFNGLUSEPROGRAMPROC              glUseProgram              = nullptr;
+PFNGLVERTEXATTRIBPOINTERPROC     glVertexAttribPointer     = nullptr;
+PFNGLENABLEVERTEXATTRIBARRAYPROC glEnableVertexAttribArray = nullptr;
+PFNGLVALIDATEPROGRAMPROC         glValidateProgram         = nullptr;
+PFNGLDEBUGMESSAGECONTROLPROC     glDebugMessageControl     = nullptr;
+PFNGLDEBUGMESSAGECALLBACKPROC    glDebugMessageCallback    = nullptr;
+PFNGLGENBUFFERSPROC              glGenBuffers              = nullptr;
+PFNGLBINDBUFFERPROC              glBindBuffer              = nullptr;
+PFNGLGENVERTEXARRAYSPROC         glGenVertexArrays         = nullptr;
+PFNGLBINDVERTEXARRAYPROC         glBindVertexArray         = nullptr;
+PFNGLGETUNIFORMLOCATIONPROC      glGetUniformLocation      = nullptr;
+PFNGLUNIFORM1FPROC               glUniform1f               = nullptr;
+PFNGLUNIFORM1IPROC               glUniform1i               = nullptr;
+PFNGLUNIFORM1FVPROC              glUniform1fv              = nullptr;
+PFNGLBUFFERDATAPROC              glBufferData              = nullptr;
+
 #ifdef GL_DEBUG_OUTPUT_USE
 void APIENTRY gl_debug_output(GLenum        source,
                               GLenum        type,
@@ -138,17 +167,29 @@ static void load_gl_func(const char* func_name, T& result)
     result = reinterpret_cast<T>(gl_pointer);
 }
 
-int engine_checker::initialize(config _config)
+int engine_checkers::initialize(config cfg)
 {
 
-    this->_config = _config;
+    _config = cfg;
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 
-    window = SDL_CreateWindow("Sphere Render",
-                              _config.width,
-                              _config.height,
-                              SDL_WINDOW_FULLSCREEN | SDL_WINDOW_OPENGL);
+    if (_config.is_full_sreen)
+    {
+        window = SDL_CreateWindow("Sphere Render",
+                                  _config.width,
+                                  _config.height,
+                                  SDL_WINDOW_FULLSCREEN | SDL_WINDOW_OPENGL);
+        int w, h;
+        SDL_GetWindowSize(window, &w, &h);
+        _config.width  = w;
+        _config.height = h;
+    }
+    else
+    {
+        window = SDL_CreateWindow(
+            "Sphere Render", _config.width, _config.height, SDL_WINDOW_OPENGL);
+    }
 
     if (window == nullptr)
     {
@@ -264,14 +305,14 @@ int engine_checker::initialize(config _config)
     return 1;
 }
 
-void engine_checker::uninitialize()
+void engine_checkers::uninitialize()
 {
     SDL_GL_DeleteContext(gl_context);
     SDL_DestroyWindow(window);
     SDL_Quit();
 }
 
-bool engine_checker::event_keyboard(event& e)
+bool engine_checkers::event_keyboard(event& e)
 {
     e.clear();
     bool      is_event = false;
@@ -316,15 +357,48 @@ bool engine_checker::event_keyboard(event& e)
     return is_event;
 }
 
-void engine_checker::render_triangle(const triangle<vertex_textured>& tr)
+void engine_checkers::render_triangle(const triangle<vertex>& tr)
 {
 
     glUniform1f(glGetUniformLocation(program, "u_uniforms.width"),
-                uniforms_world.width);
+                uniforms_world->width);
     glUniform1f(glGetUniformLocation(program, "u_uniforms.height"),
-                uniforms_world.height);
+                uniforms_world->height);
 
-    std::cout << uniforms_world.width << std::endl;
+    glUniform1f(glGetUniformLocation(program, "u_uniforms.rotate_alpha_obj"),
+                *uniforms_world->rotate_alpha_obj);
+    glUniform1f(glGetUniformLocation(program, "u_uniforms.rotate_beta_obj"),
+                *uniforms_world->rotate_beta_obj);
+    glUniform1f(glGetUniformLocation(program, "u_uniforms.rotate_gamma_obj"),
+                *uniforms_world->rotate_gamma_obj);
+
+    glUniform1f(glGetUniformLocation(program, "u_uniforms.rotate_alpha_camera"),
+                *uniforms_world->rotate_alpha_camera);
+    glUniform1f(glGetUniformLocation(program, "u_uniforms.rotate_beta_camera"),
+                *uniforms_world->rotate_beta_camera);
+    glUniform1f(glGetUniformLocation(program, "u_uniforms.rotate_gamma_camera"),
+                *uniforms_world->rotate_gamma_camera);
+
+    glUniform1f(glGetUniformLocation(program, "u_uniforms.translate_x_obj"),
+                *uniforms_world->translate_x_obj);
+    glUniform1f(glGetUniformLocation(program, "u_uniforms.translate_y_obj"),
+                *uniforms_world->translate_y_obj);
+    glUniform1f(glGetUniformLocation(program, "u_uniforms.translate_z_obj"),
+                *uniforms_world->translate_z_obj);
+
+    glUniform1f(glGetUniformLocation(program, "u_uniforms.translate_x_camera"),
+                *uniforms_world->translate_x_camera);
+    glUniform1f(glGetUniformLocation(program, "u_uniforms.translate_y_camera"),
+                *uniforms_world->translate_y_camera);
+    glUniform1f(glGetUniformLocation(program, "u_uniforms.translate_z_camera"),
+                *uniforms_world->translate_z_camera);
+
+    glUniform1f(glGetUniformLocation(program, "u_uniforms.scale_x_obj"),
+                *uniforms_world->scale_x_obj);
+    glUniform1f(glGetUniformLocation(program, "u_uniforms.scale_y_obj"),
+                *uniforms_world->scale_y_obj);
+    glUniform1f(glGetUniformLocation(program, "u_uniforms.scale_z_obj"),
+                *uniforms_world->scale_z_obj);
 
     glBufferData(GL_ARRAY_BUFFER,
                  sizeof(triangle<vertex_textured>),
@@ -355,7 +429,7 @@ void engine_checker::render_triangle(const triangle<vertex_textured>& tr)
     glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
-void engine_checker::swap_buffers()
+void engine_checkers::swap_buffers()
 {
     SDL_GL_SwapWindow(window);
 
@@ -366,7 +440,7 @@ void engine_checker::swap_buffers()
     GL_CHECK_ERRORS()
 }
 
-void engine_checker::load_texture(const char* path)
+void engine_checkers::load_texture(const char* path)
 {
     if (!std::filesystem::exists(path))
         throw std::runtime_error("No file");
@@ -401,14 +475,14 @@ void engine_checker::load_texture(const char* path)
     GLint border       = 0;
     // clang-format off
     glTexImage2D(GL_TEXTURE_2D, // Specifies the target texture of the active texture unit
-                    mipmap_level,  // Specifies the level-of-detail number. Level 0 is the base image level
-                    GL_RGBA,       // Specifies the internal format of the texture
-                    static_cast<GLsizei>(w),
-                    static_cast<GLsizei>(h),
-                    border,        // Specifies the width of the border. Must be 0. For GLES 2.0
-                    GL_RGBA,       // Specifies the format of the texel data. Must match internalformat
-                    GL_UNSIGNED_BYTE, // Specifies the data type of the texel data
-                    image.data());    // Specifies a pointer to the image data in memory
+                 mipmap_level,  // Specifies the level-of-detail number. Level 0 is the base image level
+                 GL_RGB,       // Specifies the internal format of the texture
+                 static_cast<GLsizei>(w),
+                 static_cast<GLsizei>(h),
+                 border,        // Specifies the width of the border. Must be 0. For GLES 2.0
+                 GL_RGB,       // Specifies the format of the texel data. Must match internalformat
+                 GL_UNSIGNED_BYTE, // Specifies the data type of the texel data
+                 image.data());    // Specifies a pointer to the image data in memory
     // clang-format on
     GL_CHECK_ERRORS()
 
@@ -418,12 +492,12 @@ void engine_checker::load_texture(const char* path)
     GL_CHECK_ERRORS()
 }
 
-void engine_checker::set_uniform(uniform& uni)
+void engine_checkers::set_uniform(uniform& uni)
 {
-    this->uniforms_world = uni;
+    this->uniforms_world = &uni;
 }
 
-void engine_checker::reload_shader(const char* path, int type)
+void engine_checkers::reload_shader(const char* path, int type)
 {
     load_shader(path, type);
     glLinkProgram(program);
@@ -433,7 +507,7 @@ void engine_checker::reload_shader(const char* path, int type)
     GL_CHECK_ERRORS()
 }
 
-void engine_checker::load_shader(const char* path, int type)
+void engine_checkers::load_shader(const char* path, int type)
 {
     if (!std::filesystem::exists(path))
         throw std::runtime_error("No file");

@@ -78,6 +78,7 @@ int main()
         {
             time_last = time_now;
             _game.get_object(0).set_rotate(0, phi, phi / 2);
+            // _game.get_object(0).set_translate(0, phi, phi / 2);
 
             _game.render(_camera);
 

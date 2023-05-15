@@ -4,6 +4,34 @@
 #include <cmath>
 #include <cstddef>
 
+struct uniform
+{
+    float alpha = 0.f;  // For animation
+
+    float width  = 0.f; // Resolution
+    float height = 0.f;
+
+    float* rotate_alpha_obj; // Rotate object
+    float* rotate_beta_obj;
+    float* rotate_gamma_obj;
+
+    float* rotate_alpha_camera; // Rotate camera
+    float* rotate_beta_camera;
+    float* rotate_gamma_camera;
+
+    float* translate_x_obj; // Translate object
+    float* translate_y_obj;
+    float* translate_z_obj;
+
+    float* translate_x_camera; // Translate camera
+    float* translate_y_camera;
+    float* translate_z_camera;
+
+    float* scale_x_obj; // Scale object
+    float* scale_y_obj;
+    float* scale_z_obj;
+};
+
 namespace color
 {
 struct rgb
@@ -121,12 +149,12 @@ struct vector3d
     }
 };
 
-float dot(const vector3d& x, const vector3d& y)
+inline float dot(const vector3d& x, const vector3d& y)
 {
     return x.x * y.x + x.y * y.y + x.z * y.z;
 }
 
-vector3d cross(const vector3d& x, const vector3d& y)
+inline vector3d cross(const vector3d& x, const vector3d& y)
 {
     return vector3d(
         x.y * y.z - y.y * x.z, x.z * y.x - y.z * x.x, x.x * y.y - y.x * x.y);
