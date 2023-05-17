@@ -25,7 +25,7 @@ public:
     void update();
     void render();
 
-    void add_figure(figure&);
+    void add_figure(figure&, const char* texture, size_t texture_index);
 
 private:
     config cfg;
@@ -35,4 +35,7 @@ private:
     camera           cam;
 
     std::vector<figure*> figures;
+
+    double phi   = 0;
+    double theta = 0;
 };

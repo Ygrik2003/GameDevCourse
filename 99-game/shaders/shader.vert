@@ -31,10 +31,13 @@ struct uniforms
 layout(location = 0) in vec3 i_position;
 in vec2 i_tex_coord;
 
-out vec4 v_position;
+out vec3 v_position;
+out vec3 i_normal;
 out vec2 v_tex_coord;
+out vec3 camera_pos;
 
 uniform uniforms u_uniforms;
+uniform vec3     u_normal;
 
 const float front = 0.01f;
 const float back  = 30.f;
@@ -89,27 +92,29 @@ void main()
         fovy, u_uniforms.width / u_uniforms.height, front, back);
 
     v_tex_coord = i_tex_coord;
-    v_position  = vec4(i_position, 1.);
+    camera_pos  = vec3(u_uniforms.translate_x_camera,
+                      u_uniforms.translate_y_camera,
+                      u_uniforms.translate_z_camera);
 
-    v_position = v_position *
-                 scale_matrix(u_uniforms.scale_x_obj,
+    mat4 model = scale_matrix(u_uniforms.scale_x_obj,
                               u_uniforms.scale_y_obj,
                               u_uniforms.scale_z_obj) *
-                 rotate_matrix(u_uniforms.rotate_alpha_obj,
-                               u_uniforms.rotate_beta_obj,
-                               u_uniforms.rotate_gamma_obj) *
                  translate_matrix(u_uniforms.translate_x_obj,
                                   u_uniforms.translate_y_obj,
-                                  u_uniforms.translate_z_obj);
+                                  u_uniforms.translate_z_obj) *
+                 rotate_matrix(u_uniforms.rotate_alpha_obj,
+                               u_uniforms.rotate_beta_obj,
+                               u_uniforms.rotate_gamma_obj);
 
-    v_position = v_position *
-                 translate_matrix(u_uniforms.translate_x_camera,
-                                  u_uniforms.translate_y_camera,
-                                  u_uniforms.translate_z_camera) *
-                 rotate_matrix(u_uniforms.rotate_alpha_camera,
-                               u_uniforms.rotate_beta_camera,
-                               u_uniforms.rotate_gamma_camera) *
-                 projection;
+    v_position = vec3(vec4(i_position, 1.) * model);
+    i_normal   = normalize(mat3(transpose(inverse(model))) * u_normal);
 
-    gl_Position = v_position;
+    gl_Position = vec4(v_position, 1.) *
+                  translate_matrix(u_uniforms.translate_x_camera,
+                                   u_uniforms.translate_y_camera,
+                                   u_uniforms.translate_z_camera) *
+                  rotate_matrix(u_uniforms.rotate_alpha_camera,
+                                u_uniforms.rotate_beta_camera,
+                                u_uniforms.rotate_gamma_camera) *
+                  projection;
 }

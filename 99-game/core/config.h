@@ -3,10 +3,10 @@
 struct config
 {
     const char* shader_vertex;
-    const char* shader_fragment_chessboard;
-    const char* shader_fragment_chessboard_cells;
-    const char* shader_fragment_checker;
+    const char* shader_fragment;
     const char* texture_cells;
+    const char* texture_chessboard;
+    const char* texture_checker;
     double      width         = 960;
     double      height        = 540;
     bool        is_full_sreen = false;

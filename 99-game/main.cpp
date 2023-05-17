@@ -1,4 +1,5 @@
 #include "game.h"
+#include "objects/chessboard.h"
 #include "objects/chessboard_cells.h"
 
 #include <chrono>
@@ -9,19 +10,20 @@
 int main()
 {
     config cfg;
-    cfg.shader_fragment_checker    = "./99-game/shaders/checker.frag";
-    cfg.shader_fragment_chessboard = "./99-game/shaders/chessboard.frag";
-    cfg.shader_fragment_chessboard_cells =
-        "./99-game/shaders/chessboard_cells.frag";
-    cfg.shader_vertex = "./99-game/shaders/shader.vert";
-    cfg.texture_cells = "./99-game/textures/chessboard_texture1.png";
+    cfg.shader_fragment    = "./99-game/shaders/shader.frag";
+    cfg.shader_vertex      = "./99-game/shaders/shader.vert";
+    cfg.texture_cells      = "./99-game/textures/texture_cells.png";
+    cfg.texture_checker    = "./99-game/textures/texture_cells.png";
+    cfg.texture_chessboard = "./99-game/textures/texture_chessboard.png";
 
     game_checkers my_game;
     my_game.initialize(cfg);
 
     chessboard_cells obj_cells;
-    obj_cells.set_translate(0, 0, 0);
-    my_game.add_figure(obj_cells);
+    my_game.add_figure(obj_cells, cfg.texture_cells, 0);
+
+    chessboard obj_chessboard;
+    my_game.add_figure(obj_chessboard, cfg.texture_cells, 1);
 
     event e;
     float phi      = 0;
@@ -32,11 +34,8 @@ int main()
         auto time_now = std::chrono::steady_clock::now();
         if ((time_now - time_last).count() > 1.e9 / fps)
         {
-            // obj_cells.set_rotate(0, phi, 0);
-
             my_game.update();
             my_game.render();
-            phi += 0.1;
         }
     }
 

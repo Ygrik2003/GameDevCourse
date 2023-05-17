@@ -26,7 +26,8 @@ public:
     virtual void load_shader(const char* path, int type)   = 0;
     virtual void reload_shader(const char* path, int type) = 0;
 
-    virtual void load_texture(const char* path) = 0;
+    virtual void load_texture(size_t index, const char* path) = 0;
+    virtual void set_texture(size_t index)                    = 0;
 
 protected:
     config _config;
@@ -45,7 +46,8 @@ public:
 
     void reload_shader(const char* path, int type) override;
 
-    void load_texture(const char* path) override;
+    void load_texture(size_t index, const char* path) override;
+    void set_texture(size_t index) override;
 
     void set_uniform(uniform& uni);
 

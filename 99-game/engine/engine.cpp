@@ -33,6 +33,7 @@ PFNGLGENVERTEXARRAYSPROC         glGenVertexArrays         = nullptr;
 PFNGLBINDVERTEXARRAYPROC         glBindVertexArray         = nullptr;
 PFNGLGETUNIFORMLOCATIONPROC      glGetUniformLocation      = nullptr;
 PFNGLUNIFORM1FPROC               glUniform1f               = nullptr;
+PFNGLUNIFORM3FPROC               glUniform3f               = nullptr;
 PFNGLUNIFORM1IPROC               glUniform1i               = nullptr;
 PFNGLUNIFORM1FVPROC              glUniform1fv              = nullptr;
 PFNGLBUFFERDATAPROC              glBufferData              = nullptr;
@@ -237,19 +238,20 @@ int engine_checkers::initialize(config cfg)
     load_gl_func("glUseProgram", glUseProgram);
     load_gl_func("glVertexAttribPointer", glVertexAttribPointer);
     load_gl_func("glEnableVertexAttribArray", glEnableVertexAttribArray);
-    load_gl_func("glDebugMessageCallback", glDebugMessageCallback);
-    load_gl_func("glDebugMessageControl", glDebugMessageControl);
     load_gl_func("glGenBuffers", glGenBuffers);
     load_gl_func("glBindBuffer", glBindBuffer);
     load_gl_func("glGenVertexArrays", glGenVertexArrays);
     load_gl_func("glBindVertexArray", glBindVertexArray);
     load_gl_func("glGetUniformLocation", glGetUniformLocation);
     load_gl_func("glUniform1f", glUniform1f);
+    load_gl_func("glUniform3f", glUniform3f);
     load_gl_func("glUniform1i", glUniform1i);
     load_gl_func("glUniform1fv", glUniform1fv);
     load_gl_func("glBufferData", glBufferData);
 
 #ifdef GL_DEBUG_OUTPUT_USE
+    load_gl_func("glDebugMessageCallback", glDebugMessageCallback);
+    load_gl_func("glDebugMessageControl", glDebugMessageControl);
     glEnable(GL_DEBUG_OUTPUT);
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     glDebugMessageCallback(gl_debug_output, nullptr);
@@ -261,7 +263,7 @@ int engine_checkers::initialize(config cfg)
     GL_CHECK_ERRORS()
 
     load_shader(_config.shader_vertex, GL_VERTEX_SHADER);
-    load_shader(_config.shader_fragment_chessboard_cells, GL_FRAGMENT_SHADER);
+    load_shader(_config.shader_fragment, GL_FRAGMENT_SHADER);
 
     GLuint vertex_buffer = 0;
     glGenBuffers(1, &vertex_buffer);
@@ -287,13 +289,6 @@ int engine_checkers::initialize(config cfg)
     GL_CHECK_ERRORS()
     uniform_texture = glGetUniformLocation(program, "u_texture");
     GL_CHECK_ERRORS()
-
-    int texture_unit = 0;
-    glActiveTexture(GL_TEXTURE0 + texture_unit);
-    GL_CHECK_ERRORS()
-    glUniform1i(uniform_texture, 0 + texture_unit);
-
-    load_texture(_config.texture_cells);
 
     glEnable(GL_BLEND);
     GL_CHECK_ERRORS()
@@ -400,6 +395,14 @@ void engine_checkers::render_triangle(const triangle<vertex_textured>& tr)
     glUniform1f(glGetUniformLocation(program, "u_uniforms.scale_z_obj"),
                 *uniforms_world->scale_z_obj);
 
+    // glUniform3f(glGetUniformLocation(program, "camera_pos"),
+    //             *uniforms_world->translate_x_camera);
+
+    glUniform3f(glGetUniformLocation(program, "u_normal"),
+                tr.normal.x,
+                tr.normal.y,
+                tr.normal.z);
+
     glBufferData(GL_ARRAY_BUFFER,
                  sizeof(triangle<vertex_textured>),
                  &tr,
@@ -440,8 +443,12 @@ void engine_checkers::swap_buffers()
     GL_CHECK_ERRORS()
 }
 
-void engine_checkers::load_texture(const char* path)
+void engine_checkers::load_texture(size_t index, const char* path)
 {
+    glActiveTexture(GL_TEXTURE0 + index);
+    GL_CHECK_ERRORS()
+    glUniform1i(uniform_texture, index);
+
     if (!std::filesystem::exists(path))
         throw std::runtime_error("No file");
 
@@ -474,15 +481,15 @@ void engine_checkers::load_texture(const char* path)
     GLint mipmap_level = 0;
     GLint border       = 0;
     // clang-format off
-    glTexImage2D(GL_TEXTURE_2D, // Specifies the target texture of the active texture unit
-                 mipmap_level,  // Specifies the level-of-detail number. Level 0 is the base image level
-                 GL_RGB,       // Specifies the internal format of the texture
+    glTexImage2D(GL_TEXTURE_2D,
+                 mipmap_level,
+                 GL_RGB,
                  static_cast<GLsizei>(w),
                  static_cast<GLsizei>(h),
-                 border,        // Specifies the width of the border. Must be 0. For GLES 2.0
-                 GL_RGB,       // Specifies the format of the texel data. Must match internalformat
-                 GL_UNSIGNED_BYTE, // Specifies the data type of the texel data
-                 image.data());    // Specifies a pointer to the image data in memory
+                 border,
+                 GL_RGB,
+                 GL_UNSIGNED_BYTE,
+                 image.data());
     // clang-format on
     GL_CHECK_ERRORS()
 
@@ -490,6 +497,12 @@ void engine_checkers::load_texture(const char* path)
     GL_CHECK_ERRORS()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     GL_CHECK_ERRORS()
+}
+
+void engine_checkers::set_texture(size_t index)
+{
+    glActiveTexture(GL_TEXTURE0 + index);
+    glUniform1i(uniform_texture, index);
 }
 
 void engine_checkers::set_uniform(uniform& uni)

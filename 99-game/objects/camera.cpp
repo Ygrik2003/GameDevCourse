@@ -4,7 +4,7 @@
 camera::camera()
 {
     set_rotate(0, 0, 0);
-    set_translate(0, 0, 1);
+    set_translate(0, 0, 0);
     set_scale(1, 1, 1);
 }
 
@@ -29,27 +29,35 @@ void camera::move(float dx, float dy, float dz)
 void camera::move_forward(float distance)
 {
     // move(0, 0, distance);
-    move(distance * std::cos(alpha) * std::sin(beta),
+    move(distance * std::cos(gamma) * std::sin(beta),
          distance * std::sin(beta),
-         -distance * std::cos(alpha) * std::cos(beta));
+         -distance * std::cos(gamma) * std::cos(beta));
+    // move(-distance * std::sin(alpha) * std::cos(beta),
+    //      distance * std::sin(beta),
+    //      -distance * std::cos(alpha) * std::cos(beta));
 }
 
 void camera::move_backward(float distance)
 {
     // move(0, 0, -distance);
-    move(-distance * std::cos(alpha) * std::sin(beta),
+    move(-distance * std::cos(gamma) * std::sin(beta),
          -distance * std::sin(beta),
-         distance * std::cos(alpha) * std::cos(beta));
+         distance * std::cos(gamma) * std::cos(beta));
+    // move(distance * std::sin(alpha) * std::cos(beta),
+    //      -distance * std::sin(beta),
+    //      distance * std::cos(alpha) * std::cos(beta));
 }
 
 void camera::move_left(float distance)
 {
-    move(-distance * std::cos(alpha), 0, -distance * std::sin(alpha));
+    move(-distance * std::cos(gamma), 0, -distance * std::sin(gamma));
+    // move(distance * std::cos(alpha), 0, -distance * std::sin(alpha));
 }
 
 void camera::move_right(float distance)
 {
-    move(distance * std::cos(alpha), 0, distance * std::sin(alpha));
+    move(distance * std::cos(gamma), 0, distance * std::sin(gamma));
+    // move(-distance * std::cos(alpha), 0, distance * std::sin(alpha));
 }
 
 void camera::add_rotate(float dalpha, float dbeta, float dgamma)

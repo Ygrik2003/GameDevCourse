@@ -28,9 +28,15 @@ public:
         uni.scale_z_obj = &scale_z;
     }
 
+    void   set_texture_index(size_t index) { texture_index = index; }
+    size_t get_texture_index() { return texture_index; }
+
 protected:
     std::vector<vertex_textured> vertexes;
     std::vector<uint32_t>        indexes;
 
     size_t count;
+
+private:
+    size_t texture_index = 0;
 };
