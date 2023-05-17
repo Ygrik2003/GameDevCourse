@@ -107,7 +107,7 @@ void main()
                                u_uniforms.rotate_gamma_obj);
 
     v_position = vec3(vec4(i_position, 1.) * model);
-    i_normal   = normalize(mat3(transpose(inverse(model))) * u_normal);
+    i_normal   = normalize((vec4(u_normal, 0.f) * model).xyz);
 
     gl_Position = vec4(v_position, 1.) *
                   translate_matrix(u_uniforms.translate_x_camera,

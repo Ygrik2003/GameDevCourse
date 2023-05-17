@@ -259,7 +259,7 @@ int engine_checkers::initialize(config cfg)
         GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 #endif
 
-    program = glCreateProgram();
+    shader_program = glCreateProgram();
     GL_CHECK_ERRORS()
 
     load_shader(_config.shader_vertex, GL_VERTEX_SHADER);
@@ -276,18 +276,18 @@ int engine_checkers::initialize(config cfg)
     glBindVertexArray(vertex_array_object);
     GL_CHECK_ERRORS()
 
-    glBindAttribLocation(program, 0, "i_position");
+    glBindAttribLocation(shader_program, 0, "i_position");
     GL_CHECK_ERRORS()
 
-    glLinkProgram(program);
+    glLinkProgram(shader_program);
     GL_CHECK_ERRORS()
 
-    glUseProgram(program);
+    glUseProgram(shader_program);
     GL_CHECK_ERRORS()
 
-    uniforms = glGetUniformLocation(program, "u_uniforms");
+    uniforms = glGetUniformLocation(shader_program, "u_uniforms");
     GL_CHECK_ERRORS()
-    uniform_texture = glGetUniformLocation(program, "u_texture");
+    uniform_texture = glGetUniformLocation(shader_program, "u_texture");
     GL_CHECK_ERRORS()
 
     glEnable(GL_BLEND);
@@ -355,50 +355,59 @@ bool engine_checkers::event_keyboard(event& e)
 void engine_checkers::render_triangle(const triangle<vertex_textured>& tr)
 {
 
-    glUniform1f(glGetUniformLocation(program, "u_uniforms.width"),
+    glUniform1f(glGetUniformLocation(shader_program, "u_uniforms.width"),
                 uniforms_world->width);
-    glUniform1f(glGetUniformLocation(program, "u_uniforms.height"),
+    glUniform1f(glGetUniformLocation(shader_program, "u_uniforms.height"),
                 uniforms_world->height);
 
-    glUniform1f(glGetUniformLocation(program, "u_uniforms.rotate_alpha_obj"),
-                *uniforms_world->rotate_alpha_obj);
-    glUniform1f(glGetUniformLocation(program, "u_uniforms.rotate_beta_obj"),
-                *uniforms_world->rotate_beta_obj);
-    glUniform1f(glGetUniformLocation(program, "u_uniforms.rotate_gamma_obj"),
-                *uniforms_world->rotate_gamma_obj);
+    glUniform1f(
+        glGetUniformLocation(shader_program, "u_uniforms.rotate_alpha_obj"),
+        *uniforms_world->rotate_alpha_obj);
+    glUniform1f(
+        glGetUniformLocation(shader_program, "u_uniforms.rotate_beta_obj"),
+        *uniforms_world->rotate_beta_obj);
+    glUniform1f(
+        glGetUniformLocation(shader_program, "u_uniforms.rotate_gamma_obj"),
+        *uniforms_world->rotate_gamma_obj);
 
-    glUniform1f(glGetUniformLocation(program, "u_uniforms.rotate_alpha_camera"),
-                *uniforms_world->rotate_alpha_camera);
-    glUniform1f(glGetUniformLocation(program, "u_uniforms.rotate_beta_camera"),
-                *uniforms_world->rotate_beta_camera);
-    glUniform1f(glGetUniformLocation(program, "u_uniforms.rotate_gamma_camera"),
-                *uniforms_world->rotate_gamma_camera);
+    glUniform1f(
+        glGetUniformLocation(shader_program, "u_uniforms.rotate_alpha_camera"),
+        *uniforms_world->rotate_alpha_camera);
+    glUniform1f(
+        glGetUniformLocation(shader_program, "u_uniforms.rotate_beta_camera"),
+        *uniforms_world->rotate_beta_camera);
+    glUniform1f(
+        glGetUniformLocation(shader_program, "u_uniforms.rotate_gamma_camera"),
+        *uniforms_world->rotate_gamma_camera);
 
-    glUniform1f(glGetUniformLocation(program, "u_uniforms.translate_x_obj"),
-                *uniforms_world->translate_x_obj);
-    glUniform1f(glGetUniformLocation(program, "u_uniforms.translate_y_obj"),
-                *uniforms_world->translate_y_obj);
-    glUniform1f(glGetUniformLocation(program, "u_uniforms.translate_z_obj"),
-                *uniforms_world->translate_z_obj);
+    glUniform1f(
+        glGetUniformLocation(shader_program, "u_uniforms.translate_x_obj"),
+        *uniforms_world->translate_x_obj);
+    glUniform1f(
+        glGetUniformLocation(shader_program, "u_uniforms.translate_y_obj"),
+        *uniforms_world->translate_y_obj);
+    glUniform1f(
+        glGetUniformLocation(shader_program, "u_uniforms.translate_z_obj"),
+        *uniforms_world->translate_z_obj);
 
-    glUniform1f(glGetUniformLocation(program, "u_uniforms.translate_x_camera"),
-                *uniforms_world->translate_x_camera);
-    glUniform1f(glGetUniformLocation(program, "u_uniforms.translate_y_camera"),
-                *uniforms_world->translate_y_camera);
-    glUniform1f(glGetUniformLocation(program, "u_uniforms.translate_z_camera"),
-                *uniforms_world->translate_z_camera);
+    glUniform1f(
+        glGetUniformLocation(shader_program, "u_uniforms.translate_x_camera"),
+        *uniforms_world->translate_x_camera);
+    glUniform1f(
+        glGetUniformLocation(shader_program, "u_uniforms.translate_y_camera"),
+        *uniforms_world->translate_y_camera);
+    glUniform1f(
+        glGetUniformLocation(shader_program, "u_uniforms.translate_z_camera"),
+        *uniforms_world->translate_z_camera);
 
-    glUniform1f(glGetUniformLocation(program, "u_uniforms.scale_x_obj"),
+    glUniform1f(glGetUniformLocation(shader_program, "u_uniforms.scale_x_obj"),
                 *uniforms_world->scale_x_obj);
-    glUniform1f(glGetUniformLocation(program, "u_uniforms.scale_y_obj"),
+    glUniform1f(glGetUniformLocation(shader_program, "u_uniforms.scale_y_obj"),
                 *uniforms_world->scale_y_obj);
-    glUniform1f(glGetUniformLocation(program, "u_uniforms.scale_z_obj"),
+    glUniform1f(glGetUniformLocation(shader_program, "u_uniforms.scale_z_obj"),
                 *uniforms_world->scale_z_obj);
 
-    // glUniform3f(glGetUniformLocation(program, "camera_pos"),
-    //             *uniforms_world->translate_x_camera);
-
-    glUniform3f(glGetUniformLocation(program, "u_normal"),
+    glUniform3f(glGetUniformLocation(shader_program, "u_normal"),
                 tr.normal.x,
                 tr.normal.y,
                 tr.normal.z);
@@ -510,13 +519,22 @@ void engine_checkers::set_uniform(uniform& uni)
     this->uniforms_world = &uni;
 }
 
-void engine_checkers::reload_shader(const char* path, int type)
+void engine_checkers::reload_shader(const char* path_to_vertex,
+                                    const char* path_to_fragment)
 {
-    load_shader(path, type);
-    glLinkProgram(program);
+    glDeleteProgram(shader_program);
     GL_CHECK_ERRORS()
 
-    glUseProgram(program);
+    shader_program = glCreateProgram();
+    GL_CHECK_ERRORS()
+
+    load_shader(path_to_vertex, GL_VERTEX_SHADER);
+    load_shader(path_to_fragment, GL_FRAGMENT_SHADER);
+
+    glLinkProgram(shader_program);
+    GL_CHECK_ERRORS()
+
+    glUseProgram(shader_program);
     GL_CHECK_ERRORS()
 }
 
@@ -563,7 +581,7 @@ void engine_checkers::load_shader(const char* path, int type)
 
         throw std::runtime_error(log.data());
     }
-    glAttachShader(program, handle);
+    glAttachShader(shader_program, handle);
     GL_CHECK_ERRORS()
 
     glDeleteShader(handle);

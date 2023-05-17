@@ -4,13 +4,12 @@ int game_checkers::initialize(config cfg)
 {
     this->cfg = cfg;
 
-    uniforms;
     uniforms.width  = cfg.width;
     uniforms.height = cfg.height;
 
     cam = camera();
     cam.uniform_link(uniforms);
-    cam.move(0, 1, 0);
+    cam.move(0, 0.2, 0);
     cam.set_rotate(0, M_PI / 2, -3 * M_PI / 2);
 
     my_engine = new engine_checkers();
@@ -58,8 +57,7 @@ bool game_checkers::event_listener(event& e)
         }
         else if (e.keyboard.space_clicked)
         {
-            my_engine->reload_shader(cfg.shader_vertex, GL_VERTEX_SHADER);
-            my_engine->reload_shader(cfg.shader_fragment, GL_FRAGMENT_SHADER);
+            my_engine->reload_shader(cfg.shader_vertex, cfg.shader_fragment);
         }
     }
     return true;
@@ -71,7 +69,7 @@ void game_checkers::update()
     theta += M_PI / 300;
 
     cam.add_rotate(0, -M_PI / 300, 0);
-    cam.set_translate(1 * std::cos(phi), -1, 1 * std::sin(phi));
+    cam.set_translate(1 * std::cos(M_PI + phi), -.5, 1 * std::sin(M_PI + phi));
 };
 
 void game_checkers::render()

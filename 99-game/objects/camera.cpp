@@ -24,6 +24,7 @@ void camera::move(float dx, float dy, float dz)
     this->dx += dx;
     this->dy += dy;
     this->dz += dz;
+    std::cout << dx << " " << dy << " " << dz << std::endl;
 }
 
 void camera::move_forward(float distance)
@@ -65,5 +66,4 @@ void camera::add_rotate(float dalpha, float dbeta, float dgamma)
     alpha += dalpha;
     beta += dbeta;
     gamma += dgamma;
-    std::cout << alpha << " " << beta << " " << gamma << std::endl;
 }

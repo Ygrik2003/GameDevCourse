@@ -23,8 +23,9 @@ public:
     virtual void render_triangle(const triangle<vertex_textured>& tr) = 0;
     virtual void swap_buffers()                                       = 0;
 
-    virtual void load_shader(const char* path, int type)   = 0;
-    virtual void reload_shader(const char* path, int type) = 0;
+    virtual void load_shader(const char* path, int type)     = 0;
+    virtual void reload_shader(const char* path_to_vertex,
+                               const char* path_to_fragment) = 0;
 
     virtual void load_texture(size_t index, const char* path) = 0;
     virtual void set_texture(size_t index)                    = 0;
@@ -44,7 +45,8 @@ public:
     void render_triangle(const triangle<vertex_textured>& tr) override;
     void swap_buffers() override;
 
-    void reload_shader(const char* path, int type) override;
+    void reload_shader(const char* path_to_vertex,
+                       const char* path_to_fragment) override;
 
     void load_texture(size_t index, const char* path) override;
     void set_texture(size_t index) override;
@@ -57,7 +59,7 @@ private:
     SDL_Window*   window;
     SDL_GLContext gl_context;
 
-    GLuint program = 0;
+    GLuint shader_program = 0;
 
     GLuint shader_vertex                    = 0;
     GLuint shader_fragment_chessboard_cells = 0;
