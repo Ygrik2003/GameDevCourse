@@ -1,4 +1,5 @@
 #include "game.h"
+#include "objects/checker.h"
 #include "objects/chessboard.h"
 #include "objects/chessboard_cells.h"
 
@@ -10,11 +11,12 @@
 int main()
 {
     config cfg;
-    cfg.shader_fragment    = "./99-game/shaders/shader.frag";
-    cfg.shader_vertex      = "./99-game/shaders/shader.vert";
-    cfg.texture_cells      = "./99-game/textures/texture_cells.png";
-    cfg.texture_checker    = "./99-game/textures/texture_cells.png";
-    cfg.texture_chessboard = "./99-game/textures/texture_chessboard.png";
+    cfg.shader_fragment       = "./99-game/shaders/shader.frag";
+    cfg.shader_vertex         = "./99-game/shaders/shader.vert";
+    cfg.texture_cells         = "./99-game/textures/texture_cells.png";
+    cfg.texture_checker_white = "./99-game/textures/texture_checker_white.png";
+    cfg.texture_checker_black = "./99-game/textures/texture_checker_black.png";
+    cfg.texture_chessboard    = "./99-game/textures/texture_chessboard.png";
 
     game_checkers my_game;
     my_game.initialize(cfg);
@@ -24,6 +26,12 @@ int main()
 
     chessboard obj_chessboard;
     my_game.add_figure(obj_chessboard, cfg.texture_cells, 1);
+
+    // checker obj_ch1;
+    // my_game.add_figure(obj_ch1, cfg.texture_chessboard, 2);
+
+    // checker obj_ch2;
+    // my_game.add_figure(obj_ch2, cfg.texture_chessboard, 3);
 
     event e;
     float phi      = 0;

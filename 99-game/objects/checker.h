@@ -3,5 +3,6 @@
 
 class checker : public figure
 {
+public:
     checker();
 };

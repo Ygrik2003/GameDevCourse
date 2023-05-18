@@ -39,7 +39,7 @@ out vec3 camera_pos;
 uniform uniforms u_uniforms;
 uniform vec3     u_normal;
 
-const float front = 0.01f;
+const float front = 0.0001f;
 const float back  = 30.f;
 float       fovy  = 3.14159 / 2.;
 
@@ -92,9 +92,9 @@ void main()
         fovy, u_uniforms.width / u_uniforms.height, front, back);
 
     v_tex_coord = i_tex_coord;
-    camera_pos  = vec3(u_uniforms.translate_x_camera,
+    camera_pos  = vec3(-u_uniforms.translate_x_camera,
                       u_uniforms.translate_y_camera,
-                      u_uniforms.translate_z_camera);
+                      -u_uniforms.translate_z_camera);
 
     mat4 model = scale_matrix(u_uniforms.scale_x_obj,
                               u_uniforms.scale_y_obj,

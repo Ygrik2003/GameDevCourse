@@ -25,36 +25,61 @@ chessboard::chessboard()
     vertexes.push_back(vertex_textured(vertex(0.6, -0.05, -0.6), 1, 0));
     vertexes.push_back(vertex_textured(vertex(-0.6, -0.05, -0.6), 0, 0));
 
-    for (int i = 0; i <= 1; i++)
-    {
-        indexes.push_back(0 + i * 4);
-        indexes.push_back(3 + i * 4);
-        indexes.push_back(4 + i * 4);
-        indexes.push_back(4 + i * 4);
-        indexes.push_back(3 + i * 4);
-        indexes.push_back(7 + i * 4);
+    indexes.push_back(0);
+    indexes.push_back(3);
+    indexes.push_back(4);
+    indexes.push_back(4);
+    indexes.push_back(3);
+    indexes.push_back(7);
 
-        indexes.push_back(6 + i * 4);
-        indexes.push_back(7 + i * 4);
-        indexes.push_back(2 + i * 4);
-        indexes.push_back(2 + i * 4);
-        indexes.push_back(7 + i * 4);
-        indexes.push_back(3 + i * 4);
+    indexes.push_back(6);
+    indexes.push_back(7);
+    indexes.push_back(2);
+    indexes.push_back(2);
+    indexes.push_back(7);
+    indexes.push_back(3);
 
-        indexes.push_back(1 + i * 4);
-        indexes.push_back(6 + i * 4);
-        indexes.push_back(2 + i * 4);
-        indexes.push_back(5 + i * 4);
-        indexes.push_back(6 + i * 4);
-        indexes.push_back(1 + i * 4);
+    indexes.push_back(1);
+    indexes.push_back(6);
+    indexes.push_back(2);
+    indexes.push_back(5);
+    indexes.push_back(6);
+    indexes.push_back(1);
 
-        indexes.push_back(0 + i * 4);
-        indexes.push_back(5 + i * 4);
-        indexes.push_back(1 + i * 4);
-        indexes.push_back(4 + i * 4);
-        indexes.push_back(5 + i * 4);
-        indexes.push_back(0 + i * 4);
-    }
+    indexes.push_back(0);
+    indexes.push_back(5);
+    indexes.push_back(1);
+    indexes.push_back(4);
+    indexes.push_back(5);
+    indexes.push_back(0);
+
+    indexes.push_back(3 + 4);
+    indexes.push_back(0 + 4);
+    indexes.push_back(4 + 4);
+    indexes.push_back(3 + 4);
+    indexes.push_back(4 + 4);
+    indexes.push_back(7 + 4);
+
+    indexes.push_back(7 + 4);
+    indexes.push_back(6 + 4);
+    indexes.push_back(2 + 4);
+    indexes.push_back(7 + 4);
+    indexes.push_back(2 + 4);
+    indexes.push_back(3 + 4);
+
+    indexes.push_back(6 + 4);
+    indexes.push_back(1 + 4);
+    indexes.push_back(2 + 4);
+    indexes.push_back(6 + 4);
+    indexes.push_back(5 + 4);
+    indexes.push_back(1 + 4);
+
+    indexes.push_back(5 + 4);
+    indexes.push_back(0 + 4);
+    indexes.push_back(1 + 4);
+    indexes.push_back(5 + 4);
+    indexes.push_back(4 + 4);
+    indexes.push_back(0 + 4);
 
     indexes.push_back(8);
     indexes.push_back(10);
