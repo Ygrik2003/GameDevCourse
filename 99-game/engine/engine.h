@@ -5,9 +5,9 @@
 
 #include <vector>
 
+#include <KHR/khrplatform.h>
 #include <SDL3/SDL.h>
-#include <SDL3/SDL_opengl.h>
-#include <SDL3/SDL_opengl_glext.h>
+#include <glad/glad.h>
 #include <glm/glm.hpp>
 
 class engine
@@ -26,6 +26,8 @@ public:
     virtual void load_shader(const char* path, int type)     = 0;
     virtual void reload_shader(const char* path_to_vertex,
                                const char* path_to_fragment) = 0;
+
+    virtual void create_shadow_map() = 0;
 
     virtual void load_texture(size_t index, const char* path) = 0;
     virtual void set_texture(size_t index)                    = 0;
@@ -51,6 +53,8 @@ public:
     void load_texture(size_t index, const char* path) override;
     void set_texture(size_t index) override;
 
+    void create_shadow_map() override;
+
     void set_uniform(uniform& uni);
 
 private:
@@ -65,6 +69,9 @@ private:
     GLuint shader_fragment_chessboard_cells = 0;
     GLuint shader_fragment_chessboard       = 0;
     GLuint shader_fragment_checker          = 0;
+
+    GLuint obj_depth_map     = 0;
+    GLuint texture_depth_map = 0;
 
     GLuint uniforms        = 0;
     GLuint uniform_texture = 0;

@@ -8,6 +8,8 @@ find_package(SDL3 REQUIRED)
 find_package(OpenGL REQUIRED)
 
 add_library(99-engine STATIC
+            glad/glad.h glad/glad.c
+            KHR/khrplatform.h
             engine/engine.h engine/engine.cpp
             core/config.h core/event.h
             core/types.h objects/figure.h 

@@ -8,36 +8,6 @@
 
 #define GL_DEBUG_OUTPUT_USE
 
-PFNGLCREATESHADERPROC            glCreateShader            = nullptr;
-PFNGLSHADERSOURCEPROC            glShaderSource            = nullptr;
-PFNGLCOMPILESHADERPROC           glCompileShader           = nullptr;
-PFNGLGETSHADERIVPROC             glGetShaderiv             = nullptr;
-PFNGLGETSHADERINFOLOGPROC        glGetShaderInfoLog        = nullptr;
-PFNGLDELETESHADERPROC            glDeleteShader            = nullptr;
-PFNGLCREATEPROGRAMPROC           glCreateProgram           = nullptr;
-PFNGLATTACHSHADERPROC            glAttachShader            = nullptr;
-PFNGLBINDATTRIBLOCATIONPROC      glBindAttribLocation      = nullptr;
-PFNGLLINKPROGRAMPROC             glLinkProgram             = nullptr;
-PFNGLGETPROGRAMIVPROC            glGetProgramiv            = nullptr;
-PFNGLGETPROGRAMINFOLOGPROC       glGetProgramInfoLog       = nullptr;
-PFNGLDELETEPROGRAMPROC           glDeleteProgram           = nullptr;
-PFNGLUSEPROGRAMPROC              glUseProgram              = nullptr;
-PFNGLVERTEXATTRIBPOINTERPROC     glVertexAttribPointer     = nullptr;
-PFNGLENABLEVERTEXATTRIBARRAYPROC glEnableVertexAttribArray = nullptr;
-PFNGLVALIDATEPROGRAMPROC         glValidateProgram         = nullptr;
-PFNGLDEBUGMESSAGECONTROLPROC     glDebugMessageControl     = nullptr;
-PFNGLDEBUGMESSAGECALLBACKPROC    glDebugMessageCallback    = nullptr;
-PFNGLGENBUFFERSPROC              glGenBuffers              = nullptr;
-PFNGLBINDBUFFERPROC              glBindBuffer              = nullptr;
-PFNGLGENVERTEXARRAYSPROC         glGenVertexArrays         = nullptr;
-PFNGLBINDVERTEXARRAYPROC         glBindVertexArray         = nullptr;
-PFNGLGETUNIFORMLOCATIONPROC      glGetUniformLocation      = nullptr;
-PFNGLUNIFORM1FPROC               glUniform1f               = nullptr;
-PFNGLUNIFORM3FPROC               glUniform3f               = nullptr;
-PFNGLUNIFORM1IPROC               glUniform1i               = nullptr;
-PFNGLUNIFORM1FVPROC              glUniform1fv              = nullptr;
-PFNGLBUFFERDATAPROC              glBufferData              = nullptr;
-
 #ifdef GL_DEBUG_OUTPUT_USE
 void APIENTRY gl_debug_output(GLenum        source,
                               GLenum        type,
@@ -156,16 +126,15 @@ void APIENTRY gl_debug_output(GLenum        source,
         }                                                                      \
     }
 
-template <typename T>
-static void load_gl_func(const char* func_name, T& result)
+void* load_gl_func(const char* name)
 {
-    SDL_FunctionPointer gl_pointer = SDL_GL_GetProcAddress(func_name);
+    SDL_FunctionPointer gl_pointer = SDL_GL_GetProcAddress(name);
     if (gl_pointer == nullptr)
     {
-        throw std::runtime_error(std::string("can't load GL function") +
-                                 func_name);
+        throw std::runtime_error(std::string("can't load GL function: ") +
+                                 name);
     }
-    result = reinterpret_cast<T>(gl_pointer);
+    return reinterpret_cast<void*>(gl_pointer);
 }
 
 int engine_checkers::initialize(config cfg)
@@ -222,36 +191,14 @@ int engine_checkers::initialize(config cfg)
 
     std::clog << "OpenGL " << gl_major_v << '.' << gl_minor_v << '\n';
 
-    load_gl_func("glCreateShader", glCreateShader);
-    load_gl_func("glShaderSource", glShaderSource);
-    load_gl_func("glCompileShader", glCompileShader);
-    load_gl_func("glGetShaderiv", glGetShaderiv);
-    load_gl_func("glGetShaderInfoLog", glGetShaderInfoLog);
-    load_gl_func("glDeleteShader", glDeleteShader);
-    load_gl_func("glCreateProgram", glCreateProgram);
-    load_gl_func("glAttachShader", glAttachShader);
-    load_gl_func("glBindAttribLocation", glBindAttribLocation);
-    load_gl_func("glLinkProgram", glLinkProgram);
-    load_gl_func("glGetProgramiv", glGetProgramiv);
-    load_gl_func("glGetProgramInfoLog", glGetProgramInfoLog);
-    load_gl_func("glDeleteProgram", glDeleteProgram);
-    load_gl_func("glUseProgram", glUseProgram);
-    load_gl_func("glVertexAttribPointer", glVertexAttribPointer);
-    load_gl_func("glEnableVertexAttribArray", glEnableVertexAttribArray);
-    load_gl_func("glGenBuffers", glGenBuffers);
-    load_gl_func("glBindBuffer", glBindBuffer);
-    load_gl_func("glGenVertexArrays", glGenVertexArrays);
-    load_gl_func("glBindVertexArray", glBindVertexArray);
-    load_gl_func("glGetUniformLocation", glGetUniformLocation);
-    load_gl_func("glUniform1f", glUniform1f);
-    load_gl_func("glUniform3f", glUniform3f);
-    load_gl_func("glUniform1i", glUniform1i);
-    load_gl_func("glUniform1fv", glUniform1fv);
-    load_gl_func("glBufferData", glBufferData);
+    if (gladLoadGLES2Loader(load_gl_func) == 0)
+    {
+        std::cerr << "cant init glad" << std::endl;
+        SDL_Quit();
+        return 0;
+    }
 
 #ifdef GL_DEBUG_OUTPUT_USE
-    load_gl_func("glDebugMessageCallback", glDebugMessageCallback);
-    load_gl_func("glDebugMessageControl", glDebugMessageControl);
     glEnable(GL_DEBUG_OUTPUT);
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     glDebugMessageCallback(gl_debug_output, nullptr);
@@ -512,6 +459,27 @@ void engine_checkers::set_texture(size_t index)
 {
     glActiveTexture(GL_TEXTURE0 + index);
     glUniform1i(uniform_texture, index);
+}
+
+void engine_checkers::create_shadow_map()
+{
+    glGenFramebuffers(1, &obj_depth_map);
+
+    glGenTextures(1, &texture_depth_map);
+    glBindTexture(GL_TEXTURE_2D, texture_depth_map);
+    glTexImage2D(GL_TEXTURE_2D,
+                 0,
+                 GL_DEPTH_COMPONENT,
+                 _config.width,
+                 _config.height,
+                 0,
+                 GL_DEPTH_COMPONENT,
+                 GL_FLOAT,
+                 NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 }
 
 void engine_checkers::set_uniform(uniform& uni)
