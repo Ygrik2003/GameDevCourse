@@ -12,7 +12,7 @@ int game_checkers::initialize(config cfg)
     // cam.move(0.6, -0.1, 0.6);
     cam.set_rotate(0, 0, 0);
 
-    my_engine = new engine_checkers();
+    my_engine = new engine_tetris();
     my_engine->set_uniform(uniforms);
     my_engine->initialize(cfg);
 
@@ -69,8 +69,9 @@ void game_checkers::update()
     phi += M_PI / 300;
     theta += M_PI / 300;
 
-    cam.add_rotate(0, -M_PI / 300, 0);
-    cam.set_translate(1 * std::cos(M_PI + phi), -.5, 1 * std::sin(M_PI + phi));
+    // cam.add_rotate(0, -M_PI / 300, 0);
+    // cam.set_translate(1 * std::cos(M_PI + phi), -.5, 1 * std::sin(M_PI +
+    // phi));
 };
 
 void game_checkers::render()
@@ -79,7 +80,7 @@ void game_checkers::render()
     for (auto fig : figures)
     {
         fig->uniform_link(uniforms);
-        fig->set_rotate(0, 0, theta);
+        // fig->set_rotate(0, 0, theta);
         my_engine->set_texture(fig->get_texture_index());
         for (size_t i = 0; i < fig->get_count(); i++)
         {

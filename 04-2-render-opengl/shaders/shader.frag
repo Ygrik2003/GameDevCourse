@@ -1,4 +1,4 @@
-#version 320 es
+#version 200 es
 precision mediump float;
 
 in vec4 v_position;

@@ -137,7 +137,7 @@ void* load_gl_func(const char* name)
     return reinterpret_cast<void*>(gl_pointer);
 }
 
-int engine_checkers::initialize(config cfg)
+int engine_tetris::initialize(config cfg)
 {
 
     _config = cfg;
@@ -243,18 +243,21 @@ int engine_checkers::initialize(config cfg)
     GL_CHECK_ERRORS()
 
     glEnable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     return 1;
 }
 
-void engine_checkers::uninitialize()
+void engine_tetris::uninitialize()
 {
     SDL_GL_DeleteContext(gl_context);
     SDL_DestroyWindow(window);
     SDL_Quit();
 }
 
-bool engine_checkers::event_keyboard(event& e)
+bool engine_tetris::event_keyboard(event& e)
 {
     e.clear();
     bool      is_event = false;
@@ -299,70 +302,11 @@ bool engine_checkers::event_keyboard(event& e)
     return is_event;
 }
 
-void engine_checkers::render_triangle(const triangle<vertex_textured>& tr)
+void engine_tetris::render_triangle(const triangle<vertex_textured>& tr)
 {
+    reload_uniform();
 
-    glUniform1f(glGetUniformLocation(shader_program, "u_uniforms.width"),
-                uniforms_world->width);
-    glUniform1f(glGetUniformLocation(shader_program, "u_uniforms.height"),
-                uniforms_world->height);
-
-    glUniform1f(
-        glGetUniformLocation(shader_program, "u_uniforms.rotate_alpha_obj"),
-        *uniforms_world->rotate_alpha_obj);
-    glUniform1f(
-        glGetUniformLocation(shader_program, "u_uniforms.rotate_beta_obj"),
-        *uniforms_world->rotate_beta_obj);
-    glUniform1f(
-        glGetUniformLocation(shader_program, "u_uniforms.rotate_gamma_obj"),
-        *uniforms_world->rotate_gamma_obj);
-
-    glUniform1f(
-        glGetUniformLocation(shader_program, "u_uniforms.rotate_alpha_camera"),
-        *uniforms_world->rotate_alpha_camera);
-    glUniform1f(
-        glGetUniformLocation(shader_program, "u_uniforms.rotate_beta_camera"),
-        *uniforms_world->rotate_beta_camera);
-    glUniform1f(
-        glGetUniformLocation(shader_program, "u_uniforms.rotate_gamma_camera"),
-        *uniforms_world->rotate_gamma_camera);
-
-    glUniform1f(
-        glGetUniformLocation(shader_program, "u_uniforms.translate_x_obj"),
-        *uniforms_world->translate_x_obj);
-    glUniform1f(
-        glGetUniformLocation(shader_program, "u_uniforms.translate_y_obj"),
-        *uniforms_world->translate_y_obj);
-    glUniform1f(
-        glGetUniformLocation(shader_program, "u_uniforms.translate_z_obj"),
-        *uniforms_world->translate_z_obj);
-
-    glUniform1f(
-        glGetUniformLocation(shader_program, "u_uniforms.translate_x_camera"),
-        *uniforms_world->translate_x_camera);
-    glUniform1f(
-        glGetUniformLocation(shader_program, "u_uniforms.translate_y_camera"),
-        *uniforms_world->translate_y_camera);
-    glUniform1f(
-        glGetUniformLocation(shader_program, "u_uniforms.translate_z_camera"),
-        *uniforms_world->translate_z_camera);
-
-    glUniform1f(glGetUniformLocation(shader_program, "u_uniforms.scale_x_obj"),
-                *uniforms_world->scale_x_obj);
-    glUniform1f(glGetUniformLocation(shader_program, "u_uniforms.scale_y_obj"),
-                *uniforms_world->scale_y_obj);
-    glUniform1f(glGetUniformLocation(shader_program, "u_uniforms.scale_z_obj"),
-                *uniforms_world->scale_z_obj);
-
-    glUniform3f(glGetUniformLocation(shader_program, "u_normal"),
-                tr.normal.x,
-                tr.normal.y,
-                tr.normal.z);
-
-    glBufferData(GL_ARRAY_BUFFER,
-                 sizeof(triangle<vertex_textured>),
-                 &tr,
-                 GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(tr), &tr, GL_STATIC_DRAW);
     GL_CHECK_ERRORS()
 
     glEnableVertexAttribArray(0);
@@ -371,24 +315,34 @@ void engine_checkers::render_triangle(const triangle<vertex_textured>& tr)
                           3,
                           GL_FLOAT,
                           GL_FALSE,
-                          sizeof(vertex_textured),
+                          sizeof(tr.vertexes[0]),
                           reinterpret_cast<GLvoid*>(0));
     GL_CHECK_ERRORS()
 
     glEnableVertexAttribArray(1);
     GL_CHECK_ERRORS()
     glVertexAttribPointer(1,
+                          3,
+                          GL_FLOAT,
+                          GL_FALSE,
+                          sizeof(tr.vertexes[0]),
+                          reinterpret_cast<GLvoid*>(3 * sizeof(float)));
+    GL_CHECK_ERRORS()
+
+    glEnableVertexAttribArray(2);
+    GL_CHECK_ERRORS()
+    glVertexAttribPointer(2,
                           2,
                           GL_FLOAT,
                           GL_FALSE,
-                          sizeof(vertex_textured),
-                          reinterpret_cast<GLvoid*>(3 * sizeof(float)));
+                          sizeof(tr.vertexes[0]),
+                          reinterpret_cast<GLvoid*>(sizeof(vertex)));
     GL_CHECK_ERRORS()
 
     glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
-void engine_checkers::swap_buffers()
+void engine_tetris::swap_buffers()
 {
     SDL_GL_SwapWindow(window);
 
@@ -399,7 +353,7 @@ void engine_checkers::swap_buffers()
     GL_CHECK_ERRORS()
 }
 
-void engine_checkers::load_texture(size_t index, const char* path)
+void engine_tetris::load_texture(size_t index, const char* path)
 {
     glActiveTexture(GL_TEXTURE0 + index);
     GL_CHECK_ERRORS()
@@ -455,13 +409,15 @@ void engine_checkers::load_texture(size_t index, const char* path)
     GL_CHECK_ERRORS()
 }
 
-void engine_checkers::set_texture(size_t index)
+void engine_tetris::set_texture(size_t index)
 {
     glActiveTexture(GL_TEXTURE0 + index);
     glUniform1i(uniform_texture, index);
 }
 
-void engine_checkers::create_shadow_map()
+void engine_tetris::load_object(const char* path) {}
+
+void engine_tetris::create_shadow_map()
 {
     glGenFramebuffers(1, &obj_depth_map);
 
@@ -480,15 +436,80 @@ void engine_checkers::create_shadow_map()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, obj_depth_map);
+    glFramebufferTexture2D(GL_FRAMEBUFFER,
+                           GL_DEPTH_ATTACHMENT,
+                           GL_TEXTURE_2D,
+                           texture_depth_map,
+                           0);
+    // glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void engine_checkers::set_uniform(uniform& uni)
+void engine_tetris::set_uniform(uniform& uni)
 {
     this->uniforms_world = &uni;
 }
 
-void engine_checkers::reload_shader(const char* path_to_vertex,
-                                    const char* path_to_fragment)
+void engine_tetris::reload_uniform()
+{
+    glUniform1f(glGetUniformLocation(shader_program, "u_uniforms.width"),
+                uniforms_world->width);
+    glUniform1f(glGetUniformLocation(shader_program, "u_uniforms.height"),
+                uniforms_world->height);
+
+    glUniform1f(
+        glGetUniformLocation(shader_program, "u_uniforms.rotate_alpha_obj"),
+        *uniforms_world->rotate_alpha_obj);
+    glUniform1f(
+        glGetUniformLocation(shader_program, "u_uniforms.rotate_beta_obj"),
+        *uniforms_world->rotate_beta_obj);
+    glUniform1f(
+        glGetUniformLocation(shader_program, "u_uniforms.rotate_gamma_obj"),
+        *uniforms_world->rotate_gamma_obj);
+
+    glUniform1f(
+        glGetUniformLocation(shader_program, "u_uniforms.rotate_alpha_camera"),
+        *uniforms_world->rotate_alpha_camera);
+    glUniform1f(
+        glGetUniformLocation(shader_program, "u_uniforms.rotate_beta_camera"),
+        *uniforms_world->rotate_beta_camera);
+    glUniform1f(
+        glGetUniformLocation(shader_program, "u_uniforms.rotate_gamma_camera"),
+        *uniforms_world->rotate_gamma_camera);
+
+    glUniform1f(
+        glGetUniformLocation(shader_program, "u_uniforms.translate_x_obj"),
+        *uniforms_world->translate_x_obj);
+    glUniform1f(
+        glGetUniformLocation(shader_program, "u_uniforms.translate_y_obj"),
+        *uniforms_world->translate_y_obj);
+    glUniform1f(
+        glGetUniformLocation(shader_program, "u_uniforms.translate_z_obj"),
+        *uniforms_world->translate_z_obj);
+
+    glUniform1f(
+        glGetUniformLocation(shader_program, "u_uniforms.translate_x_camera"),
+        *uniforms_world->translate_x_camera);
+    glUniform1f(
+        glGetUniformLocation(shader_program, "u_uniforms.translate_y_camera"),
+        *uniforms_world->translate_y_camera);
+    glUniform1f(
+        glGetUniformLocation(shader_program, "u_uniforms.translate_z_camera"),
+        *uniforms_world->translate_z_camera);
+
+    glUniform1f(glGetUniformLocation(shader_program, "u_uniforms.scale_x_obj"),
+                *uniforms_world->scale_x_obj);
+    glUniform1f(glGetUniformLocation(shader_program, "u_uniforms.scale_y_obj"),
+                *uniforms_world->scale_y_obj);
+    glUniform1f(glGetUniformLocation(shader_program, "u_uniforms.scale_z_obj"),
+                *uniforms_world->scale_z_obj);
+}
+
+void engine_tetris::reload_shader(const char* path_to_vertex,
+                                  const char* path_to_fragment)
 {
     glDeleteProgram(shader_program);
     GL_CHECK_ERRORS()
@@ -506,7 +527,7 @@ void engine_checkers::reload_shader(const char* path_to_vertex,
     GL_CHECK_ERRORS()
 }
 
-void engine_checkers::load_shader(const char* path, int type)
+void engine_tetris::load_shader(const char* path, int type)
 {
     if (!std::filesystem::exists(path))
         throw std::runtime_error("No file");

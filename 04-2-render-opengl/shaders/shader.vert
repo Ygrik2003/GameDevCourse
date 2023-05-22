@@ -1,4 +1,4 @@
-#version 320 es
+#version 200 es
 
 struct transformation_object
 {
@@ -14,8 +14,8 @@ struct transformation_camera
     mat4 projection;
 };
 
-layout(location = 0) in vec3 a_position;
-layout(location = 1) in vec4 a_color;
+in vec3 a_position;
+in vec4 a_color;
 
 uniform transformation_object tr_obj;
 uniform transformation_camera tr_cam;

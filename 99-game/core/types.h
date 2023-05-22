@@ -6,7 +6,7 @@
 
 struct uniform
 {
-    float alpha = 0.f;  // For animation
+    float alpha = 0.f; // For animation
 
     float width  = 0.f; // Resolution
     float height = 0.f;
@@ -32,17 +32,34 @@ struct uniform
     float* scale_z_obj;
 };
 
+struct vertex;
+
+struct vector3d
+{
+    vector3d();
+    vector3d(float x, float y, float z);
+    vector3d(vertex v);
+
+    vector3d  operator+(const vector3d& right);
+    vector3d  operator+=(const vector3d& right);
+    vector3d  operator-(const vector3d& right);
+    vector3d& operator=(const vector3d& right);
+    float     length() const;
+
+    vector3d& normalize();
+
+    float x = 0.;
+    float y = 0.;
+    float z = 0.;
+};
+
 namespace color
 {
 struct rgb
 {
-    rgb() {}
-    rgb(float r, float g, float b)
-    {
-        this->r = r;
-        this->g = g;
-        this->b = b;
-    }
+    rgb();
+    rgb(float r, float g, float b);
+
     float r = 0.;
     float g = 0.;
     float b = 0.;
@@ -51,102 +68,31 @@ struct rgb
 
 struct vertex
 {
-    vertex() {}
-    vertex(float x, float y, float z)
-    {
-        this->x = x;
-        this->y = y;
-        this->z = z;
-    }
+    vertex();
+    vertex(float x, float y, float z);
+
     float x = 0.;
     float y = 0.;
     float z = 0.;
+
+    vector3d normal;
 };
 
 struct vertex_colored : vertex
 {
     vertex_colored() {}
-    vertex_colored(vertex ver, color::rgb color)
-    {
-        x   = ver.x;
-        y   = ver.y;
-        z   = ver.z;
-        rgb = color;
-    }
+    vertex_colored(vertex ver, color::rgb color);
 
     color::rgb rgb;
 };
 
 struct vertex_textured : vertex
 {
-    vertex_textured() {}
-    vertex_textured(vertex ver, float u, float v)
-    {
-        x       = ver.x;
-        y       = ver.y;
-        z       = ver.z;
-        this->u = u;
-        this->v = v;
-    }
+    vertex_textured();
+    vertex_textured(vertex ver, float u, float v);
 
     float u = 0.;
     float v = 0.;
-};
-
-struct vector3d
-{
-    vector3d(){};
-    vector3d(float x, float y, float z)
-    {
-        this->x = x;
-        this->y = y;
-        this->z = z;
-    };
-
-    vector3d(vertex v)
-    {
-        this->x = v.x;
-        this->y = v.y;
-        this->z = v.z;
-    };
-
-    float x = 0.;
-    float y = 0.;
-    float z = 0.;
-
-    vector3d operator+(const vector3d& right)
-    {
-        return vector3d(
-            this->x + right.x, this->y + right.y, this->z + right.z);
-    }
-    vector3d operator-(const vector3d& right)
-    {
-        return vector3d(
-            this->x - right.x, this->y - right.y, this->z - right.z);
-    }
-
-    vector3d& operator=(const vector3d& right)
-    {
-        this->x = right.x;
-        this->y = right.y;
-        this->z = right.z;
-        return *this;
-    }
-
-    float length() const
-    {
-        return std::pow(std::pow(x, 2) + std::pow(y, 2) + std::pow(z, 2),
-                        1. / 2.);
-    }
-
-    vector3d& normalize()
-    {
-        float len = length();
-        x /= len;
-        y /= len;
-        z /= len;
-        return *this;
-    }
 };
 
 inline float dot(const vector3d& x, const vector3d& y)

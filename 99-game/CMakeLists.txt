@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
 project(99-game CXX)
-# set(WORKING_DIRECTORY ${CMAKE_WORK})
-# message(${WORKING_DIRECTORY})
 
 find_package(SDL3 REQUIRED)
 find_package(OpenGL REQUIRED)
@@ -12,7 +10,7 @@ add_library(99-engine STATIC
             KHR/khrplatform.h
             engine/engine.h engine/engine.cpp
             core/config.h core/event.h
-            core/types.h objects/figure.h 
+            core/types.h core/types.cpp objects/figure.h 
             objects/camera.h objects/camera.cpp
             objects/object.h objects/object.cpp
             objects/checker.h objects/checker.cpp
@@ -21,7 +19,7 @@ add_library(99-engine STATIC
             core/picopng.hxx)
 target_include_directories(99-engine PRIVATE ${CMAKE_CURRENT_LIST_DIR})
 target_compile_features(99-engine PUBLIC cxx_std_20)
-target_link_libraries(99-engine SDL3::SDL3-shared OpenGL::GL)
+target_link_libraries(99-engine SDL3::SDL3-shared OpenGL::GL -lassimp)
 
 
 

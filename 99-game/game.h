@@ -30,9 +30,9 @@ public:
 private:
     config cfg;
 
-    engine_checkers* my_engine;
-    uniform          uniforms;
-    camera           cam;
+    engine_tetris* my_engine;
+    uniform        uniforms;
+    camera         cam;
 
     std::vector<figure*> figures;
 

@@ -49,4 +49,12 @@ checker::checker()
     }
 
     count = indexes.size() / 3;
+
+    for (size_t i = 0; i < get_count(); i++)
+    {
+        triangle tr = get_triangle(i);
+        vertexes[indexes[3 * i + 0]].normal += tr.normal;
+        vertexes[indexes[3 * i + 1]].normal += tr.normal;
+        vertexes[indexes[3 * i + 2]].normal += tr.normal;
+    }
 }

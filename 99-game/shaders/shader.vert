@@ -28,11 +28,12 @@ struct uniforms
     float scale_z_obj;
 };
 
-layout(location = 0) in vec3 i_position;
+in vec3 i_position;
+in vec3 i_normal;
 in vec2 i_tex_coord;
 
 out vec3 v_position;
-out vec3 i_normal;
+out vec3 v_normal;
 out vec2 v_tex_coord;
 out vec3 camera_pos;
 
@@ -107,7 +108,7 @@ void main()
                                u_uniforms.rotate_gamma_obj);
 
     v_position = vec3(vec4(i_position, 1.) * model);
-    i_normal   = normalize((vec4(u_normal, 0.f) * model).xyz);
+    v_normal   = normalize((vec4(i_normal, 0.f) * model).xyz);
 
     gl_Position = vec4(v_position, 1.) *
                   translate_matrix(u_uniforms.translate_x_camera,

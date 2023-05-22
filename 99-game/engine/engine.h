@@ -10,6 +10,10 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
+
 class engine
 {
 public:
@@ -32,11 +36,13 @@ public:
     virtual void load_texture(size_t index, const char* path) = 0;
     virtual void set_texture(size_t index)                    = 0;
 
+    virtual void load_object(const char* path) = 0;
+
 protected:
     config _config;
 };
 
-class engine_checkers : engine
+class engine_tetris : engine
 {
 public:
     int  initialize(config _config) override;
@@ -53,9 +59,12 @@ public:
     void load_texture(size_t index, const char* path) override;
     void set_texture(size_t index) override;
 
+    void load_object(const char* path) override;
+
     void create_shadow_map() override;
 
     void set_uniform(uniform& uni);
+    void reload_uniform();
 
 private:
     void load_shader(const char* path, int type) override;

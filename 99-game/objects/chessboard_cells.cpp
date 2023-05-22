@@ -19,4 +19,12 @@ chessboard_cells::chessboard_cells()
     indexes.push_back(3);
     indexes.push_back(2);
     count = 2;
+
+    for (size_t i = 0; i < get_count(); i++)
+    {
+        triangle tr = get_triangle(i);
+        vertexes[indexes[3 * i + 0]].normal += tr.normal;
+        vertexes[indexes[3 * i + 1]].normal += tr.normal;
+        vertexes[indexes[3 * i + 2]].normal += tr.normal;
+    }
 }
