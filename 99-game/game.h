@@ -19,10 +19,10 @@ public:
 class game_tetris : public game
 {
 public:
-    int  initialize(config);
-    bool event_listener(event&);
-    void update();
-    void render();
+    int  initialize(config) override;
+    bool event_listener(event&) override;
+    void update() override;
+    void render() override;
 
     void add_figure(figure, const char* texture, size_t texture_index);
 
