@@ -1,0 +1,13 @@
+#include "mesh.h"
+
+mesh::mesh(std::vector<vertex_textured> vertexes, std::vector<uint32_t> indexes)
+{
+    set_translate(0, 0.25, 0);
+    set_rotate(0, 0, 0);
+    set_scale(1, 1, 1);
+
+    this->vertexes = vertexes;
+    this->indexes  = indexes;
+
+    count = indexes.size() / 3;
+}

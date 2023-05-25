@@ -3,7 +3,6 @@
 #include "core/event.h"
 #include "core/types.h"
 #include "engine/engine.h"
-#include "objects/chessboard_cells.h"
 
 constexpr uint32_t fps = 60;
 
@@ -17,7 +16,7 @@ public:
     virtual void render()               = 0;
 };
 
-class game_checkers : public game
+class game_tetris : public game
 {
 public:
     int  initialize(config);
@@ -25,16 +24,16 @@ public:
     void update();
     void render();
 
-    void add_figure(figure&, const char* texture, size_t texture_index);
+    void add_figure(figure, const char* texture, size_t texture_index);
 
 private:
     config cfg;
 
     engine_tetris* my_engine;
     uniform        uniforms;
-    camera         cam;
+    camera*        cam;
 
-    std::vector<figure*> figures;
+    std::vector<figure> figures;
 
     double phi   = 0;
     double theta = 0;

@@ -1,4 +1,4 @@
-#version 320 es
+#version 300 es
 
 struct uniforms
 {
@@ -94,7 +94,7 @@ void main()
 
     v_tex_coord = i_tex_coord;
     camera_pos  = vec3(-u_uniforms.translate_x_camera,
-                      u_uniforms.translate_y_camera,
+                      -u_uniforms.translate_y_camera,
                       -u_uniforms.translate_z_camera);
 
     mat4 model = scale_matrix(u_uniforms.scale_x_obj,
@@ -108,7 +108,8 @@ void main()
                                u_uniforms.rotate_gamma_obj);
 
     v_position = vec3(vec4(i_position, 1.) * model);
-    v_normal   = normalize((vec4(i_normal, 0.f) * model).xyz);
+
+    v_normal = normalize((vec4(i_normal, 0.f) * model).xyz);
 
     gl_Position = vec4(v_position, 1.) *
                   translate_matrix(u_uniforms.translate_x_camera,

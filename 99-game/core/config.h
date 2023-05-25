@@ -5,7 +5,7 @@ struct config
     const char* shader_vertex;
     const char* shader_fragment;
     const char* texture_cells;
-    const char* texture_chessboard;
+    const char* texture_board;
     const char* texture_checker_white;
     const char* texture_checker_black;
     double      width         = 960;

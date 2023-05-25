@@ -12,10 +12,9 @@ add_library(99-engine STATIC
             core/config.h core/event.h
             core/types.h core/types.cpp objects/figure.h 
             objects/camera.h objects/camera.cpp
+            objects/mesh.h objects/mesh.cpp
+            objects/model.h objects/model.cpp
             objects/object.h objects/object.cpp
-            objects/checker.h objects/checker.cpp
-            objects/chessboard.h objects/chessboard.cpp
-            objects/chessboard_cells.h objects/chessboard_cells.cpp
             core/picopng.hxx)
 target_include_directories(99-engine PRIVATE ${CMAKE_CURRENT_LIST_DIR})
 target_compile_features(99-engine PUBLIC cxx_std_20)

@@ -1,7 +1,5 @@
 #include "game.h"
-#include "objects/checker.h"
-#include "objects/chessboard.h"
-#include "objects/chessboard_cells.h"
+#include "objects/model.h"
 
 #include <chrono>
 #include <cmath>
@@ -16,22 +14,23 @@ int main()
     cfg.texture_cells         = "./99-game/textures/texture_cells.png";
     cfg.texture_checker_white = "./99-game/textures/texture_checker_white.png";
     cfg.texture_checker_black = "./99-game/textures/texture_checker_black.png";
-    cfg.texture_chessboard    = "./99-game/textures/texture_chessboard.png";
+    cfg.texture_board         = "./99-game/textures/texture_board.png";
 
-    game_checkers my_game;
+    game_tetris my_game;
     my_game.initialize(cfg);
 
-    chessboard_cells obj_cells;
-    my_game.add_figure(obj_cells, cfg.texture_cells, 0);
+    model  model_board("./99-game/textures/board.obj");
+    figure obj_board = model_board.get_meshes()[0];
+    my_game.add_figure(obj_board, cfg.texture_cells, 1);
 
-    chessboard obj_chessboard;
-    my_game.add_figure(obj_chessboard, cfg.texture_cells, 1);
-
-    // checker obj_ch1;
-    // my_game.add_figure(obj_ch1, cfg.texture_chessboard, 2);
-
-    // checker obj_ch2;
-    // my_game.add_figure(obj_ch2, cfg.texture_chessboard, 3);
+    model model_cube("./99-game/textures/cube.obj");
+    for (int i = 0; i < 100; i++)
+    {
+        figure obj_cube = model_cube.get_meshes()[0];
+        obj_cube.set_scale(0.1, 0.1, 0.1);
+        obj_cube.set_translate(1, 1 + (0.2 + 0.001) * i, 0);
+        my_game.add_figure(obj_cube, cfg.texture_cells, 0);
+    }
 
     event e;
     float phi      = 0;

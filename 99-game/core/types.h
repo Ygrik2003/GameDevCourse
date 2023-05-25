@@ -33,6 +33,9 @@ struct uniform
 };
 
 struct vertex;
+struct vertex_colored;
+struct vertex_textured;
+struct vertex_colored_textured;
 
 struct vector3d
 {
@@ -64,6 +67,14 @@ struct rgb
     float g = 0.;
     float b = 0.;
 };
+
+struct rgba : rgb
+{
+    rgba();
+    rgba(float r, float g, float b, float a);
+
+    float a = 1.;
+};
 } // namespace color
 
 struct vertex
@@ -81,15 +92,24 @@ struct vertex
 struct vertex_colored : vertex
 {
     vertex_colored() {}
-    vertex_colored(vertex ver, color::rgb color);
+    vertex_colored(vertex ver, color::rgba color);
 
-    color::rgb rgb;
+    color::rgba rgba;
 };
 
 struct vertex_textured : vertex
 {
     vertex_textured();
     vertex_textured(vertex ver, float u, float v);
+
+    float u = 0.;
+    float v = 0.;
+};
+
+struct vertex_colored_textured : vertex_colored
+{
+    vertex_colored_textured();
+    vertex_colored_textured(vertex ver, color::rgba clr, float u, float v);
 
     float u = 0.;
     float v = 0.;
@@ -116,6 +136,13 @@ struct triangle
         vertexes[1] = v1;
         vertexes[2] = v2;
         calc_normal();
+    }
+    triangle(T v0, T v1, T v2, vector3d norm)
+    {
+        vertexes[0] = v0;
+        vertexes[1] = v1;
+        vertexes[2] = v2;
+        normal      = norm;
     }
 
     void calc_normal()

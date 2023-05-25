@@ -1,14 +1,12 @@
 #include "engine.h"
 #include "core/picopng.hxx"
 
+#include "objects/mesh.h"
 #include <filesystem>
 #include <fstream>
-#include <iostream>
 #include <stdexcept>
 
-#define GL_DEBUG_OUTPUT_USE
-
-#ifdef GL_DEBUG_OUTPUT_USE
+#ifndef _WIN32
 void APIENTRY gl_debug_output(GLenum        source,
                               GLenum        type,
                               GLuint        id,
@@ -126,6 +124,74 @@ void APIENTRY gl_debug_output(GLenum        source,
         }                                                                      \
     }
 
+template <class vertex_type>
+void bind_vertexes(const triangle<vertex_type>& tr)
+{
+    glEnableVertexAttribArray(0);
+    GL_CHECK_ERRORS()
+    glVertexAttribPointer(0,
+                          3,
+                          GL_FLOAT,
+                          GL_FALSE,
+                          sizeof(tr.vertexes[0]),
+                          reinterpret_cast<GLvoid*>(0));
+    GL_CHECK_ERRORS()
+}
+
+template <class vertex_type>
+void bind_normals(const triangle<vertex_type>& tr)
+{
+    glEnableVertexAttribArray(1);
+    GL_CHECK_ERRORS()
+    glVertexAttribPointer(1,
+                          3,
+                          GL_FLOAT,
+                          GL_FALSE,
+                          sizeof(tr.vertexes[0]),
+                          reinterpret_cast<GLvoid*>(3 * sizeof(float)));
+    GL_CHECK_ERRORS()
+}
+
+void bind_texture_coords(const triangle<vertex_textured>& tr)
+{
+    glEnableVertexAttribArray(2);
+    GL_CHECK_ERRORS()
+    glVertexAttribPointer(2,
+                          2,
+                          GL_FLOAT,
+                          GL_FALSE,
+                          sizeof(tr.vertexes[0]),
+                          reinterpret_cast<GLvoid*>(sizeof(vertex)));
+    GL_CHECK_ERRORS()
+}
+
+void bind_texture_coords(const triangle<vertex_colored_textured>& tr)
+{
+    glEnableVertexAttribArray(2);
+    GL_CHECK_ERRORS()
+    glVertexAttribPointer(2,
+                          2,
+                          GL_FLOAT,
+                          GL_FALSE,
+                          sizeof(tr.vertexes[0]),
+                          reinterpret_cast<GLvoid*>(sizeof(vertex_colored)));
+    GL_CHECK_ERRORS()
+}
+
+template <class vertex_colored_type>
+void bind_colors(const triangle<vertex_colored_type>& tr)
+{
+    glEnableVertexAttribArray(3);
+    GL_CHECK_ERRORS()
+    glVertexAttribPointer(3,
+                          4,
+                          GL_FLOAT,
+                          GL_FALSE,
+                          sizeof(tr.vertexes[0]),
+                          reinterpret_cast<GLvoid*>(sizeof(vertex)));
+    GL_CHECK_ERRORS()
+}
+
 void* load_gl_func(const char* name)
 {
     SDL_FunctionPointer gl_pointer = SDL_GL_GetProcAddress(name);
@@ -198,7 +264,7 @@ int engine_tetris::initialize(config cfg)
         return 0;
     }
 
-#ifdef GL_DEBUG_OUTPUT_USE
+#ifndef _WIN32
     glEnable(GL_DEBUG_OUTPUT);
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     glDebugMessageCallback(gl_debug_output, nullptr);
@@ -302,6 +368,33 @@ bool engine_tetris::event_keyboard(event& e)
     return is_event;
 }
 
+void engine_tetris::render_triangle(const triangle<vertex>& tr)
+{
+    reload_uniform();
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(tr), &tr, GL_STATIC_DRAW);
+    GL_CHECK_ERRORS()
+
+    bind_vertexes(tr);
+    bind_normals(tr);
+
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+}
+
+void engine_tetris::render_triangle(const triangle<vertex_colored>& tr)
+{
+    reload_uniform();
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(tr), &tr, GL_STATIC_DRAW);
+    GL_CHECK_ERRORS()
+
+    bind_vertexes(tr);
+    bind_normals(tr);
+    bind_colors(tr);
+
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+}
+
 void engine_tetris::render_triangle(const triangle<vertex_textured>& tr)
 {
     reload_uniform();
@@ -309,35 +402,24 @@ void engine_tetris::render_triangle(const triangle<vertex_textured>& tr)
     glBufferData(GL_ARRAY_BUFFER, sizeof(tr), &tr, GL_STATIC_DRAW);
     GL_CHECK_ERRORS()
 
-    glEnableVertexAttribArray(0);
-    GL_CHECK_ERRORS()
-    glVertexAttribPointer(0,
-                          3,
-                          GL_FLOAT,
-                          GL_FALSE,
-                          sizeof(tr.vertexes[0]),
-                          reinterpret_cast<GLvoid*>(0));
+    bind_vertexes(tr);
+    bind_normals(tr);
+    bind_texture_coords(tr);
+
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+}
+
+void engine_tetris::render_triangle(const triangle<vertex_colored_textured>& tr)
+{
+    reload_uniform();
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(tr), &tr, GL_STATIC_DRAW);
     GL_CHECK_ERRORS()
 
-    glEnableVertexAttribArray(1);
-    GL_CHECK_ERRORS()
-    glVertexAttribPointer(1,
-                          3,
-                          GL_FLOAT,
-                          GL_FALSE,
-                          sizeof(tr.vertexes[0]),
-                          reinterpret_cast<GLvoid*>(3 * sizeof(float)));
-    GL_CHECK_ERRORS()
-
-    glEnableVertexAttribArray(2);
-    GL_CHECK_ERRORS()
-    glVertexAttribPointer(2,
-                          2,
-                          GL_FLOAT,
-                          GL_FALSE,
-                          sizeof(tr.vertexes[0]),
-                          reinterpret_cast<GLvoid*>(sizeof(vertex)));
-    GL_CHECK_ERRORS()
+    bind_vertexes(tr);
+    bind_normals(tr);
+    bind_texture_coords(tr);
+    bind_colors(tr);
 
     glDrawArrays(GL_TRIANGLES, 0, 3);
 }
@@ -415,7 +497,12 @@ void engine_tetris::set_texture(size_t index)
     glUniform1i(uniform_texture, index);
 }
 
-void engine_tetris::load_object(const char* path) {}
+figure engine_tetris::load_object(const char* path)
+{
+    std::vector<vertex_textured> vertexes;
+    std::vector<uint32_t>        indexes;
+    return mesh(vertexes, indexes);
+}
 
 void engine_tetris::create_shadow_map()
 {
@@ -530,7 +617,7 @@ void engine_tetris::reload_shader(const char* path_to_vertex,
 void engine_tetris::load_shader(const char* path, int type)
 {
     if (!std::filesystem::exists(path))
-        throw std::runtime_error("No file");
+        throw std::runtime_error("No file: " + std::string(path));
 
     GLuint handle = glCreateShader(type);
     GL_CHECK_ERRORS()
@@ -575,9 +662,4 @@ void engine_tetris::load_shader(const char* path, int type)
 
     glDeleteShader(handle);
     GL_CHECK_ERRORS()
-
-    // if (type == GL_VERTEX_SHADER)
-    //     shader_vertex = handle;
-    // else if (type == GL_FRAGMENT_SHADER)
-    //     shader_fragment_chessboard_cells = handle;
 }

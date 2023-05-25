@@ -8,6 +8,16 @@ color::rgb::rgb(float r, float g, float b)
     this->b = b;
 }
 
+color::rgba::rgba() {}
+
+color::rgba::rgba(float r, float g, float b, float a)
+{
+    this->r = r;
+    this->g = g;
+    this->b = b;
+    this->a = a;
+}
+
 vertex::vertex() {}
 vertex::vertex(float x, float y, float z)
 {
@@ -79,10 +89,27 @@ vector3d& vector3d::normalize()
     return *this;
 }
 
-vertex_colored::vertex_colored(vertex ver, color::rgb color)
+vertex_colored::vertex_colored(vertex ver, color::rgba color)
 {
-    x   = ver.x;
-    y   = ver.y;
-    z   = ver.z;
-    rgb = color;
+    x    = ver.x;
+    y    = ver.y;
+    z    = ver.z;
+    rgba = color;
+}
+
+vertex_colored_textured::vertex_colored_textured() {}
+
+vertex_colored_textured::vertex_colored_textured(vertex      ver,
+                                                 color::rgba clr,
+                                                 float       u,
+                                                 float       v)
+{
+    this->x = ver.x;
+    this->y = ver.y;
+    this->z = ver.z;
+
+    this->rgba = clr;
+
+    this->u = u;
+    this->v = v;
 }
