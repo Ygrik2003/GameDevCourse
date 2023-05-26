@@ -1,5 +1,4 @@
 #include "camera.h"
-#include "iostream"
 
 camera::camera(float speed)
 {

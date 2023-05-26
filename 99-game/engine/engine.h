@@ -10,7 +10,6 @@
 #include <KHR/khrplatform.h>
 #include <SDL3/SDL.h>
 #include <glad/glad.h>
-#include <glm/glm.hpp>
 
 class engine
 {
