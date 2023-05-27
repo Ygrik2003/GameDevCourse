@@ -1,7 +1,11 @@
 #pragma once
 #include <array>
 #include <cassert>
+#define _USE_MATH_DEFINES
 #include <cmath>
+#ifndef M_PI
+#define M_PI 3.141592653589793238
+#endif
 #include <cstddef>
 
 struct uniform

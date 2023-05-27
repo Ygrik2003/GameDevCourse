@@ -5,6 +5,9 @@ project(99-game CXX)
 find_package(SDL3 REQUIRED)
 find_package(OpenGL REQUIRED)
 
+find_package(assimp REQUIRED)
+message(STATUS "Found ASSIMP in ${ASSIMP_INCLUDE_DIR}")
+
 add_library(99-engine STATIC
             glad/glad.h glad/glad.c
             KHR/khrplatform.h
