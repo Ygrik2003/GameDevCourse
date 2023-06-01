@@ -34,7 +34,7 @@ private:
 
     config cfg;
 
-    engine_tetris* my_engine;
+    engine_opengl* my_engine;
     uniform        uniforms;
     camera*        cam;
 

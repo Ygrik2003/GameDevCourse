@@ -12,7 +12,7 @@ int game_tetris::initialize(config cfg)
     // cam->move(0.6, -0.1, 0.6);
     cam->set_rotate(0, 0, 0);
 
-    my_engine = new engine_tetris();
+    my_engine = new engine_opengl();
     my_engine->set_uniform(uniforms);
     my_engine->initialize(cfg);
 
@@ -56,7 +56,7 @@ bool game_tetris::event_listener(event& e)
             cam->set_move_right(false);
         else if (e.keyboard.space_clicked)
         {
-            my_engine->reload_shader(cfg.shader_vertex, cfg.shader_fragment);
+            // my_engine->reload_shader(cfg.shader_vertex, cfg.shader_fragment);
         }
     }
     return true;

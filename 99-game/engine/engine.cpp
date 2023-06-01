@@ -94,36 +94,6 @@ void APIENTRY gl_debug_output(GLenum        source,
 }
 #endif
 
-#define GL_CHECK_ERRORS()                                                      \
-    {                                                                          \
-        const GLenum err = glGetError();                                       \
-        if (err != GL_NO_ERROR)                                                \
-        {                                                                      \
-            switch (err)                                                       \
-            {                                                                  \
-                case GL_INVALID_ENUM:                                          \
-                    std::cerr << "GL_INVALID_ENUM" << std::endl;               \
-                    break;                                                     \
-                case GL_INVALID_VALUE:                                         \
-                    std::cerr << "GL_INVALID_VALUE" << std::endl;              \
-                    break;                                                     \
-                case GL_INVALID_OPERATION:                                     \
-                    std::cerr << "GL_INVALID_OPERATION" << std::endl;          \
-                    break;                                                     \
-                case GL_INVALID_FRAMEBUFFER_OPERATION:                         \
-                    std::cerr << "GL_INVALID_FRAMEBUFFER_OPERATION"            \
-                              << std::endl;                                    \
-                    break;                                                     \
-                case GL_OUT_OF_MEMORY:                                         \
-                    std::cerr << "GL_OUT_OF_MEMORY" << std::endl;              \
-                    break;                                                     \
-            }                                                                  \
-            std::cerr << __FILE__ << ':' << __LINE__ << '(' << __FUNCTION__    \
-                      << ')' << std::endl;                                     \
-            assert(false);                                                     \
-        }                                                                      \
-    }
-
 template <class vertex_type>
 void bind_vertexes(const triangle<vertex_type>& tr)
 {
@@ -203,7 +173,7 @@ void* load_gl_func(const char* name)
     return reinterpret_cast<void*>(gl_pointer);
 }
 
-int engine_tetris::initialize(config cfg)
+int engine_opengl::initialize(config cfg)
 {
 
     _config = cfg;
@@ -272,11 +242,10 @@ int engine_tetris::initialize(config cfg)
         GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 #endif
 
-    shader_program = glCreateProgram();
     GL_CHECK_ERRORS()
 
-    load_shader(_config.shader_vertex, GL_VERTEX_SHADER);
-    load_shader(_config.shader_fragment, GL_FRAGMENT_SHADER);
+    shader = new shader_opengl(_config.shader_vertex, _config.shader_fragment);
+    shader->use();
 
     GLuint vertex_buffer = 0;
     glGenBuffers(1, &vertex_buffer);
@@ -289,18 +258,13 @@ int engine_tetris::initialize(config cfg)
     glBindVertexArray(vertex_array_object);
     GL_CHECK_ERRORS()
 
-    glBindAttribLocation(shader_program, 0, "i_position");
+    glBindAttribLocation(shader->get_program_id(), 0, "i_position");
     GL_CHECK_ERRORS()
 
-    glLinkProgram(shader_program);
+    uniforms = glGetUniformLocation(shader->get_program_id(), "u_uniforms");
     GL_CHECK_ERRORS()
-
-    glUseProgram(shader_program);
-    GL_CHECK_ERRORS()
-
-    uniforms = glGetUniformLocation(shader_program, "u_uniforms");
-    GL_CHECK_ERRORS()
-    uniform_texture = glGetUniformLocation(shader_program, "u_texture");
+    uniform_texture =
+        glGetUniformLocation(shader->get_program_id(), "u_texture");
     GL_CHECK_ERRORS()
 
     glEnable(GL_BLEND);
@@ -316,14 +280,14 @@ int engine_tetris::initialize(config cfg)
     return 1;
 }
 
-void engine_tetris::uninitialize()
+void engine_opengl::uninitialize()
 {
     SDL_GL_DeleteContext(gl_context);
     SDL_DestroyWindow(window);
     SDL_Quit();
 }
 
-bool engine_tetris::event_keyboard(event& e)
+bool engine_opengl::event_keyboard(event& e)
 {
     e.clear();
     bool      is_event = false;
@@ -368,7 +332,7 @@ bool engine_tetris::event_keyboard(event& e)
     return is_event;
 }
 
-void engine_tetris::render_triangle(const triangle<vertex>& tr)
+void engine_opengl::render_triangle(const triangle<vertex>& tr)
 {
     reload_uniform();
 
@@ -381,7 +345,7 @@ void engine_tetris::render_triangle(const triangle<vertex>& tr)
     glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
-void engine_tetris::render_triangle(const triangle<vertex_colored>& tr)
+void engine_opengl::render_triangle(const triangle<vertex_colored>& tr)
 {
     reload_uniform();
 
@@ -395,7 +359,7 @@ void engine_tetris::render_triangle(const triangle<vertex_colored>& tr)
     glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
-void engine_tetris::render_triangle(const triangle<vertex_textured>& tr)
+void engine_opengl::render_triangle(const triangle<vertex_textured>& tr)
 {
     reload_uniform();
 
@@ -409,7 +373,7 @@ void engine_tetris::render_triangle(const triangle<vertex_textured>& tr)
     glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
-void engine_tetris::render_triangle(const triangle<vertex_colored_textured>& tr)
+void engine_opengl::render_triangle(const triangle<vertex_colored_textured>& tr)
 {
     reload_uniform();
 
@@ -424,7 +388,7 @@ void engine_tetris::render_triangle(const triangle<vertex_colored_textured>& tr)
     glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
-void engine_tetris::swap_buffers()
+void engine_opengl::swap_buffers()
 {
     SDL_GL_SwapWindow(window);
 
@@ -435,7 +399,7 @@ void engine_tetris::swap_buffers()
     GL_CHECK_ERRORS()
 }
 
-void engine_tetris::load_texture(size_t index, const char* path)
+void engine_opengl::load_texture(size_t index, const char* path)
 {
     glActiveTexture(GL_TEXTURE0 + index);
     GL_CHECK_ERRORS()
@@ -491,20 +455,20 @@ void engine_tetris::load_texture(size_t index, const char* path)
     GL_CHECK_ERRORS()
 }
 
-void engine_tetris::set_texture(size_t index)
+void engine_opengl::set_texture(size_t index)
 {
     glActiveTexture(GL_TEXTURE0 + index);
     glUniform1i(uniform_texture, index);
 }
 
-figure engine_tetris::load_object(const char* path)
+figure engine_opengl::load_object(const char* path)
 {
     std::vector<vertex_textured> vertexes;
     std::vector<uint32_t>        indexes;
     return mesh(vertexes, indexes);
 }
 
-void engine_tetris::create_shadow_map()
+void engine_opengl::create_shadow_map()
 {
     glGenFramebuffers(1, &obj_depth_map);
 
@@ -535,131 +499,67 @@ void engine_tetris::create_shadow_map()
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void engine_tetris::set_uniform(uniform& uni)
+void engine_opengl::set_uniform(uniform& uni)
 {
     this->uniforms_world = &uni;
 }
 
-void engine_tetris::reload_uniform()
+void engine_opengl::reload_uniform()
 {
-    glUniform1f(glGetUniformLocation(shader_program, "u_uniforms.width"),
-                uniforms_world->width);
-    glUniform1f(glGetUniformLocation(shader_program, "u_uniforms.height"),
-                uniforms_world->height);
+    glUniform1f(
+        glGetUniformLocation(shader->get_program_id(), "u_uniforms.width"),
+        uniforms_world->width);
+    glUniform1f(
+        glGetUniformLocation(shader->get_program_id(), "u_uniforms.height"),
+        uniforms_world->height);
 
-    glUniform1f(
-        glGetUniformLocation(shader_program, "u_uniforms.rotate_alpha_obj"),
-        *uniforms_world->rotate_alpha_obj);
-    glUniform1f(
-        glGetUniformLocation(shader_program, "u_uniforms.rotate_beta_obj"),
-        *uniforms_world->rotate_beta_obj);
-    glUniform1f(
-        glGetUniformLocation(shader_program, "u_uniforms.rotate_gamma_obj"),
-        *uniforms_world->rotate_gamma_obj);
+    glUniform1f(glGetUniformLocation(shader->get_program_id(),
+                                     "u_uniforms.rotate_alpha_obj"),
+                *uniforms_world->rotate_alpha_obj);
+    glUniform1f(glGetUniformLocation(shader->get_program_id(),
+                                     "u_uniforms.rotate_beta_obj"),
+                *uniforms_world->rotate_beta_obj);
+    glUniform1f(glGetUniformLocation(shader->get_program_id(),
+                                     "u_uniforms.rotate_gamma_obj"),
+                *uniforms_world->rotate_gamma_obj);
 
-    glUniform1f(
-        glGetUniformLocation(shader_program, "u_uniforms.rotate_alpha_camera"),
-        *uniforms_world->rotate_alpha_camera);
-    glUniform1f(
-        glGetUniformLocation(shader_program, "u_uniforms.rotate_beta_camera"),
-        *uniforms_world->rotate_beta_camera);
-    glUniform1f(
-        glGetUniformLocation(shader_program, "u_uniforms.rotate_gamma_camera"),
-        *uniforms_world->rotate_gamma_camera);
+    glUniform1f(glGetUniformLocation(shader->get_program_id(),
+                                     "u_uniforms.rotate_alpha_camera"),
+                *uniforms_world->rotate_alpha_camera);
+    glUniform1f(glGetUniformLocation(shader->get_program_id(),
+                                     "u_uniforms.rotate_beta_camera"),
+                *uniforms_world->rotate_beta_camera);
+    glUniform1f(glGetUniformLocation(shader->get_program_id(),
+                                     "u_uniforms.rotate_gamma_camera"),
+                *uniforms_world->rotate_gamma_camera);
 
-    glUniform1f(
-        glGetUniformLocation(shader_program, "u_uniforms.translate_x_obj"),
-        *uniforms_world->translate_x_obj);
-    glUniform1f(
-        glGetUniformLocation(shader_program, "u_uniforms.translate_y_obj"),
-        *uniforms_world->translate_y_obj);
-    glUniform1f(
-        glGetUniformLocation(shader_program, "u_uniforms.translate_z_obj"),
-        *uniforms_world->translate_z_obj);
+    glUniform1f(glGetUniformLocation(shader->get_program_id(),
+                                     "u_uniforms.translate_x_obj"),
+                *uniforms_world->translate_x_obj);
+    glUniform1f(glGetUniformLocation(shader->get_program_id(),
+                                     "u_uniforms.translate_y_obj"),
+                *uniforms_world->translate_y_obj);
+    glUniform1f(glGetUniformLocation(shader->get_program_id(),
+                                     "u_uniforms.translate_z_obj"),
+                *uniforms_world->translate_z_obj);
 
-    glUniform1f(
-        glGetUniformLocation(shader_program, "u_uniforms.translate_x_camera"),
-        *uniforms_world->translate_x_camera);
-    glUniform1f(
-        glGetUniformLocation(shader_program, "u_uniforms.translate_y_camera"),
-        *uniforms_world->translate_y_camera);
-    glUniform1f(
-        glGetUniformLocation(shader_program, "u_uniforms.translate_z_camera"),
-        *uniforms_world->translate_z_camera);
+    glUniform1f(glGetUniformLocation(shader->get_program_id(),
+                                     "u_uniforms.translate_x_camera"),
+                *uniforms_world->translate_x_camera);
+    glUniform1f(glGetUniformLocation(shader->get_program_id(),
+                                     "u_uniforms.translate_y_camera"),
+                *uniforms_world->translate_y_camera);
+    glUniform1f(glGetUniformLocation(shader->get_program_id(),
+                                     "u_uniforms.translate_z_camera"),
+                *uniforms_world->translate_z_camera);
 
-    glUniform1f(glGetUniformLocation(shader_program, "u_uniforms.scale_x_obj"),
+    glUniform1f(glGetUniformLocation(shader->get_program_id(),
+                                     "u_uniforms.scale_x_obj"),
                 *uniforms_world->scale_x_obj);
-    glUniform1f(glGetUniformLocation(shader_program, "u_uniforms.scale_y_obj"),
+    glUniform1f(glGetUniformLocation(shader->get_program_id(),
+                                     "u_uniforms.scale_y_obj"),
                 *uniforms_world->scale_y_obj);
-    glUniform1f(glGetUniformLocation(shader_program, "u_uniforms.scale_z_obj"),
+    glUniform1f(glGetUniformLocation(shader->get_program_id(),
+                                     "u_uniforms.scale_z_obj"),
                 *uniforms_world->scale_z_obj);
-}
-
-void engine_tetris::reload_shader(const char* path_to_vertex,
-                                  const char* path_to_fragment)
-{
-    glDeleteProgram(shader_program);
-    GL_CHECK_ERRORS()
-
-    shader_program = glCreateProgram();
-    GL_CHECK_ERRORS()
-
-    load_shader(path_to_vertex, GL_VERTEX_SHADER);
-    load_shader(path_to_fragment, GL_FRAGMENT_SHADER);
-
-    glLinkProgram(shader_program);
-    GL_CHECK_ERRORS()
-
-    glUseProgram(shader_program);
-    GL_CHECK_ERRORS()
-}
-
-void engine_tetris::load_shader(const char* path, int type)
-{
-    if (!std::filesystem::exists(path))
-        throw std::runtime_error("No file: " + std::string(path));
-
-    GLuint handle = glCreateShader(type);
-    GL_CHECK_ERRORS()
-
-    std::string   buffer;
-    std::ifstream file(path);
-
-    file.seekg(0, std::ios::end);
-    buffer.reserve(file.tellg());
-
-    file.seekg(0, std::ios::beg);
-    buffer.assign(std::istreambuf_iterator<char>(file),
-                  std::istreambuf_iterator<char>());
-
-    const char* c_buffer = buffer.data();
-    file.close();
-    glShaderSource(handle, 1, &c_buffer, nullptr);
-    GL_CHECK_ERRORS()
-
-    glCompileShader(handle);
-    GL_CHECK_ERRORS()
-
-    GLint result = 0;
-    glGetShaderiv(handle, GL_COMPILE_STATUS, &result);
-    GL_CHECK_ERRORS()
-    if (result == 0)
-    {
-        glGetShaderiv(handle, GL_INFO_LOG_LENGTH, &result);
-        GL_CHECK_ERRORS()
-
-        std::vector<char> log(static_cast<size_t>(result));
-        glGetShaderInfoLog(handle, result, nullptr, log.data());
-        GL_CHECK_ERRORS()
-
-        glDeleteShader(handle);
-        GL_CHECK_ERRORS()
-
-        throw std::runtime_error(log.data());
-    }
-    glAttachShader(shader_program, handle);
-    GL_CHECK_ERRORS()
-
-    glDeleteShader(handle);
-    GL_CHECK_ERRORS()
 }

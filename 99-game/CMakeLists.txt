@@ -26,6 +26,7 @@ add_library(99-engine STATIC
             glad/glad.h glad/glad.c
             KHR/khrplatform.h
             engine/engine.h engine/engine.cpp
+            engine/shader_opengl.h engine/shader_opengl.cpp
             core/config.h core/event.h
             core/types.h core/types.cpp objects/figure.h 
             objects/camera.h objects/camera.cpp

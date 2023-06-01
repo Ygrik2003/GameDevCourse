@@ -3,6 +3,7 @@
 #include "core/event.h"
 #include "objects/camera.h"
 #include "objects/figure.h"
+#include "shader_opengl.h"
 
 #include <iostream>
 #include <vector>
@@ -28,10 +29,6 @@ public:
         const triangle<vertex_colored_textured>& tr) = 0;
     virtual void swap_buffers()                      = 0;
 
-    virtual void load_shader(const char* path, int type)     = 0;
-    virtual void reload_shader(const char* path_to_vertex,
-                               const char* path_to_fragment) = 0;
-
     virtual void create_shadow_map() = 0;
 
     virtual void load_texture(size_t index, const char* path) = 0;
@@ -43,7 +40,7 @@ protected:
     config _config;
 };
 
-class engine_tetris : engine
+class engine_opengl : engine
 {
 public:
     int  initialize(config _config) override;
@@ -57,9 +54,6 @@ public:
     void render_triangle(const triangle<vertex_colored_textured>& tr) override;
     void swap_buffers() override;
 
-    void reload_shader(const char* path_to_vertex,
-                       const char* path_to_fragment) override;
-
     void load_texture(size_t index, const char* path) override;
     void set_texture(size_t index) override;
 
@@ -71,12 +65,10 @@ public:
     void reload_uniform();
 
 private:
-    void load_shader(const char* path, int type) override;
-
     SDL_Window*   window;
     SDL_GLContext gl_context;
 
-    GLuint shader_program = 0;
+    shader_opengl* shader;
 
     GLuint obj_depth_map     = 0;
     GLuint texture_depth_map = 0;
