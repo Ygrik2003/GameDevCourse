@@ -4,6 +4,8 @@
 #include "core/types.h"
 #include "engine/engine.h"
 
+#include "imgui/imgui.h"
+
 constexpr uint32_t fps = 60;
 
 class game
@@ -27,6 +29,9 @@ public:
     void add_figure(figure, const char* texture, size_t texture_index);
 
 private:
+    void render_menu();
+    void render_scene();
+
     config cfg;
 
     engine_tetris* my_engine;
@@ -37,4 +42,6 @@ private:
 
     double phi   = 0;
     double theta = 0;
+
+    bool isStarted = false;
 };

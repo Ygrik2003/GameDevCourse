@@ -2,6 +2,20 @@ cmake_minimum_required(VERSION 3.20)
 
 project(99-game CXX)
 
+
+add_library(imgui STATIC 
+            imgui/imconfig.h 
+            imgui/imgui.h imgui/imgui.cpp
+            imgui/imstb_rectpack.h imgui/imgui_draw.cpp
+            imgui/imgui_widgets.cpp
+            imgui/imgui_demo.cpp imgui/imgui_tables.cpp
+            imgui/imgui_internal.h imgui/imstb_textedit.h
+            imgui/imstb_truetype.h
+            )
+target_include_directories(imgui PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+set_property(TARGET imgui PROPERTY POSITION_INDEPENDENT_CODE ON)
+
+
 find_package(SDL3 REQUIRED)
 find_package(OpenGL REQUIRED)
 
@@ -19,9 +33,9 @@ add_library(99-engine STATIC
             objects/model.h objects/model.cpp
             objects/object.h objects/object.cpp
             core/picopng.hxx)
-target_include_directories(99-engine PRIVATE ${CMAKE_CURRENT_LIST_DIR})
+target_include_directories(99-engine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_features(99-engine PUBLIC cxx_std_20)
-target_link_libraries(99-engine SDL3::SDL3-shared OpenGL::GL -lassimp)
+target_link_libraries(99-engine SDL3::SDL3-shared OpenGL::GL imgui -lassimp)
 
 
 

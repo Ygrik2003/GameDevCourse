@@ -69,11 +69,34 @@ void game_tetris::update()
     phi += M_PI / 300;
     theta += M_PI / 300;
 
-    cam->add_rotate(0, -M_PI / 300, 0);
-    cam->set_translate(1 * std::cos(M_PI + phi), -.5, 1 * std::sin(M_PI + phi));
+    // cam->add_rotate(0, -M_PI / 300, 0);
+    // cam->set_translate(1 * std::cos(M_PI + phi), -.5, 1 * std::sin(M_PI +
+    // phi));
 };
 
 void game_tetris::render()
+{
+    if (!isStarted)
+    {
+        render_menu();
+    }
+    else
+    {
+        render_scene();
+    }
+    my_engine->swap_buffers();
+};
+
+void game_tetris::add_figure(figure      fig,
+                             const char* texture,
+                             size_t      texture_index)
+{
+
+    fig.set_texture_index(texture_index);
+    figures.push_back(fig);
+}
+void game_tetris::render_menu() {}
+void game_tetris::render_scene()
 {
 
     for (auto fig : figures)
@@ -87,14 +110,4 @@ void game_tetris::render()
             my_engine->render_triangle(tr);
         }
     }
-    my_engine->swap_buffers();
-};
-
-void game_tetris::add_figure(figure      fig,
-                             const char* texture,
-                             size_t      texture_index)
-{
-
-    fig.set_texture_index(texture_index);
-    figures.push_back(fig);
-};
+}

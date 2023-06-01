@@ -11,8 +11,9 @@ if ( WIN32 )
 endif()
 
 
-find_package(SDL)
-if ( NOT SDL_FOUND AND EXISTS "${CMAKE_SOURCE_DIR}/modules/SDL/CMakeLists.txt" )
+find_package(SDL3)
+
+if ( (NOT SDL3_FOUND) AND EXISTS "${CMAKE_SOURCE_DIR}/modules/SDL/CMakeLists.txt" )
 add_subdirectory(${CMAKE_SOURCE_DIR}/modules/SDL
                  ${CMAKE_BINARY_DIR}/lib/SDL)
 endif()
@@ -35,11 +36,11 @@ endif()
 
 # add_subdirectory(01-1-hello-world)
 # add_subdirectory(01-2-hello-world-lib)
-add_subdirectory(02-1-sdl-version)
+# add_subdirectory(02-1-sdl-version)
 # add_subdirectory(03-1-sdl-hot-reload)
 # add_subdirectory(04-1-render-basic)
 # add_subdirectory(04-2-render-opengl)
 # add_subdirectory(04-3-render-morphing)
 # add_subdirectory(05-1-texture)
 
-# add_subdirectory(99-game)
+add_subdirectory(99-game)
