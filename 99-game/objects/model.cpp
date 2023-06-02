@@ -44,7 +44,7 @@ void model::process_node(aiNode* node, const aiScene* scene)
 mesh model::process_mesh(aiMesh* m, const aiScene* scene)
 {
     std::vector<vertex_textured> vertixes;
-    std::vector<unsigned int>    indexes;
+    std::vector<uint16_t>        indexes;
     // vector<texture>      textures;
 
     for (unsigned int i = 0; i < m->mNumVertices; i++)
@@ -64,7 +64,7 @@ mesh model::process_mesh(aiMesh* m, const aiScene* scene)
     {
         aiFace face = m->mFaces[i];
         for (unsigned int j = 0; j < face.mNumIndices; j++)
-            indexes.push_back(face.mIndices[j]);
+            indexes.push_back(static_cast<uint32_t>(face.mIndices[j]));
     }
 
     // if (m->mMaterialIndex >= 0)

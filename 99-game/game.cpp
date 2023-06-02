@@ -16,10 +16,10 @@ int game_tetris::initialize(config cfg)
     my_engine->set_uniform(uniforms);
     my_engine->initialize(cfg);
 
-    my_engine->load_texture(0, cfg.texture_cells);
-    my_engine->load_texture(1, cfg.texture_board);
-    my_engine->load_texture(2, cfg.texture_checker_white);
-    my_engine->load_texture(3, cfg.texture_checker_black);
+    textures.push_back(my_engine->load_texture(0, cfg.texture_cells));
+    textures.push_back(my_engine->load_texture(1, cfg.texture_board));
+    textures.push_back(my_engine->load_texture(2, cfg.texture_checker_white));
+    textures.push_back(my_engine->load_texture(3, cfg.texture_checker_black));
 
     return 1;
 };
@@ -103,11 +103,25 @@ void game_tetris::render_scene()
     {
         fig.uniform_link(uniforms);
         // fig.set_rotate(0, 0, theta);
-        my_engine->set_texture(fig.get_texture_index());
-        for (size_t i = 0; i < fig.get_count(); i++)
-        {
-            triangle tr = fig.get_triangle(i);
-            my_engine->render_triangle(tr);
-        }
+
+        vertex_buffer<vertex_textured>* vertex_buff = new vertex_buffer(
+            fig.get_vertexes().data(), fig.get_vertexes().size());
+        index_buffer* index_buff = new index_buffer(fig.get_indexes().data(),
+                                                    fig.get_indexes().size());
+        my_engine->render_triangles(vertex_buff,
+                                    index_buff,
+                                    textures[fig.get_texture_index()],
+                                    0,
+                                    index_buff->size());
+
+        delete vertex_buff;
+        delete index_buff;
+
+        // my_engine->set_texture(fig.get_texture_index());
+        // for (size_t i = 0; i < fig.get_count(); i++)
+        // {
+        //     triangle tr = fig.get_triangle(i);
+        //     my_engine->render_triangle(tr);
+        // }
     }
 }

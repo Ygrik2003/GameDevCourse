@@ -10,7 +10,12 @@ public:
                         vertexes[indexes[3 * index + 1]],
                         vertexes[indexes[3 * index + 2]]);
     }
-    size_t get_count() const { return count; }
+    size_t                              get_count() const { return count; }
+    const std::vector<vertex_textured>& get_vertexes() const
+    {
+        return vertexes;
+    }
+    const std::vector<uint16_t>& get_indexes() const { return indexes; }
 
     void uniform_link(uniform& uni) override
     {
@@ -33,7 +38,7 @@ public:
 
 protected:
     std::vector<vertex_textured> vertexes;
-    std::vector<uint32_t>        indexes;
+    std::vector<uint16_t>        indexes;
 
     size_t count;
 

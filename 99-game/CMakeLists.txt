@@ -27,6 +27,9 @@ add_library(99-engine STATIC
             KHR/khrplatform.h
             engine/engine.h engine/engine.cpp
             engine/shader_opengl.h engine/shader_opengl.cpp
+            engine/texture_opengl.h engine/texture_opengl.cpp
+            engine/vertex_buffer.h engine/vertex_buffer.cpp
+            engine/index_buffer.h engine/index_buffer.cpp
             core/config.h core/event.h
             core/types.h core/types.cpp objects/figure.h 
             objects/camera.h objects/camera.cpp

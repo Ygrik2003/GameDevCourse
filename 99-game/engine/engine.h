@@ -1,9 +1,12 @@
 #pragma once
 #include "core/config.h"
 #include "core/event.h"
+#include "index_buffer.h"
 #include "objects/camera.h"
 #include "objects/figure.h"
 #include "shader_opengl.h"
+#include "texture_opengl.h"
+#include "vertex_buffer.h"
 
 #include <iostream>
 #include <vector>
@@ -11,6 +14,13 @@
 #include <KHR/khrplatform.h>
 #include <SDL3/SDL.h>
 #include <glad/glad.h>
+
+#include "imgui/imgui.h"
+
+bool ImGui_ImplSdlGL3_Init(SDL_Window* window);
+void ImGui_ImplSdlGL3_Shutdown();
+void ImGui_ImplSdlGL3_NewFrame(SDL_Window* window);
+bool ImGui_ImplSdlGL3_ProcessEvent(const SDL_Event* event);
 
 class engine
 {
@@ -27,14 +37,31 @@ public:
     virtual void render_triangle(const triangle<vertex_textured>& tr) = 0;
     virtual void render_triangle(
         const triangle<vertex_colored_textured>& tr) = 0;
-    virtual void swap_buffers()                      = 0;
+
+    virtual void render_triangles(vertex_buffer<vertex>*,
+                                  index_buffer*,
+                                  const std::uint32_t*,
+                                  size_t) = 0;
+    virtual void render_triangles(vertex_buffer<vertex_colored>*,
+                                  index_buffer*,
+                                  const std::uint32_t*,
+                                  size_t) = 0;
+    virtual void render_triangles(vertex_buffer<vertex_textured>*,
+                                  index_buffer*,
+                                  const texture_opengl*,
+                                  const std::uint32_t*,
+                                  size_t) = 0;
+    virtual void render_triangles(vertex_buffer<vertex_colored_textured>*,
+                                  index_buffer*,
+                                  const texture_opengl*,
+                                  const std::uint32_t*,
+                                  size_t) = 0;
+    virtual void swap_buffers()           = 0;
 
     virtual void create_shadow_map() = 0;
 
-    virtual void load_texture(size_t index, const char* path) = 0;
-    virtual void set_texture(size_t index)                    = 0;
-
-    virtual figure load_object(const char* path) = 0;
+    virtual texture_opengl* load_texture(size_t index, const char* path) = 0;
+    virtual void            set_texture(size_t index)                    = 0;
 
 protected:
     config _config;
@@ -52,12 +79,29 @@ public:
     void render_triangle(const triangle<vertex_colored>& tr) override;
     void render_triangle(const triangle<vertex_textured>& tr) override;
     void render_triangle(const triangle<vertex_colored_textured>& tr) override;
+
+    void render_triangles(vertex_buffer<vertex>* vertexes,
+                          index_buffer*          indexes,
+                          const std::uint32_t*   start_vertex_index,
+                          size_t                 num_vertexes) override;
+    void render_triangles(vertex_buffer<vertex_colored>* vertexes,
+                          index_buffer*                  indexes,
+                          const std::uint32_t*           start_vertex_index,
+                          size_t                         num_vertexes) override;
+    void render_triangles(vertex_buffer<vertex_textured>* vertexes,
+                          index_buffer*                   indexes,
+                          const texture_opengl*           tex,
+                          const std::uint32_t*            start_vertex_index,
+                          size_t num_vertexes) override;
+    void render_triangles(vertex_buffer<vertex_colored_textured>* vertexes,
+                          index_buffer*                           indexes,
+                          const texture_opengl*                   tex,
+                          const std::uint32_t* start_vertex_index,
+                          size_t               num_vertexes) override;
     void swap_buffers() override;
 
-    void load_texture(size_t index, const char* path) override;
-    void set_texture(size_t index) override;
-
-    figure load_object(const char* path) override;
+    texture_opengl* load_texture(size_t index, const char* path) override;
+    void            set_texture(size_t index) override;
 
     void create_shadow_map() override;
 

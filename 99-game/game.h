@@ -4,8 +4,6 @@
 #include "core/types.h"
 #include "engine/engine.h"
 
-#include "imgui/imgui.h"
-
 constexpr uint32_t fps = 60;
 
 class game
@@ -38,10 +36,11 @@ private:
     uniform        uniforms;
     camera*        cam;
 
-    std::vector<figure> figures;
+    std::vector<figure>          figures;
+    std::vector<texture_opengl*> textures;
 
     double phi   = 0;
     double theta = 0;
 
-    bool isStarted = false;
+    bool isStarted = true;
 };

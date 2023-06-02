@@ -2480,6 +2480,12 @@ struct ImDrawVert
     ImU32   col;
 };
 #else
+struct ImDrawVert
+{
+    ImVec2 pos;
+    ImU32  col;
+    ImVec2 uv;
+};
 // You can override the vertex format layout by defining IMGUI_OVERRIDE_DRAWVERT_STRUCT_LAYOUT in imconfig.h
 // The code expect ImVec2 pos (8 bytes), ImVec2 uv (8 bytes), ImU32 col (4 bytes), but you can re-order them or add other fields as needed to simplify integration in your engine.
 // The type has to be described within the macro (you can either declare the struct or use a typedef). This is because ImVec2/ImU32 are likely not declared at the time you'd want to set your type up.

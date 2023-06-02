@@ -3,5 +3,5 @@
 class mesh : public figure
 {
 public:
-    mesh(std::vector<vertex_textured> vertexes, std::vector<uint32_t> indexes);
+    mesh(std::vector<vertex_textured> vertexes, std::vector<uint16_t> indexes);
 };

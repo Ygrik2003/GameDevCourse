@@ -1,7 +1,7 @@
 #include "engine.h"
-#include "core/picopng.hxx"
 
 #include "objects/mesh.h"
+
 #include <filesystem>
 #include <fstream>
 #include <stdexcept>
@@ -95,7 +95,7 @@ void APIENTRY gl_debug_output(GLenum        source,
 #endif
 
 template <class vertex_type>
-void bind_vertexes(const triangle<vertex_type>& tr)
+void bind_vertexes()
 {
     glEnableVertexAttribArray(0);
     GL_CHECK_ERRORS()
@@ -103,13 +103,13 @@ void bind_vertexes(const triangle<vertex_type>& tr)
                           3,
                           GL_FLOAT,
                           GL_FALSE,
-                          sizeof(tr.vertexes[0]),
+                          sizeof(vertex_type),
                           reinterpret_cast<GLvoid*>(0));
     GL_CHECK_ERRORS()
 }
 
 template <class vertex_type>
-void bind_normals(const triangle<vertex_type>& tr)
+void bind_normals()
 {
     glEnableVertexAttribArray(1);
     GL_CHECK_ERRORS()
@@ -117,39 +117,28 @@ void bind_normals(const triangle<vertex_type>& tr)
                           3,
                           GL_FLOAT,
                           GL_FALSE,
-                          sizeof(tr.vertexes[0]),
+                          sizeof(vertex_type),
                           reinterpret_cast<GLvoid*>(3 * sizeof(float)));
     GL_CHECK_ERRORS()
 }
 
-void bind_texture_coords(const triangle<vertex_textured>& tr)
+template <class vertex_type>
+void bind_texture_coords()
 {
     glEnableVertexAttribArray(2);
     GL_CHECK_ERRORS()
-    glVertexAttribPointer(2,
-                          2,
-                          GL_FLOAT,
-                          GL_FALSE,
-                          sizeof(tr.vertexes[0]),
-                          reinterpret_cast<GLvoid*>(sizeof(vertex)));
-    GL_CHECK_ERRORS()
-}
-
-void bind_texture_coords(const triangle<vertex_colored_textured>& tr)
-{
-    glEnableVertexAttribArray(2);
-    GL_CHECK_ERRORS()
-    glVertexAttribPointer(2,
-                          2,
-                          GL_FLOAT,
-                          GL_FALSE,
-                          sizeof(tr.vertexes[0]),
-                          reinterpret_cast<GLvoid*>(sizeof(vertex_colored)));
+    glVertexAttribPointer(
+        2,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(vertex_type),
+        reinterpret_cast<GLvoid*>(sizeof(vertex_type) - 2 * sizeof(float)));
     GL_CHECK_ERRORS()
 }
 
 template <class vertex_colored_type>
-void bind_colors(const triangle<vertex_colored_type>& tr)
+void bind_colors()
 {
     glEnableVertexAttribArray(3);
     GL_CHECK_ERRORS()
@@ -157,7 +146,7 @@ void bind_colors(const triangle<vertex_colored_type>& tr)
                           4,
                           GL_FLOAT,
                           GL_FALSE,
-                          sizeof(tr.vertexes[0]),
+                          sizeof(vertex_colored_type),
                           reinterpret_cast<GLvoid*>(sizeof(vertex)));
     GL_CHECK_ERRORS()
 }
@@ -172,6 +161,11 @@ void* load_gl_func(const char* name)
     }
     return reinterpret_cast<void*>(gl_pointer);
 }
+
+static float          g_Time            = 0.0;
+static bool           g_MousePressed[3] = { false, false, false };
+static float          g_MouseWheel      = 0.0f;
+static shader_opengl* g_im_gui_shader   = nullptr;
 
 int engine_opengl::initialize(config cfg)
 {
@@ -277,6 +271,13 @@ int engine_opengl::initialize(config cfg)
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+    if (!ImGui_ImplSdlGL3_Init(window))
+    {
+        std::runtime_error("error: failed to init ImGui");
+    }
+
+    ImGui_ImplSdlGL3_NewFrame(window);
+
     return 1;
 }
 
@@ -295,6 +296,7 @@ bool engine_opengl::event_keyboard(event& e)
 
     if (SDL_PollEvent(&sdl_event))
     {
+        ImGui_ImplSdlGL3_ProcessEvent(&sdl_event);
         if (sdl_event.type == SDL_EVENT_QUIT)
         {
             e.action.quit = true;
@@ -339,8 +341,8 @@ void engine_opengl::render_triangle(const triangle<vertex>& tr)
     glBufferData(GL_ARRAY_BUFFER, sizeof(tr), &tr, GL_STATIC_DRAW);
     GL_CHECK_ERRORS()
 
-    bind_vertexes(tr);
-    bind_normals(tr);
+    bind_vertexes<vertex>();
+    bind_normals<vertex>();
 
     glDrawArrays(GL_TRIANGLES, 0, 3);
 }
@@ -352,9 +354,9 @@ void engine_opengl::render_triangle(const triangle<vertex_colored>& tr)
     glBufferData(GL_ARRAY_BUFFER, sizeof(tr), &tr, GL_STATIC_DRAW);
     GL_CHECK_ERRORS()
 
-    bind_vertexes(tr);
-    bind_normals(tr);
-    bind_colors(tr);
+    bind_vertexes<vertex_colored>();
+    bind_normals<vertex_colored>();
+    bind_colors<vertex_colored>();
 
     glDrawArrays(GL_TRIANGLES, 0, 3);
 }
@@ -366,9 +368,9 @@ void engine_opengl::render_triangle(const triangle<vertex_textured>& tr)
     glBufferData(GL_ARRAY_BUFFER, sizeof(tr), &tr, GL_STATIC_DRAW);
     GL_CHECK_ERRORS()
 
-    bind_vertexes(tr);
-    bind_normals(tr);
-    bind_texture_coords(tr);
+    bind_vertexes<vertex_textured>();
+    bind_normals<vertex_textured>();
+    bind_texture_coords<vertex_textured>();
 
     glDrawArrays(GL_TRIANGLES, 0, 3);
 }
@@ -380,12 +382,95 @@ void engine_opengl::render_triangle(const triangle<vertex_colored_textured>& tr)
     glBufferData(GL_ARRAY_BUFFER, sizeof(tr), &tr, GL_STATIC_DRAW);
     GL_CHECK_ERRORS()
 
-    bind_vertexes(tr);
-    bind_normals(tr);
-    bind_texture_coords(tr);
-    bind_colors(tr);
+    bind_vertexes<vertex_colored_textured>();
+    bind_normals<vertex_colored_textured>();
+    bind_texture_coords<vertex_colored_textured>();
+    bind_colors<vertex_colored_textured>();
 
     glDrawArrays(GL_TRIANGLES, 0, 3);
+}
+
+void engine_opengl::render_triangles(vertex_buffer<vertex>* vertexes,
+                                     index_buffer*          indexes,
+                                     const std::uint32_t*   start_vertex_index,
+                                     size_t                 num_vertexes)
+{
+    reload_uniform();
+
+    vertexes->bind();
+    indexes->bind();
+
+    bind_vertexes<vertex>();
+    bind_normals<vertex>();
+
+    glDrawElements(
+        GL_TRIANGLES, num_vertexes, GL_UNSIGNED_SHORT, start_vertex_index);
+
+    GL_CHECK_ERRORS()
+}
+void engine_opengl::render_triangles(vertex_buffer<vertex_colored>* vertexes,
+                                     index_buffer*                  indexes,
+                                     const std::uint32_t* start_vertex_index,
+                                     size_t               num_vertexes)
+{
+    reload_uniform();
+
+    vertexes->bind();
+    indexes->bind();
+
+    bind_vertexes<vertex_colored>();
+    bind_normals<vertex_colored>();
+    bind_colors<vertex_colored>();
+
+    glDrawElements(
+        GL_TRIANGLES, num_vertexes, GL_UNSIGNED_SHORT, start_vertex_index);
+
+    GL_CHECK_ERRORS()
+}
+void engine_opengl::render_triangles(vertex_buffer<vertex_textured>* vertexes,
+                                     index_buffer*                   indexes,
+                                     const texture_opengl*           tex,
+                                     const std::uint32_t* start_vertex_index,
+                                     size_t               num_vertexes)
+{
+    reload_uniform();
+
+    vertexes->bind();
+    indexes->bind();
+    tex->bind();
+
+    bind_vertexes<vertex_textured>();
+    bind_normals<vertex_textured>();
+    bind_texture_coords<vertex_textured>();
+
+    glDrawElements(
+        GL_TRIANGLES, num_vertexes, GL_UNSIGNED_SHORT, start_vertex_index);
+
+    GL_CHECK_ERRORS()
+}
+
+void engine_opengl::render_triangles(
+    vertex_buffer<vertex_colored_textured>* vertexes,
+    index_buffer*                           indexes,
+    const texture_opengl*                   tex,
+    const std::uint32_t*                    start_vertex_index,
+    size_t                                  num_vertexes)
+{
+    reload_uniform();
+
+    vertexes->bind();
+    indexes->bind();
+    tex->bind();
+
+    bind_vertexes<vertex_colored_textured>();
+    bind_normals<vertex_colored_textured>();
+    bind_texture_coords<vertex_colored_textured>();
+    bind_colors<vertex_colored_textured>();
+
+    glDrawElements(
+        GL_TRIANGLES, num_vertexes, GL_UNSIGNED_SHORT, start_vertex_index);
+
+    GL_CHECK_ERRORS()
 }
 
 void engine_opengl::swap_buffers()
@@ -399,73 +484,26 @@ void engine_opengl::swap_buffers()
     GL_CHECK_ERRORS()
 }
 
-void engine_opengl::load_texture(size_t index, const char* path)
+texture_opengl* engine_opengl::load_texture(size_t index, const char* path)
 {
     glActiveTexture(GL_TEXTURE0 + index);
     GL_CHECK_ERRORS()
     glUniform1i(uniform_texture, index);
 
-    if (!std::filesystem::exists(path))
-        throw std::runtime_error("No file");
-
-    std::vector<std::byte> png_file_in_memory;
-    std::ifstream          ifs(path, std::ios_base::binary);
-
-    size_t pos_in_file = std::filesystem::file_size(path);
-    png_file_in_memory.resize(pos_in_file);
-
-    ifs.read(reinterpret_cast<char*>(png_file_in_memory.data()),
-             static_cast<std::streamsize>(png_file_in_memory.size()));
-
-    std::vector<std::byte> image;
-    unsigned long          w = 0;
-    unsigned long          h = 0;
-
-    decodePNG(image,
-              w,
-              h,
-              png_file_in_memory.data(),
-              png_file_in_memory.size(),
-              false);
-
-    GLuint tex_handl = 0;
-    glGenTextures(1, &tex_handl);
-    GL_CHECK_ERRORS()
-    glBindTexture(GL_TEXTURE_2D, tex_handl);
-    GL_CHECK_ERRORS()
-
-    GLint mipmap_level = 0;
-    GLint border       = 0;
-    // clang-format off
-    glTexImage2D(GL_TEXTURE_2D,
-                 mipmap_level,
-                 GL_RGB,
-                 static_cast<GLsizei>(w),
-                 static_cast<GLsizei>(h),
-                 border,
-                 GL_RGB,
-                 GL_UNSIGNED_BYTE,
-                 image.data());
-    // clang-format on
-    GL_CHECK_ERRORS()
+    texture_opengl* tex = new texture_opengl(path);
+    tex->bind();
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     GL_CHECK_ERRORS()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     GL_CHECK_ERRORS()
+    return tex;
 }
 
 void engine_opengl::set_texture(size_t index)
 {
     glActiveTexture(GL_TEXTURE0 + index);
     glUniform1i(uniform_texture, index);
-}
-
-figure engine_opengl::load_object(const char* path)
-{
-    std::vector<vertex_textured> vertexes;
-    std::vector<uint32_t>        indexes;
-    return mesh(vertexes, indexes);
 }
 
 void engine_opengl::create_shadow_map()
@@ -562,4 +600,200 @@ void engine_opengl::reload_uniform()
     glUniform1f(glGetUniformLocation(shader->get_program_id(),
                                      "u_uniforms.scale_z_obj"),
                 *uniforms_world->scale_z_obj);
+}
+
+void imgui_render()
+{
+    ImDrawData* draw_data = ImGui::GetDrawData();
+    // Avoid rendering when minimized, scale coordinates for retina displays
+    // (screen coordinates != framebuffer coordinates)
+    ImGuiIO& io        = ImGui::GetIO();
+    int      fb_width  = int(io.DisplaySize.x * io.DisplayFramebufferScale.x);
+    int      fb_height = int(io.DisplaySize.y * io.DisplayFramebufferScale.y);
+    if (fb_width == 0 || fb_height == 0)
+    {
+        return;
+    }
+    draw_data->ScaleClipRects(io.DisplayFramebufferScale);
+
+    texture_opengl* texture =
+        reinterpret_cast<texture_opengl*>(io.Fonts->TexID);
+    assert(texture != nullptr);
+
+    // om::mat2x3 orto_matrix =
+    //     om::mat2x3::scale(2.0f / io.DisplaySize.x, -2.0f / io.DisplaySize.y)
+    //     * om::mat2x3::move(om::vec2(-1.0f, 1.0f));
+
+    g_im_gui_shader->use();
+    // g_im_gui_shader->set_uniform("Texture", texture);
+    // g_im_gui_shader->set_uniform("ProjMtx", orto_matrix);
+
+    for (int n = 0; n < draw_data->CmdListsCount; n++)
+    {
+        const ImDrawList* cmd_list          = draw_data->CmdLists[n];
+        const ImDrawIdx*  idx_buffer_offset = nullptr;
+
+        const vertex_colored_textured* vertexes =
+            reinterpret_cast<vertex_colored_textured*>(
+                cmd_list->VtxBuffer.Data);
+        size_t vert_count = static_cast<size_t>(cmd_list->VtxBuffer.size());
+
+        vertex_buffer<vertex_colored_textured>* vertex_buff =
+            new vertex_buffer(vertexes, vert_count);
+
+        const std::uint16_t* indexes = cmd_list->IdxBuffer.Data;
+        size_t index_count = static_cast<size_t>(cmd_list->IdxBuffer.size());
+
+        index_buffer* index_buff = new index_buffer(indexes, index_count);
+
+        for (int cmd_i = 0; cmd_i < cmd_list->CmdBuffer.Size; cmd_i++)
+        {
+            const ImDrawCmd* pcmd = &cmd_list->CmdBuffer[cmd_i];
+            assert(pcmd->UserCallback == nullptr); // we not use it
+
+            texture_opengl* tex =
+                reinterpret_cast<texture_opengl*>(pcmd->TextureId);
+
+            // render(vertexes, indexes, tex, idx_buffer_offset,
+            // pcmd->ElemCount);
+
+            idx_buffer_offset += pcmd->ElemCount;
+        } // end for cmd_i
+        // om::g_engine->destroy_vertex_buffer(vertex_buff);
+        // om::g_engine->destroy_index_buffer(index_buff);
+    } // end for n
+}
+
+bool ImGui_ImplSdlGL3_ProcessEvent(const SDL_Event* event)
+{
+    ImGuiIO& io = ImGui::GetIO();
+    switch (event->type)
+    {
+        case SDL_EVENT_MOUSE_WHEEL:
+        {
+            if (event->wheel.y > 0)
+                g_MouseWheel = 1;
+            if (event->wheel.y < 0)
+                g_MouseWheel = -1;
+            return true;
+        }
+        case SDL_EVENT_MOUSE_BUTTON_DOWN:
+        {
+            if (event->button.button == SDL_BUTTON_LEFT)
+                g_MousePressed[0] = true;
+            if (event->button.button == SDL_BUTTON_RIGHT)
+                g_MousePressed[1] = true;
+            if (event->button.button == SDL_BUTTON_MIDDLE)
+                g_MousePressed[2] = true;
+            return true;
+        }
+        case SDL_EVENT_TEXT_INPUT:
+        {
+            io.AddInputCharactersUTF8(event->text.text);
+            return true;
+        }
+        case SDL_EVENT_KEY_DOWN:
+        case SDL_EVENT_KEY_UP:
+        {
+            int key          = event->key.keysym.sym & ~SDLK_SCANCODE_MASK;
+            io.KeysDown[key] = (event->type == SDL_EVENT_KEY_DOWN);
+            uint32_t mod_keys_mask = SDL_GetModState();
+            io.KeyShift            = ((mod_keys_mask & SDL_KMOD_SHIFT) != 0);
+            io.KeyCtrl             = ((mod_keys_mask & SDL_KMOD_CTRL) != 0);
+            io.KeyAlt              = ((mod_keys_mask & SDL_KMOD_ALT) != 0);
+            io.KeySuper            = ((mod_keys_mask & SDL_KMOD_GUI) != 0);
+            return true;
+        }
+    }
+    return false;
+}
+
+bool ImGui_ImplSdlGL3_Init(SDL_Window* window)
+{
+    // Setup Dear ImGui context
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard
+    // Controls
+
+    // Setup Dear ImGui style
+    ImGui::StyleColorsDark();
+    // ImGui::StyleColorsClassic();
+
+    ImGuiIO& io = ImGui::GetIO();
+    // g_Window    = window;
+
+    // Setup back-end capabilities flags
+    // io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors; // We can honor
+    // GetMouseCursor()
+    //                                           // values (optional)
+    //    io.BackendFlags |=
+    //        ImGuiBackendFlags_HasSetMousePos; // We can honor
+    //        io.WantSetMousePos
+    //                                          // requests (optional, rarely
+    //                                          used)
+    io.BackendPlatformName = "custom_micro_engine";
+
+    // Keyboard mapping. ImGui will use those indices to peek into the
+    // io.KeysDown[] array.
+    io.KeyMap[ImGuiKey_Tab]        = SDL_SCANCODE_TAB;
+    io.KeyMap[ImGuiKey_LeftArrow]  = SDL_SCANCODE_LEFT;
+    io.KeyMap[ImGuiKey_RightArrow] = SDL_SCANCODE_RIGHT;
+    io.KeyMap[ImGuiKey_UpArrow]    = SDL_SCANCODE_UP;
+    io.KeyMap[ImGuiKey_DownArrow]  = SDL_SCANCODE_DOWN;
+    io.KeyMap[ImGuiKey_PageUp]     = SDL_SCANCODE_PAGEUP;
+    io.KeyMap[ImGuiKey_PageDown]   = SDL_SCANCODE_PAGEDOWN;
+    io.KeyMap[ImGuiKey_Home]       = SDL_SCANCODE_HOME;
+    io.KeyMap[ImGuiKey_End]        = SDL_SCANCODE_END;
+    io.KeyMap[ImGuiKey_Insert]     = SDL_SCANCODE_INSERT;
+    io.KeyMap[ImGuiKey_Delete]     = SDL_SCANCODE_DELETE;
+    io.KeyMap[ImGuiKey_Backspace]  = SDL_SCANCODE_BACKSPACE;
+    io.KeyMap[ImGuiKey_Space]      = SDL_SCANCODE_SPACE;
+    io.KeyMap[ImGuiKey_Enter]      = SDL_SCANCODE_RETURN;
+    io.KeyMap[ImGuiKey_Escape]     = SDL_SCANCODE_ESCAPE;
+    io.KeyMap[ImGuiKey_A]          = SDL_SCANCODE_A;
+    io.KeyMap[ImGuiKey_C]          = SDL_SCANCODE_C;
+    io.KeyMap[ImGuiKey_V]          = SDL_SCANCODE_V;
+    io.KeyMap[ImGuiKey_X]          = SDL_SCANCODE_X;
+    io.KeyMap[ImGuiKey_Y]          = SDL_SCANCODE_Y;
+    io.KeyMap[ImGuiKey_Z]          = SDL_SCANCODE_Z;
+    /*
+        g_MouseCursors[ImGuiMouseCursor_Arrow] =
+            SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_ARROW);
+        g_MouseCursors[ImGuiMouseCursor_TextInput] =
+            SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_IBEAM);
+        g_MouseCursors[ImGuiMouseCursor_ResizeAll] =
+            SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZEALL);
+        g_MouseCursors[ImGuiMouseCursor_ResizeNS] =
+            SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENS);
+        g_MouseCursors[ImGuiMouseCursor_ResizeEW] =
+            SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZEWE);
+        g_MouseCursors[ImGuiMouseCursor_ResizeNESW] =
+            SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENESW);
+        g_MouseCursors[ImGuiMouseCursor_ResizeNWSE] =
+            SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENWSE);
+        g_MouseCursors[ImGuiMouseCursor_Hand] =
+            SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_HAND);
+    */
+    // io.RenderDrawListsFn =
+    //     imgui_to_engine_render; // Alternatively you can set this to
+    //                             // NULL and call ImGui::GetDrawData()
+    //                             // after ImGui::Render() to get the
+    //                             // same ImDrawData pointer.
+    // io.SetClipboardTextFn = ImGui_ImplSdlGL3_SetClipboardText;
+    // io.GetClipboardTextFn = ImGui_ImplSdlGL3_GetClipboardText;
+    // io.ClipboardUserData  = nullptr;
+
+#ifdef _WIN32
+    SDL_SysWMinfo wmInfo;
+    SDL_VERSION(&wmInfo.version);
+    SDL_GetWindowWMInfo(window, &wmInfo);
+    io.ImeWindowHandle = wmInfo.info.win.window;
+#else
+    (void)window;
+#endif
+
+    g_Time = SDL_GetTicks() / 1000.f;
+
+    return true;
 }

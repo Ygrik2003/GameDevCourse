@@ -31,6 +31,7 @@ struct uniforms
 in vec3 i_position;
 in vec3 i_normal;
 in vec2 i_tex_coord;
+in vec4 i_color;
 
 out vec3 v_position;
 out vec3 v_normal;
