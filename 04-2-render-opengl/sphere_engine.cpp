@@ -407,7 +407,7 @@ void engine_impl::render_triangle(const triangle&        tr,
 
     glEnableVertexAttribArray(0);
     GL_CHECK_ERRORS()
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), 0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex3d), 0);
     GL_CHECK_ERRORS()
 
     glEnableVertexAttribArray(1);
@@ -416,7 +416,7 @@ void engine_impl::render_triangle(const triangle&        tr,
                           4,
                           GL_FLOAT,
                           GL_FALSE,
-                          sizeof(vertex),
+                          sizeof(vertex3d),
                           reinterpret_cast<void*>(3 * sizeof(float)));
     GL_CHECK_ERRORS()
 

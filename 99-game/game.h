@@ -38,6 +38,8 @@ private:
 
     std::vector<figure>          figures;
     std::vector<texture_opengl*> textures;
+    shader_opengl*               shader_scene;
+    shader_opengl*               shader_temp;
 
     double phi   = 0;
     double theta = 0;

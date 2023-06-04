@@ -10,8 +10,8 @@ public:
                         vertexes[indexes[3 * index + 1]],
                         vertexes[indexes[3 * index + 2]]);
     }
-    size_t                              get_count() const { return count; }
-    const std::vector<vertex_textured>& get_vertexes() const
+    size_t                                get_count() const { return count; }
+    const std::vector<vertex3d_textured>& get_vertexes() const
     {
         return vertexes;
     }
@@ -37,8 +37,8 @@ public:
     size_t get_texture_index() { return texture_index; }
 
 protected:
-    std::vector<vertex_textured> vertexes;
-    std::vector<uint16_t>        indexes;
+    std::vector<vertex3d_textured> vertexes;
+    std::vector<uint16_t>          indexes;
 
     size_t count;
 

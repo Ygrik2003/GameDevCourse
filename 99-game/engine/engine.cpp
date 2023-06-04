@@ -99,26 +99,28 @@ void bind_vertexes()
 {
     glEnableVertexAttribArray(0);
     GL_CHECK_ERRORS()
-    glVertexAttribPointer(0,
-                          3,
-                          GL_FLOAT,
-                          GL_FALSE,
-                          sizeof(vertex_type),
-                          reinterpret_cast<GLvoid*>(0));
+    glVertexAttribPointer(
+        0,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(vertex_type),
+        reinterpret_cast<GLvoid*>(vertex_type::OFFSET_POSITION));
     GL_CHECK_ERRORS()
 }
 
 template <class vertex_type>
-void bind_normals()
+void bind_normal()
 {
     glEnableVertexAttribArray(1);
     GL_CHECK_ERRORS()
-    glVertexAttribPointer(1,
-                          3,
-                          GL_FLOAT,
-                          GL_FALSE,
-                          sizeof(vertex_type),
-                          reinterpret_cast<GLvoid*>(3 * sizeof(float)));
+    glVertexAttribPointer(
+        1,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(vertex_type),
+        reinterpret_cast<GLvoid*>(vertex_type::OFFSET_NORMAL));
     GL_CHECK_ERRORS()
 }
 
@@ -133,21 +135,21 @@ void bind_texture_coords()
         GL_FLOAT,
         GL_FALSE,
         sizeof(vertex_type),
-        reinterpret_cast<GLvoid*>(sizeof(vertex_type) - 2 * sizeof(float)));
+        reinterpret_cast<GLvoid*>(vertex_type::OFFSET_TEXTURE));
     GL_CHECK_ERRORS()
 }
 
-template <class vertex_colored_type>
+template <class vertex_type>
 void bind_colors()
 {
     glEnableVertexAttribArray(3);
     GL_CHECK_ERRORS()
     glVertexAttribPointer(3,
                           4,
-                          GL_FLOAT,
-                          GL_FALSE,
-                          sizeof(vertex_colored_type),
-                          reinterpret_cast<GLvoid*>(sizeof(vertex)));
+                          GL_UNSIGNED_BYTE,
+                          GL_TRUE,
+                          sizeof(vertex_type),
+                          reinterpret_cast<GLvoid*>(vertex_type::OFFSET_COLOR));
     GL_CHECK_ERRORS()
 }
 
@@ -165,31 +167,104 @@ void* load_gl_func(const char* name)
 static float          g_Time            = 0.0;
 static bool           g_MousePressed[3] = { false, false, false };
 static float          g_MouseWheel      = 0.0f;
-static shader_opengl* g_im_gui_shader   = nullptr;
+static shader_opengl* g_imgui_shader    = nullptr;
 
-int engine_opengl::initialize(config cfg)
+void ImGui_ImplSdlGL3_RenderDrawLists(engine* eng, ImDrawData* draw_data)
 {
+    // Avoid rendering when minimized, scale coordinates for retina displays
+    // (screen coordinates != framebuffer coordinates)
+    ImGuiIO& io        = ImGui::GetIO();
+    int      fb_width  = int(io.DisplaySize.x * io.DisplayFramebufferScale.x);
+    int      fb_height = int(io.DisplaySize.y * io.DisplayFramebufferScale.y);
+    if (fb_width == 0 || fb_height == 0)
+    {
+        return;
+    }
+    draw_data->ScaleClipRects(io.DisplayFramebufferScale);
 
-    _config = cfg;
+    texture_opengl* texture =
+        reinterpret_cast<texture_opengl*>(io.Fonts->TexID);
+
+    g_imgui_shader->use();
+
+    unsigned int texture_unit = 0;
+    texture->bind();
+
+    g_imgui_shader->set_uniform1("u_texture",
+                                 static_cast<int>(0 + texture_unit));
+
+    glDisable(GL_DEPTH_TEST);
+    for (int n = 0; n < draw_data->CmdListsCount; n++)
+    {
+        const ImDrawList* cmd_list          = draw_data->CmdLists[n];
+        const ImDrawIdx*  idx_buffer_offset = nullptr;
+
+        const vertex2d_colored_textured* vertex_data =
+            reinterpret_cast<const vertex2d_colored_textured*>(
+                cmd_list->VtxBuffer.Data);
+        size_t vert_count = static_cast<size_t>(cmd_list->VtxBuffer.size());
+
+        vertex_buffer<vertex2d_colored_textured>* vertex_buff =
+            new vertex_buffer(vertex_data, vert_count);
+
+        const std::uint16_t* indexes = cmd_list->IdxBuffer.Data;
+        size_t index_count = static_cast<size_t>(cmd_list->IdxBuffer.size());
+
+        index_buffer* index_buff = new index_buffer(indexes, index_count);
+
+        for (int cmd_i = 0; cmd_i < cmd_list->CmdBuffer.Size; cmd_i++)
+        {
+            const ImDrawCmd* pcmd = &cmd_list->CmdBuffer[cmd_i];
+
+            texture_opengl* tex =
+                reinterpret_cast<texture_opengl*>(pcmd->TextureId);
+            eng->render_triangles(vertex_buff,
+                                  index_buff,
+                                  tex,
+                                  idx_buffer_offset,
+                                  pcmd->ElemCount);
+
+            idx_buffer_offset += pcmd->ElemCount;
+        } // end for cmd_i
+        delete vertex_buff;
+        delete index_buff;
+    } // end for n
+    glEnable(GL_DEPTH_TEST);
+}
+
+static const char* ImGui_ImplSdlGL3_GetClipboardText(void*)
+{
+    return SDL_GetClipboardText();
+}
+
+static void ImGui_ImplSdlGL3_SetClipboardText(void*, const char* text)
+{
+    SDL_SetClipboardText(text);
+}
+
+int engine_opengl::initialize(config& cfg)
+{
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 
-    if (_config.is_full_sreen)
+    if (cfg.is_full_sreen)
     {
-        window = SDL_CreateWindow("Sphere Render",
-                                  _config.width,
-                                  _config.height,
+        window = SDL_CreateWindow("Tetris3D",
+                                  cfg.width,
+                                  cfg.height,
                                   SDL_WINDOW_FULLSCREEN | SDL_WINDOW_OPENGL);
-        int w, h;
-        SDL_GetWindowSize(window, &w, &h);
-        _config.width  = w;
-        _config.height = h;
     }
     else
     {
         window = SDL_CreateWindow(
-            "Sphere Render", _config.width, _config.height, SDL_WINDOW_OPENGL);
+            "Sphere Render", cfg.width, cfg.height, SDL_WINDOW_OPENGL);
     }
+    int w, h;
+    SDL_GetWindowSize(window, &w, &h);
+    cfg.width  = w;
+    cfg.height = h;
+
+    _config = cfg;
 
     if (window == nullptr)
     {
@@ -206,7 +281,7 @@ int engine_opengl::initialize(config cfg)
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, gl_minor_v);
 
     gl_context = SDL_GL_CreateContext(window);
-    SDL_SetRelativeMouseMode(SDL_TRUE);
+    // SDL_SetRelativeMouseMode(SDL_TRUE);
     if (gl_context == nullptr)
     {
         std::cerr << SDL_GetError();
@@ -238,9 +313,6 @@ int engine_opengl::initialize(config cfg)
 
     GL_CHECK_ERRORS()
 
-    shader = new shader_opengl(_config.shader_vertex, _config.shader_fragment);
-    shader->use();
-
     GLuint vertex_buffer = 0;
     glGenBuffers(1, &vertex_buffer);
     GL_CHECK_ERRORS()
@@ -250,15 +322,6 @@ int engine_opengl::initialize(config cfg)
     glGenVertexArrays(1, &vertex_array_object);
     GL_CHECK_ERRORS()
     glBindVertexArray(vertex_array_object);
-    GL_CHECK_ERRORS()
-
-    glBindAttribLocation(shader->get_program_id(), 0, "i_position");
-    GL_CHECK_ERRORS()
-
-    uniforms = glGetUniformLocation(shader->get_program_id(), "u_uniforms");
-    GL_CHECK_ERRORS()
-    uniform_texture =
-        glGetUniformLocation(shader->get_program_id(), "u_texture");
     GL_CHECK_ERRORS()
 
     glEnable(GL_BLEND);
@@ -334,83 +397,66 @@ bool engine_opengl::event_keyboard(event& e)
     return is_event;
 }
 
-void engine_opengl::render_triangle(const triangle<vertex>& tr)
+void engine_opengl::render_triangle(const triangle<vertex3d>& tr)
 {
     reload_uniform();
 
     glBufferData(GL_ARRAY_BUFFER, sizeof(tr), &tr, GL_STATIC_DRAW);
     GL_CHECK_ERRORS()
 
-    bind_vertexes<vertex>();
-    bind_normals<vertex>();
+    bind_vertexes<vertex3d>();
+    bind_normal<vertex3d>();
 
     glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
-void engine_opengl::render_triangle(const triangle<vertex_colored>& tr)
+void engine_opengl::render_triangle(const triangle<vertex3d_colored>& tr)
 {
     reload_uniform();
 
     glBufferData(GL_ARRAY_BUFFER, sizeof(tr), &tr, GL_STATIC_DRAW);
     GL_CHECK_ERRORS()
 
-    bind_vertexes<vertex_colored>();
-    bind_normals<vertex_colored>();
-    bind_colors<vertex_colored>();
+    bind_vertexes<vertex3d_colored>();
+    bind_normal<vertex3d_colored>();
+    bind_colors<vertex3d_colored>();
 
     glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
-void engine_opengl::render_triangle(const triangle<vertex_textured>& tr)
+void engine_opengl::render_triangle(const triangle<vertex3d_textured>& tr)
 {
     reload_uniform();
 
     glBufferData(GL_ARRAY_BUFFER, sizeof(tr), &tr, GL_STATIC_DRAW);
     GL_CHECK_ERRORS()
 
-    bind_vertexes<vertex_textured>();
-    bind_normals<vertex_textured>();
-    bind_texture_coords<vertex_textured>();
+    bind_vertexes<vertex3d_textured>();
+    bind_normal<vertex3d_textured>();
+    bind_texture_coords<vertex3d_textured>();
 
     glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
-void engine_opengl::render_triangle(const triangle<vertex_colored_textured>& tr)
+void engine_opengl::render_triangle(
+    const triangle<vertex3d_colored_textured>& tr)
 {
     reload_uniform();
 
     glBufferData(GL_ARRAY_BUFFER, sizeof(tr), &tr, GL_STATIC_DRAW);
     GL_CHECK_ERRORS()
 
-    bind_vertexes<vertex_colored_textured>();
-    bind_normals<vertex_colored_textured>();
-    bind_texture_coords<vertex_colored_textured>();
-    bind_colors<vertex_colored_textured>();
+    bind_vertexes<vertex3d_colored_textured>();
+    bind_normal<vertex3d_colored_textured>();
+    bind_texture_coords<vertex3d_colored_textured>();
+    bind_colors<vertex3d_colored_textured>();
 
     glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
-void engine_opengl::render_triangles(vertex_buffer<vertex>* vertexes,
-                                     index_buffer*          indexes,
-                                     const std::uint32_t*   start_vertex_index,
-                                     size_t                 num_vertexes)
-{
-    reload_uniform();
-
-    vertexes->bind();
-    indexes->bind();
-
-    bind_vertexes<vertex>();
-    bind_normals<vertex>();
-
-    glDrawElements(
-        GL_TRIANGLES, num_vertexes, GL_UNSIGNED_SHORT, start_vertex_index);
-
-    GL_CHECK_ERRORS()
-}
-void engine_opengl::render_triangles(vertex_buffer<vertex_colored>* vertexes,
-                                     index_buffer*                  indexes,
-                                     const std::uint32_t* start_vertex_index,
+void engine_opengl::render_triangles(vertex_buffer<vertex3d>* vertexes,
+                                     index_buffer*            indexes,
+                                     const std::uint16_t* start_vertex_index,
                                      size_t               num_vertexes)
 {
     reload_uniform();
@@ -418,19 +464,37 @@ void engine_opengl::render_triangles(vertex_buffer<vertex_colored>* vertexes,
     vertexes->bind();
     indexes->bind();
 
-    bind_vertexes<vertex_colored>();
-    bind_normals<vertex_colored>();
-    bind_colors<vertex_colored>();
+    bind_vertexes<vertex3d>();
+    bind_normal<vertex3d>();
 
     glDrawElements(
         GL_TRIANGLES, num_vertexes, GL_UNSIGNED_SHORT, start_vertex_index);
 
     GL_CHECK_ERRORS()
 }
-void engine_opengl::render_triangles(vertex_buffer<vertex_textured>* vertexes,
-                                     index_buffer*                   indexes,
-                                     const texture_opengl*           tex,
-                                     const std::uint32_t* start_vertex_index,
+void engine_opengl::render_triangles(vertex_buffer<vertex3d_colored>* vertexes,
+                                     index_buffer*                    indexes,
+                                     const std::uint16_t* start_vertex_index,
+                                     size_t               num_vertexes)
+{
+    reload_uniform();
+
+    vertexes->bind();
+    indexes->bind();
+
+    bind_vertexes<vertex3d_colored>();
+    bind_normal<vertex3d_colored>();
+    bind_colors<vertex3d_colored>();
+
+    glDrawElements(
+        GL_TRIANGLES, num_vertexes, GL_UNSIGNED_SHORT, start_vertex_index);
+
+    GL_CHECK_ERRORS()
+}
+void engine_opengl::render_triangles(vertex_buffer<vertex3d_textured>* vertexes,
+                                     index_buffer*                     indexes,
+                                     const texture_opengl*             tex,
+                                     const std::uint16_t* start_vertex_index,
                                      size_t               num_vertexes)
 {
     reload_uniform();
@@ -439,9 +503,9 @@ void engine_opengl::render_triangles(vertex_buffer<vertex_textured>* vertexes,
     indexes->bind();
     tex->bind();
 
-    bind_vertexes<vertex_textured>();
-    bind_normals<vertex_textured>();
-    bind_texture_coords<vertex_textured>();
+    bind_vertexes<vertex3d_textured>();
+    bind_normal<vertex3d_textured>();
+    bind_texture_coords<vertex3d_textured>();
 
     glDrawElements(
         GL_TRIANGLES, num_vertexes, GL_UNSIGNED_SHORT, start_vertex_index);
@@ -450,22 +514,20 @@ void engine_opengl::render_triangles(vertex_buffer<vertex_textured>* vertexes,
 }
 
 void engine_opengl::render_triangles(
-    vertex_buffer<vertex_colored_textured>* vertexes,
-    index_buffer*                           indexes,
-    const texture_opengl*                   tex,
-    const std::uint32_t*                    start_vertex_index,
-    size_t                                  num_vertexes)
+    vertex_buffer<vertex3d_colored_textured>* vertexes,
+    index_buffer*                             indexes,
+    const texture_opengl*                     tex,
+    const std::uint16_t*                      start_vertex_index,
+    size_t                                    num_vertexes)
 {
-    reload_uniform();
-
     vertexes->bind();
     indexes->bind();
     tex->bind();
 
-    bind_vertexes<vertex_colored_textured>();
-    bind_normals<vertex_colored_textured>();
-    bind_texture_coords<vertex_colored_textured>();
-    bind_colors<vertex_colored_textured>();
+    bind_vertexes<vertex3d_colored_textured>();
+    bind_normal<vertex3d_colored_textured>();
+    bind_texture_coords<vertex3d_colored_textured>();
+    bind_colors<vertex3d_colored_textured>();
 
     glDrawElements(
         GL_TRIANGLES, num_vertexes, GL_UNSIGNED_SHORT, start_vertex_index);
@@ -473,9 +535,34 @@ void engine_opengl::render_triangles(
     GL_CHECK_ERRORS()
 }
 
+void engine_opengl::render_triangles(
+    vertex_buffer<vertex2d_colored_textured>* vertexes,
+    index_buffer*                             indexes,
+    const texture_opengl*                     tex,
+    const std::uint16_t*                      start_vertex_index,
+    size_t                                    num_vertexes)
+{
+    vertexes->bind();
+    indexes->bind();
+    tex->bind();
+
+    bind_vertexes<vertex2d_colored_textured>();
+    bind_texture_coords<vertex2d_colored_textured>();
+    bind_colors<vertex2d_colored_textured>();
+
+    glDrawElements(
+        GL_TRIANGLES, num_vertexes, GL_UNSIGNED_SHORT, start_vertex_index);
+    GL_CHECK_ERRORS()
+}
+
 void engine_opengl::swap_buffers()
 {
+
+    ImGui_ImplSdlGL3_RenderDrawLists(this, ImGui::GetDrawData());
+
     SDL_GL_SwapWindow(window);
+
+    ImGui_ImplSdlGL3_NewFrame(window);
 
     glClearColor(1.f, 1.f, 1.f, 1.f);
     GL_CHECK_ERRORS()
@@ -484,26 +571,22 @@ void engine_opengl::swap_buffers()
     GL_CHECK_ERRORS()
 }
 
-texture_opengl* engine_opengl::load_texture(size_t index, const char* path)
+texture_opengl* engine_opengl::load_texture(uint32_t index, const char* path)
 {
-    glActiveTexture(GL_TEXTURE0 + index);
-    GL_CHECK_ERRORS()
-    glUniform1i(uniform_texture, index);
+    // glActiveTexture(GL_TEXTURE0 + index);
+    // GL_CHECK_ERRORS()
+    // active_shader->set_uniform1("u_texture", index);
 
     texture_opengl* tex = new texture_opengl(path);
     tex->bind();
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    GL_CHECK_ERRORS()
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    GL_CHECK_ERRORS()
     return tex;
 }
 
-void engine_opengl::set_texture(size_t index)
+void engine_opengl::set_texture(uint32_t index)
 {
     glActiveTexture(GL_TEXTURE0 + index);
-    glUniform1i(uniform_texture, index);
+    active_shader->set_uniform1("u_texture", index);
 }
 
 void engine_opengl::create_shadow_map()
@@ -544,126 +627,60 @@ void engine_opengl::set_uniform(uniform& uni)
 
 void engine_opengl::reload_uniform()
 {
-    glUniform1f(
-        glGetUniformLocation(shader->get_program_id(), "u_uniforms.width"),
-        uniforms_world->width);
-    glUniform1f(
-        glGetUniformLocation(shader->get_program_id(), "u_uniforms.height"),
-        uniforms_world->height);
+    active_shader->set_uniform1("u_uniforms.width", uniforms_world->width);
+    active_shader->set_uniform1("u_uniforms.height", uniforms_world->height);
 
-    glUniform1f(glGetUniformLocation(shader->get_program_id(),
-                                     "u_uniforms.rotate_alpha_obj"),
-                *uniforms_world->rotate_alpha_obj);
-    glUniform1f(glGetUniformLocation(shader->get_program_id(),
-                                     "u_uniforms.rotate_beta_obj"),
-                *uniforms_world->rotate_beta_obj);
-    glUniform1f(glGetUniformLocation(shader->get_program_id(),
-                                     "u_uniforms.rotate_gamma_obj"),
-                *uniforms_world->rotate_gamma_obj);
+    active_shader->set_uniform1("u_uniforms.rotate_alpha_obj",
+                                *uniforms_world->rotate_alpha_obj);
+    active_shader->set_uniform1("u_uniforms.rotate_beta_obj",
+                                *uniforms_world->rotate_beta_obj);
+    active_shader->set_uniform1("u_uniforms.rotate_gamma_obj",
+                                *uniforms_world->rotate_gamma_obj);
 
-    glUniform1f(glGetUniformLocation(shader->get_program_id(),
-                                     "u_uniforms.rotate_alpha_camera"),
-                *uniforms_world->rotate_alpha_camera);
-    glUniform1f(glGetUniformLocation(shader->get_program_id(),
-                                     "u_uniforms.rotate_beta_camera"),
-                *uniforms_world->rotate_beta_camera);
-    glUniform1f(glGetUniformLocation(shader->get_program_id(),
-                                     "u_uniforms.rotate_gamma_camera"),
-                *uniforms_world->rotate_gamma_camera);
+    active_shader->set_uniform1("u_uniforms.rotate_alpha_camera",
+                                *uniforms_world->rotate_alpha_camera);
+    active_shader->set_uniform1("u_uniforms.rotate_beta_camera",
+                                *uniforms_world->rotate_beta_camera);
+    active_shader->set_uniform1("u_uniforms.rotate_gamma_camera",
+                                *uniforms_world->rotate_gamma_camera);
 
-    glUniform1f(glGetUniformLocation(shader->get_program_id(),
-                                     "u_uniforms.translate_x_obj"),
-                *uniforms_world->translate_x_obj);
-    glUniform1f(glGetUniformLocation(shader->get_program_id(),
-                                     "u_uniforms.translate_y_obj"),
-                *uniforms_world->translate_y_obj);
-    glUniform1f(glGetUniformLocation(shader->get_program_id(),
-                                     "u_uniforms.translate_z_obj"),
-                *uniforms_world->translate_z_obj);
+    active_shader->set_uniform1("u_uniforms.translate_x_obj",
+                                *uniforms_world->translate_x_obj);
+    active_shader->set_uniform1("u_uniforms.translate_y_obj",
+                                *uniforms_world->translate_y_obj);
+    active_shader->set_uniform1("u_uniforms.translate_z_obj",
+                                *uniforms_world->translate_z_obj);
 
-    glUniform1f(glGetUniformLocation(shader->get_program_id(),
-                                     "u_uniforms.translate_x_camera"),
-                *uniforms_world->translate_x_camera);
-    glUniform1f(glGetUniformLocation(shader->get_program_id(),
-                                     "u_uniforms.translate_y_camera"),
-                *uniforms_world->translate_y_camera);
-    glUniform1f(glGetUniformLocation(shader->get_program_id(),
-                                     "u_uniforms.translate_z_camera"),
-                *uniforms_world->translate_z_camera);
+    active_shader->set_uniform1("u_uniforms.translate_x_camera",
+                                *uniforms_world->translate_x_camera);
+    active_shader->set_uniform1("u_uniforms.translate_y_camera",
+                                *uniforms_world->translate_y_camera);
+    active_shader->set_uniform1("u_uniforms.translate_z_camera",
+                                *uniforms_world->translate_z_camera);
 
-    glUniform1f(glGetUniformLocation(shader->get_program_id(),
-                                     "u_uniforms.scale_x_obj"),
-                *uniforms_world->scale_x_obj);
-    glUniform1f(glGetUniformLocation(shader->get_program_id(),
-                                     "u_uniforms.scale_y_obj"),
-                *uniforms_world->scale_y_obj);
-    glUniform1f(glGetUniformLocation(shader->get_program_id(),
-                                     "u_uniforms.scale_z_obj"),
-                *uniforms_world->scale_z_obj);
+    active_shader->set_uniform1("u_uniforms.scale_x_obj",
+                                *uniforms_world->scale_x_obj);
+    active_shader->set_uniform1("u_uniforms.scale_y_obj",
+                                *uniforms_world->scale_y_obj);
+    active_shader->set_uniform1("u_uniforms.scale_z_obj",
+                                *uniforms_world->scale_z_obj);
 }
 
-void imgui_render()
+void engine_opengl::set_shader(shader_opengl* shader)
 {
-    ImDrawData* draw_data = ImGui::GetDrawData();
-    // Avoid rendering when minimized, scale coordinates for retina displays
-    // (screen coordinates != framebuffer coordinates)
-    ImGuiIO& io        = ImGui::GetIO();
-    int      fb_width  = int(io.DisplaySize.x * io.DisplayFramebufferScale.x);
-    int      fb_height = int(io.DisplaySize.y * io.DisplayFramebufferScale.y);
-    if (fb_width == 0 || fb_height == 0)
-    {
-        return;
-    }
-    draw_data->ScaleClipRects(io.DisplayFramebufferScale);
+    this->active_shader = shader;
 
-    texture_opengl* texture =
-        reinterpret_cast<texture_opengl*>(io.Fonts->TexID);
-    assert(texture != nullptr);
-
-    // om::mat2x3 orto_matrix =
-    //     om::mat2x3::scale(2.0f / io.DisplaySize.x, -2.0f / io.DisplaySize.y)
-    //     * om::mat2x3::move(om::vec2(-1.0f, 1.0f));
-
-    g_im_gui_shader->use();
-    // g_im_gui_shader->set_uniform("Texture", texture);
-    // g_im_gui_shader->set_uniform("ProjMtx", orto_matrix);
-
-    for (int n = 0; n < draw_data->CmdListsCount; n++)
-    {
-        const ImDrawList* cmd_list          = draw_data->CmdLists[n];
-        const ImDrawIdx*  idx_buffer_offset = nullptr;
-
-        const vertex_colored_textured* vertexes =
-            reinterpret_cast<vertex_colored_textured*>(
-                cmd_list->VtxBuffer.Data);
-        size_t vert_count = static_cast<size_t>(cmd_list->VtxBuffer.size());
-
-        vertex_buffer<vertex_colored_textured>* vertex_buff =
-            new vertex_buffer(vertexes, vert_count);
-
-        const std::uint16_t* indexes = cmd_list->IdxBuffer.Data;
-        size_t index_count = static_cast<size_t>(cmd_list->IdxBuffer.size());
-
-        index_buffer* index_buff = new index_buffer(indexes, index_count);
-
-        for (int cmd_i = 0; cmd_i < cmd_list->CmdBuffer.Size; cmd_i++)
-        {
-            const ImDrawCmd* pcmd = &cmd_list->CmdBuffer[cmd_i];
-            assert(pcmd->UserCallback == nullptr); // we not use it
-
-            texture_opengl* tex =
-                reinterpret_cast<texture_opengl*>(pcmd->TextureId);
-
-            // render(vertexes, indexes, tex, idx_buffer_offset,
-            // pcmd->ElemCount);
-
-            idx_buffer_offset += pcmd->ElemCount;
-        } // end for cmd_i
-        // om::g_engine->destroy_vertex_buffer(vertex_buff);
-        // om::g_engine->destroy_index_buffer(index_buff);
-    } // end for n
+    active_shader->use();
 }
 
+// You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if
+// dear imgui wants to use your inputs.
+// - When io.WantCaptureMouse is true, do not dispatch mouse input data to your
+// main application.
+// - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to
+// your main application.
+// Generally you may always pass all inputs to dear imgui, and hide them from
+// your application based on those two flags.
 bool ImGui_ImplSdlGL3_ProcessEvent(const SDL_Event* event)
 {
     ImGuiIO& io = ImGui::GetIO();
@@ -695,17 +712,50 @@ bool ImGui_ImplSdlGL3_ProcessEvent(const SDL_Event* event)
         case SDL_EVENT_KEY_DOWN:
         case SDL_EVENT_KEY_UP:
         {
-            int key          = event->key.keysym.sym & ~SDLK_SCANCODE_MASK;
+            int key = event->key.keysym.scancode; // & ~SDLK_SCANCODE_MASK;
             io.KeysDown[key] = (event->type == SDL_EVENT_KEY_DOWN);
-            uint32_t mod_keys_mask = SDL_GetModState();
-            io.KeyShift            = ((mod_keys_mask & SDL_KMOD_SHIFT) != 0);
-            io.KeyCtrl             = ((mod_keys_mask & SDL_KMOD_CTRL) != 0);
-            io.KeyAlt              = ((mod_keys_mask & SDL_KMOD_ALT) != 0);
-            io.KeySuper            = ((mod_keys_mask & SDL_KMOD_GUI) != 0);
+            io.KeyShift      = ((SDL_GetModState() & SDL_KMOD_SHIFT) != 0);
+            io.KeyCtrl       = ((SDL_GetModState() & SDL_KMOD_CTRL) != 0);
+            io.KeyAlt        = ((SDL_GetModState() & SDL_KMOD_ALT) != 0);
+            io.KeySuper      = ((SDL_GetModState() & SDL_KMOD_GUI) != 0);
             return true;
         }
     }
     return false;
+}
+
+void ImGui_ImplSdlGL3_CreateFontsTexture()
+{
+    // Build texture atlas
+    ImGuiIO&       io     = ImGui::GetIO();
+    unsigned char* pixels = nullptr;
+    int            width  = 0;
+    int            height = 0;
+    io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
+
+    // Store our identifier
+    io.Fonts->TexID = new texture_opengl(static_cast<void*>(pixels),
+                                         static_cast<size_t>(width),
+                                         static_cast<size_t>(height));
+}
+
+bool ImGui_ImplSdlGL3_CreateDeviceObjects()
+{
+    g_imgui_shader = new shader_opengl("./99-game/shaders/imgui_shader.vert",
+                                       "./99-game/shaders/imgui_shader.frag");
+
+    ImGui_ImplSdlGL3_CreateFontsTexture();
+
+    return true;
+}
+
+void ImGui_ImplSdlGL3_InvalidateDeviceObjects()
+{
+    void*           ptr     = ImGui::GetIO().Fonts->TexID;
+    texture_opengl* texture = reinterpret_cast<texture_opengl*>(ptr);
+
+    delete g_imgui_shader;
+    g_imgui_shader = nullptr;
 }
 
 bool ImGui_ImplSdlGL3_Init(SDL_Window* window)
@@ -724,15 +774,16 @@ bool ImGui_ImplSdlGL3_Init(SDL_Window* window)
     // g_Window    = window;
 
     // Setup back-end capabilities flags
-    // io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors; // We can honor
-    // GetMouseCursor()
+    //    io.BackendFlags |=
+    //        ImGuiBackendFlags_HasMouseCursors; // We can honor
+    //        GetMouseCursor()
     //                                           // values (optional)
     //    io.BackendFlags |=
     //        ImGuiBackendFlags_HasSetMousePos; // We can honor
     //        io.WantSetMousePos
     //                                          // requests (optional, rarely
     //                                          used)
-    io.BackendPlatformName = "custom_micro_engine";
+    io.BackendPlatformName = "imgui_impl_sdl";
 
     // Keyboard mapping. ImGui will use those indices to peek into the
     // io.KeysDown[] array.
@@ -775,14 +826,9 @@ bool ImGui_ImplSdlGL3_Init(SDL_Window* window)
         g_MouseCursors[ImGuiMouseCursor_Hand] =
             SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_HAND);
     */
-    // io.RenderDrawListsFn =
-    //     imgui_to_engine_render; // Alternatively you can set this to
-    //                             // NULL and call ImGui::GetDrawData()
-    //                             // after ImGui::Render() to get the
-    //                             // same ImDrawData pointer.
-    // io.SetClipboardTextFn = ImGui_ImplSdlGL3_SetClipboardText;
-    // io.GetClipboardTextFn = ImGui_ImplSdlGL3_GetClipboardText;
-    // io.ClipboardUserData  = nullptr;
+    io.SetClipboardTextFn = ImGui_ImplSdlGL3_SetClipboardText;
+    io.GetClipboardTextFn = ImGui_ImplSdlGL3_GetClipboardText;
+    io.ClipboardUserData  = nullptr;
 
 #ifdef _WIN32
     SDL_SysWMinfo wmInfo;
@@ -796,4 +842,69 @@ bool ImGui_ImplSdlGL3_Init(SDL_Window* window)
     g_Time = SDL_GetTicks() / 1000.f;
 
     return true;
+}
+
+void ImGui_ImplSdlGL3_Shutdown()
+{
+    ImGui_ImplSdlGL3_InvalidateDeviceObjects();
+    ImGui::DestroyContext();
+}
+
+void ImGui_ImplSdlGL3_NewFrame(SDL_Window* window)
+{
+    ImGuiIO& io = ImGui::GetIO();
+
+    if (io.Fonts->TexID == nullptr)
+    {
+        ImGui_ImplSdlGL3_CreateDeviceObjects();
+    }
+
+    // Setup display size (every frame to accommodate for window resizing)
+    int w, h;
+    int display_w, display_h;
+    SDL_GetWindowSize(window, &w, &h);
+    SDL_GetWindowSizeInPixels(window, &display_w, &display_h);
+    io.DisplaySize             = ImVec2(float(w), float(h));
+    io.DisplayFramebufferScale = ImVec2(w > 0 ? float(display_w / w) : 0.f,
+                                        h > 0 ? float(display_h / h) : 0.f);
+
+    // Setup time step
+    Uint32 time         = SDL_GetTicks();
+    float  current_time = time / 1000.0f;
+    io.DeltaTime        = current_time - g_Time; // (1.0f / 60.0f);
+    if (io.DeltaTime <= 0)
+    {
+        io.DeltaTime = 0.00001f;
+    }
+    g_Time = current_time;
+
+    ImVec2   mouse_pos(-FLT_MAX, -FLT_MAX);
+    uint32_t mouse_state = SDL_GetMouseState(&mouse_pos.x, &mouse_pos.y);
+    if (SDL_GetWindowFlags(window) & SDL_WINDOW_MOUSE_FOCUS)
+    {
+        io.MousePos = mouse_pos;
+    }
+    else
+    {
+        io.MousePos = ImVec2(-FLT_MAX, -FLT_MAX);
+    }
+
+    io.MouseDown[0] = g_MousePressed[0] || (mouse_state & SDL_BUTTON_LEFT);
+    io.MouseDown[1] = g_MousePressed[1];
+    io.MouseDown[2] = g_MousePressed[2];
+
+    std::fill_n(&g_MousePressed[0], 3, false);
+
+    io.MouseWheel = g_MouseWheel;
+    g_MouseWheel  = 0.0f;
+
+    // Hide OS mouse cursor if ImGui is drawing it
+    if (io.MouseDrawCursor)
+    {
+        SDL_HideCursor();
+    }
+    else
+    {
+        SDL_ShowCursor();
+    }
 }

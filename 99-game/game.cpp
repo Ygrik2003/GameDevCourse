@@ -13,8 +13,14 @@ int game_tetris::initialize(config cfg)
     cam->set_rotate(0, 0, 0);
 
     my_engine = new engine_opengl();
+
     my_engine->set_uniform(uniforms);
-    my_engine->initialize(cfg);
+    my_engine->initialize(this->cfg);
+
+    shader_scene = new shader_opengl(cfg.shader_vertex, cfg.shader_fragment);
+    // shader_temp = new shader_opengl(cfg.shader_vertex,
+    //                                 "./99-game/shaders/shader_test.frag");
+    my_engine->set_shader(shader_scene);
 
     textures.push_back(my_engine->load_texture(0, cfg.texture_cells));
     textures.push_back(my_engine->load_texture(1, cfg.texture_board));
@@ -56,7 +62,8 @@ bool game_tetris::event_listener(event& e)
             cam->set_move_right(false);
         else if (e.keyboard.space_clicked)
         {
-            // my_engine->reload_shader(cfg.shader_vertex, cfg.shader_fragment);
+            shader_scene->reload();
+            isStarted = !isStarted;
         }
     }
     return true;
@@ -76,14 +83,23 @@ void game_tetris::update()
 
 void game_tetris::render()
 {
+    ImGui::NewFrame();
     if (!isStarted)
     {
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding,
+                            ImVec2(cfg.width - 20, cfg.height - 20));
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
+        ImGui::Begin("Menu");
         render_menu();
+        ImGui::End();
+        ImGui::PopStyleVar(2);
     }
     else
     {
+        shader_scene->use();
         render_scene();
     }
+    ImGui::Render();
     my_engine->swap_buffers();
 };
 
@@ -95,7 +111,42 @@ void game_tetris::add_figure(figure      fig,
     fig.set_texture_index(texture_index);
     figures.push_back(fig);
 }
-void game_tetris::render_menu() {}
+void game_tetris::render_menu()
+{
+    static float f       = 0.0f;
+    static int   counter = 0;
+
+    ImGuiIO& io = ImGui::GetIO();
+
+    ImGui::Text("This is some useful text."); // Display some text (you can use
+                                              // a format strings too)
+    ImGui::Checkbox(
+        "Demo Window",
+        &isStarted); // Edit bools storing our window open/close state
+
+    // ImGui::ColorEdit3(
+    //     "clear color",
+    //     (float*)&clear_color); // Edit 3 floats representing a color
+
+    if (ImGui::Button("Button")) // Buttons return true when clicked (most
+                                 // widgets return true when edited/activated)
+        counter++;
+    ImGui::SameLine();
+    ImGui::Text("counter = %d", counter);
+
+    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
+                1000.0f / io.Framerate,
+                io.Framerate);
+    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
+                1000.0f / io.Framerate,
+                io.Framerate);
+    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
+                1000.0f / io.Framerate,
+                io.Framerate);
+    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
+                1000.0f / io.Framerate,
+                io.Framerate);
+}
 void game_tetris::render_scene()
 {
 
@@ -104,10 +155,11 @@ void game_tetris::render_scene()
         fig.uniform_link(uniforms);
         // fig.set_rotate(0, 0, theta);
 
-        vertex_buffer<vertex_textured>* vertex_buff = new vertex_buffer(
+        vertex_buffer<vertex3d_textured>* vertex_buff = new vertex_buffer(
             fig.get_vertexes().data(), fig.get_vertexes().size());
         index_buffer* index_buff = new index_buffer(fig.get_indexes().data(),
                                                     fig.get_indexes().size());
+        my_engine->reload_uniform();
         my_engine->render_triangles(vertex_buff,
                                     index_buff,
                                     textures[fig.get_texture_index()],

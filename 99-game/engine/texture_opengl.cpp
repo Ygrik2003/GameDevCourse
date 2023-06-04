@@ -48,10 +48,6 @@ texture_opengl::texture_opengl(const void*  pixels,
                                const size_t height)
 {
     gen_texture_from_pixels(pixels, width, height);
-    if (file_path[0] == 0)
-    {
-        file_path = "::memory::";
-    }
 }
 
 texture_opengl::~texture_opengl()
@@ -62,7 +58,6 @@ texture_opengl::~texture_opengl()
 
 void texture_opengl::bind() const
 {
-
     glBindTexture(GL_TEXTURE_2D, tex_handl);
     GL_CHECK_ERRORS()
 }

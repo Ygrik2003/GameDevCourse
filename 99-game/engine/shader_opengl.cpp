@@ -21,6 +21,9 @@ shader_opengl::shader_opengl(const char* path_to_vertex,
     glLinkProgram(program);
     GL_CHECK_ERRORS()
 
+    glBindAttribLocation(program, 0, "i_position");
+    GL_CHECK_ERRORS()
+
     use();
 }
 
@@ -53,6 +56,8 @@ void shader_opengl::reload()
 
     glLinkProgram(program);
     GL_CHECK_ERRORS()
+
+    use();
 }
 
 void shader_opengl::load(const char* path, int type)
@@ -102,5 +107,170 @@ void shader_opengl::load(const char* path, int type)
     GL_CHECK_ERRORS()
 
     glDeleteShader(shader);
+    GL_CHECK_ERRORS()
+}
+
+void shader_opengl::set_uniform1(const char* name, int value)
+{
+    const int location = glGetUniformLocation(program, name);
+    GL_CHECK_ERRORS()
+    if (location == -1)
+    {
+        throw std::runtime_error(std::string("can't get uniform location: ") +
+                                 name);
+    }
+    glUniform1i(location, value);
+    GL_CHECK_ERRORS()
+}
+
+void shader_opengl::set_uniform1(const char* name, uint value)
+{
+    const int location = glGetUniformLocation(program, name);
+    GL_CHECK_ERRORS()
+    if (location == -1)
+    {
+        throw std::runtime_error(std::string("can't get uniform location: ") +
+                                 name);
+    }
+    glUniform1ui(location, value);
+    GL_CHECK_ERRORS()
+}
+
+void shader_opengl::set_uniform1(const char* name, float value)
+{
+    const int location = glGetUniformLocation(program, name);
+    GL_CHECK_ERRORS()
+    if (location == -1)
+    {
+        throw std::runtime_error(std::string("can't get uniform location: ") +
+                                 name);
+    }
+    glUniform1f(location, value);
+    GL_CHECK_ERRORS()
+}
+
+void shader_opengl::set_uniform2(const char* name, int val1, int val2)
+{
+    const int location = glGetUniformLocation(program, name);
+    GL_CHECK_ERRORS()
+    if (location == -1)
+    {
+        throw std::runtime_error(std::string("can't get uniform location: ") +
+                                 name);
+    }
+    glUniform2i(location, val1, val2);
+    GL_CHECK_ERRORS()
+}
+
+void shader_opengl::set_uniform2(const char* name, uint val1, uint val2)
+{
+    const int location = glGetUniformLocation(program, name);
+    GL_CHECK_ERRORS()
+    if (location == -1)
+    {
+        throw std::runtime_error(std::string("can't get uniform location: ") +
+                                 name);
+    }
+    glUniform2ui(location, val1, val2);
+    GL_CHECK_ERRORS()
+}
+
+void shader_opengl::set_uniform2(const char* name, float val1, float val2)
+{
+    const int location = glGetUniformLocation(program, name);
+    GL_CHECK_ERRORS()
+    if (location == -1)
+    {
+        throw std::runtime_error(std::string("can't get uniform location: ") +
+                                 name);
+    }
+    glUniform2f(location, val1, val2);
+    GL_CHECK_ERRORS()
+}
+
+void shader_opengl::set_uniform3(const char* name, int val1, int val2, int val3)
+{
+    const int location = glGetUniformLocation(program, name);
+    GL_CHECK_ERRORS()
+    if (location == -1)
+    {
+        throw std::runtime_error(std::string("can't get uniform location: ") +
+                                 name);
+    }
+    glUniform3i(location, val1, val2, val3);
+    GL_CHECK_ERRORS()
+}
+
+void shader_opengl::set_uniform3(const char* name,
+                                 uint        val1,
+                                 uint        val2,
+                                 uint        val3)
+{
+    const int location = glGetUniformLocation(program, name);
+    GL_CHECK_ERRORS()
+    if (location == -1)
+    {
+        throw std::runtime_error(std::string("can't get uniform location: ") +
+                                 name);
+    }
+    glUniform3ui(location, val1, val2, val3);
+    GL_CHECK_ERRORS()
+}
+
+void shader_opengl::set_uniform3(const char* name,
+                                 float       val1,
+                                 float       val2,
+                                 float       val3)
+{
+    const int location = glGetUniformLocation(program, name);
+    GL_CHECK_ERRORS()
+    if (location == -1)
+    {
+        throw std::runtime_error(std::string("can't get uniform location: ") +
+                                 name);
+    }
+    glUniform3f(location, val1, val2, val3);
+    GL_CHECK_ERRORS()
+}
+
+void shader_opengl::set_uniform4(
+    const char* name, int val1, int val2, int val3, int val4)
+{
+    const int location = glGetUniformLocation(program, name);
+    GL_CHECK_ERRORS()
+    if (location == -1)
+    {
+        throw std::runtime_error(std::string("can't get uniform location: ") +
+                                 name);
+    }
+    glUniform4i(location, val1, val2, val3, val4);
+    GL_CHECK_ERRORS()
+}
+
+void shader_opengl::set_uniform4(
+    const char* name, uint val1, uint val2, uint val3, uint val4)
+{
+    const int location = glGetUniformLocation(program, name);
+    GL_CHECK_ERRORS()
+    if (location == -1)
+    {
+        throw std::runtime_error(std::string("can't get uniform location: ") +
+                                 name);
+    }
+    glUniform4ui(location, val1, val2, val3, val4);
+    GL_CHECK_ERRORS()
+}
+
+void shader_opengl::set_uniform4(
+    const char* name, float val1, float val2, float val3, float val4)
+{
+    const int location = glGetUniformLocation(program, name);
+    GL_CHECK_ERRORS()
+    if (location == -1)
+    {
+        throw std::runtime_error(std::string("can't get uniform location: ") +
+                                 name);
+    }
+    glUniform4f(location, val1, val2, val3, val4);
     GL_CHECK_ERRORS()
 }

@@ -43,16 +43,15 @@ void model::process_node(aiNode* node, const aiScene* scene)
 
 mesh model::process_mesh(aiMesh* m, const aiScene* scene)
 {
-    std::vector<vertex_textured> vertixes;
-    std::vector<uint16_t>        indexes;
+    std::vector<vertex3d_textured> vertixes;
+    std::vector<uint16_t>          indexes;
     // vector<texture>      textures;
 
     for (unsigned int i = 0; i < m->mNumVertices; i++)
     {
-        vertex_textured v(
-            vertex(m->mVertices[i].x, m->mVertices[i].y, m->mVertices[i].z),
-            m->mTextureCoords[0][i].x,
-            m->mTextureCoords[0][i].y);
+        vertex3d_textured v(
+            vertex3d(m->mVertices[i].x, m->mVertices[i].y, m->mVertices[i].z),
+            vector2d(m->mTextureCoords[0][i].x, m->mTextureCoords[0][i].y));
         v.normal.x = m->mNormals[i].x;
         v.normal.y = m->mNormals[i].y;
         v.normal.z = m->mNormals[i].z;

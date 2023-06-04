@@ -40,9 +40,9 @@ public:
         glBufferData(GL_ARRAY_BUFFER, size_in_bytes, vert, GL_STATIC_DRAW);
         GL_CHECK_ERRORS()
     }
-    // vertex_buffer(const vertex_colored* vert, std::size_t n);
-    // vertex_buffer(const vertex_textured* vert, std::size_t n);
-    // vertex_buffer(const vertex* vert, std::size_t n);
+    // vertex_buffer(const vertex3d_colored* vert, std::size_t n);
+    // vertex_buffer(const vertex3d_textured* vert, std::size_t n);
+    // vertex_buffer(const vertex3d* vert, std::size_t n);
     ~vertex_buffer()
     {
         glBindBuffer(GL_ARRAY_BUFFER, 0);

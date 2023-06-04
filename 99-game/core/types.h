@@ -67,16 +67,32 @@ struct uniform
     float* scale_z_obj;
 };
 
-struct vertex;
-struct vertex_colored;
-struct vertex_textured;
-struct vertex_colored_textured;
+struct vertex3d;
+struct vertex3d_colored;
+struct vertex3d_textured;
+struct vertex3d_colored_textured;
+
+struct vector2d
+{
+    vector2d();
+    vector2d(float x, float y);
+
+    vector2d  operator+(const vector2d& right);
+    vector2d  operator+=(const vector2d& right);
+    vector2d  operator-(const vector2d& right);
+    vector2d& operator=(const vector2d& right);
+    float     length() const;
+
+    vector2d& normalize();
+
+    float x = 0.;
+    float y = 0.;
+};
 
 struct vector3d
 {
     vector3d();
     vector3d(float x, float y, float z);
-    vector3d(vertex v);
 
     vector3d  operator+(const vector3d& right);
     vector3d  operator+=(const vector3d& right);
@@ -86,68 +102,174 @@ struct vector3d
 
     vector3d& normalize();
 
-    float x = 0.;
-    float y = 0.;
-    float z = 0.;
+    float x = 0.f;
+    float y = 0.f;
+    float z = 0.f;
+};
+
+struct vector4d
+{
+    vector4d();
+    vector4d(float x, float y, float z, float w);
+
+    vector4d  operator+(const vector4d& right);
+    vector4d  operator+=(const vector4d& right);
+    vector4d  operator-(const vector4d& right);
+    vector4d& operator=(const vector4d& right);
+    float     length() const;
+
+    vector4d& normalize();
+
+    float x = 0.f;
+    float y = 0.f;
+    float z = 0.f;
+    float w = 0.f;
 };
 
 namespace color
 {
-struct rgb
+class rgba
 {
-    rgb();
-    rgb(float r, float g, float b);
-
-    float r = 0.;
-    float g = 0.;
-    float b = 0.;
-};
-
-struct rgba : rgb
-{
+public:
     rgba();
     rgba(float r, float g, float b, float a);
 
-    float a = 1.;
+    float get_r() const
+    {
+        std::uint32_t r_ = (value & 0x000000FF) >> 0;
+        return r_ / 255.f;
+    }
+    float get_g() const
+    {
+        std::uint32_t g_ = (value & 0x0000FF00) >> 8;
+        return g_ / 255.f;
+    }
+    float get_b() const
+    {
+        std::uint32_t b_ = (value & 0x00FF0000) >> 16;
+        return b_ / 255.f;
+    }
+    float get_a() const
+    {
+        std::uint32_t a_ = (value & 0xFF000000) >> 24;
+        return a_ / 255.f;
+    }
+    void set_r(const float r)
+    {
+        std::uint32_t r_ = static_cast<std::uint32_t>(r * 255);
+        value &= 0xFFFFFF00;
+        value |= (r_ << 0);
+    }
+    void set_g(const float g)
+    {
+        std::uint32_t g_ = static_cast<std::uint32_t>(g * 255);
+        value &= 0xFFFF00FF;
+        value |= (g_ << 8);
+    }
+    void set_b(const float b)
+    {
+        std::uint32_t b_ = static_cast<std::uint32_t>(b * 255);
+        value &= 0xFF00FFFF;
+        value |= (b_ << 16);
+    }
+    void set_a(const float a)
+    {
+        std::uint32_t a_ = static_cast<std::uint32_t>(a * 255);
+        value &= 0x00FFFFFF;
+        value |= a_ << 24;
+    }
+
+private:
+    uint32_t value = 0;
 };
 } // namespace color
 
-struct vertex
+struct vertex2d
 {
-    vertex();
-    vertex(float x, float y, float z);
+    vertex2d();
+    vertex2d(float x, float y);
 
-    float x = 0.;
-    float y = 0.;
-    float z = 0.;
+    vector2d pos;
 
-    vector3d normal;
+    static const uint8_t OFFSET_POSITION = 0;
+    // static const uint8_t OFFSET_NORMAL   = 0;
 };
 
-struct vertex_colored : vertex
+struct vertex3d
 {
-    vertex_colored() {}
-    vertex_colored(vertex ver, color::rgba color);
+    vertex3d();
+    vertex3d(float x, float y, float z);
+
+    vector3d pos;
+    vector3d normal;
+
+    static const uint8_t OFFSET_POSITION = 0;
+    static const uint8_t OFFSET_NORMAL   = sizeof(vector3d);
+};
+
+struct vertex2d_colored : vertex2d
+{
+    vertex2d_colored();
+    vertex2d_colored(vertex2d ver, color::rgba color);
 
     color::rgba rgba;
+
+    static const uint8_t OFFSET_COLOR = sizeof(vertex2d);
 };
 
-struct vertex_textured : vertex
+struct vertex3d_colored : vertex3d
 {
-    vertex_textured();
-    vertex_textured(vertex ver, float u, float v);
+    vertex3d_colored();
+    vertex3d_colored(vertex3d ver, color::rgba color);
 
-    float u = 0.;
-    float v = 0.;
+    color::rgba rgba;
+
+    static const uint8_t OFFSET_COLOR = sizeof(vertex3d);
 };
 
-struct vertex_colored_textured : vertex_colored
+struct vertex2d_textured : vertex2d
 {
-    vertex_colored_textured();
-    vertex_colored_textured(vertex ver, color::rgba clr, float u, float v);
+    vertex2d_textured();
+    vertex2d_textured(vertex2d ver, vector2d uv);
 
-    float u = 0.;
-    float v = 0.;
+    vector2d uv;
+
+    static const uint8_t OFFSET_TEXTURE = sizeof(vertex2d);
+};
+struct vertex3d_textured : vertex3d
+{
+    vertex3d_textured();
+    vertex3d_textured(vertex3d ver, vector2d uv);
+
+    vector2d uv;
+
+    static const uint8_t OFFSET_TEXTURE = sizeof(vertex3d);
+};
+
+struct vertex2d_colored_textured : vertex2d
+{
+    vertex2d_colored_textured();
+    vertex2d_colored_textured(vertex2d ver, color::rgba clr, vector2d uv);
+
+    color::rgba rgba;
+    vector2d    uv;
+
+    static const uint8_t OFFSET_COLOR = sizeof(vertex2d);
+    static const uint8_t OFFSET_TEXTURE =
+        sizeof(vertex2d) + sizeof(color::rgba);
+};
+
+struct vertex3d_colored_textured : vertex3d
+{
+    vertex3d_colored_textured();
+    vertex3d_colored_textured(vertex3d ver, color::rgba clr, vector2d uv);
+
+    color::rgba rgba;
+    vector2d    uv;
+
+    static const uint8_t OFFSET_COLOR = sizeof(vertex3d);
+    static const uint8_t OFFSET_TEXTURE =
+        sizeof(vertex3d) + sizeof(color::rgba);
 };
 
 inline float dot(const vector3d& x, const vector3d& y)
@@ -182,8 +304,8 @@ struct triangle
 
     void calc_normal()
     {
-        normal = cross(vector3d(vertexes[2]) - vector3d(vertexes[0]),
-                       vector3d(vertexes[1]) - vector3d(vertexes[0]))
+        normal = cross(vertexes[2].pos - vertexes[0].pos,
+                       vertexes[1].pos - vertexes[0].pos)
                      .normalize();
     }
 

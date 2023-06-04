@@ -1,6 +1,7 @@
 #include "mesh.h"
 
-mesh::mesh(std::vector<vertex_textured> vertexes, std::vector<uint16_t> indexes)
+mesh::mesh(std::vector<vertex3d_textured> vertexes,
+           std::vector<uint16_t>          indexes)
 {
     set_translate(0, 0.25, 0);
     set_rotate(0, 0, 0);

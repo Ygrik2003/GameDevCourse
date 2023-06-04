@@ -47,7 +47,7 @@ struct rgba
     float a = 1.f;
 };
 
-struct vertex
+struct vertex3d
 {
     float x = 0.f;
     float y = 0.f;
@@ -59,23 +59,23 @@ struct vertex
     float a = 0.f;
 };
 
-using vertexes = std::vector<vertex>;
+using vertexes = std::vector<vertex3d>;
 
 struct triangle
 {
     triangle()
     {
-        v[0] = vertex{};
-        v[1] = vertex{};
-        v[2] = vertex{};
+        v[0] = vertex3d{};
+        v[1] = vertex3d{};
+        v[2] = vertex3d{};
     }
-    triangle(vertex v1, vertex v2, vertex v3)
+    triangle(vertex3d v1, vertex3d v2, vertex3d v3)
     {
         v[0] = v1;
         v[1] = v2;
         v[2] = v3;
     }
-    vertex v[3];
+    vertex3d v[3];
 };
 
 using triangles = std::vector<triangle>;
