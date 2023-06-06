@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.20)
 
 project(99-game CXX)
 
-
 add_library(imgui STATIC 
             imgui/imconfig.h 
             imgui/imgui.h imgui/imgui.cpp
@@ -46,3 +45,5 @@ add_executable(99-game main.cpp game.h game.cpp)
 target_include_directories(99-game PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 target_compile_features(99-game PUBLIC cxx_std_20)
 target_link_libraries(99-game PRIVATE 99-engine)
+set_target_properties(99-game PROPERTIES
+    VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")

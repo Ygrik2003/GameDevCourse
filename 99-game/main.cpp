@@ -15,7 +15,7 @@ int main()
     cfg.texture_board   = "./99-game/textures/texture_board.png";
 
     game_tetris my_game;
-    if (my_game.initialize(cfg))
+    if (!my_game.initialize(cfg))
     {
         return -1;
     }
