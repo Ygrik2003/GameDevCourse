@@ -125,15 +125,15 @@ public:
     void set_shader(shader_opengl* shader);
 
 private:
-    SDL_Window*   window;
+    SDL_Window*   window = nullptr;
     SDL_GLContext gl_context;
 
-    shader_opengl* active_shader;
+    shader_opengl* active_shader = nullptr;
 
     GLuint obj_depth_map     = 0;
     GLuint texture_depth_map = 0;
 
-    uniform* uniforms_world;
+    uniform* uniforms_world = nullptr;
 };
 
 bool ImGui_ImplSdlGL3_Init(SDL_Window* window);

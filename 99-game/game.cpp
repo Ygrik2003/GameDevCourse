@@ -2,10 +2,28 @@
 
 game_tetris::game_tetris()
 {
-    state.is_started = true;
-    state.is_quit    = false;
-    state.is_rotated = false;
-    state.is_moving  = false;
+    state.is_started = 0;
+    state.is_quit    = 0;
+    state.is_rotated = 0;
+    state.is_moving  = 0;
+
+    const size_t count_primitives = 4;
+    primitives.resize(count_primitives);
+    for (int model_i = 0; model_i < count_primitives; model_i++)
+    {
+        char buff[40]{ 0 };
+        std::sprintf(buff, "./99-game/textures/primitive_%d.obj", model_i + 1);
+        model model_cube(buff);
+        figure figure_temp;
+        for (int i = 0; i < model_cube.get_meshes().size(); i++)
+        {
+            figure_temp = model_cube.get_meshes()[i];
+            primitives[model_i].add_figure(figure_temp);
+            primitives[model_i].set_scale(0.1, 0.1, 0.1);
+        }
+    }
+
+    io = &ImGui::GetIO();
 }
 
 int game_tetris::initialize(config cfg)
@@ -27,8 +45,6 @@ int game_tetris::initialize(config cfg)
 
 
     shader_scene = new shader_opengl(cfg.shader_vertex, cfg.shader_fragment);
-    // shader_temp = new shader_opengl(cfg.shader_vertex,
-    //                                 "./99-game/shaders/shader_test.frag");
     my_engine->set_shader(shader_scene);
 
     textures.push_back(my_engine->load_texture(0, cfg.texture_block));
@@ -153,8 +169,8 @@ void game_tetris::render_menu()
 {
     static float f       = 0.0f;
     static int   counter = 0;
-
-    ImGuiIO& io = ImGui::GetIO();
+    io->MouseDrawCursor   = true;
+    
 
     if (ImGui::Button("Start", ImVec2(100, 30)))
     {
@@ -202,5 +218,5 @@ void game_tetris::render_scene()
 
 void game_tetris::start_game()
 {
-    state.is_started = !state.is_started;
+    state.is_started = ~state.is_started;
 }

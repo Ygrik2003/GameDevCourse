@@ -691,14 +691,6 @@ void engine_opengl::set_shader(shader_opengl* shader)
     active_shader->use();
 }
 
-// You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if
-// dear imgui wants to use your inputs.
-// - When io.WantCaptureMouse is true, do not dispatch mouse input data to your
-// main application.
-// - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to
-// your main application.
-// Generally you may always pass all inputs to dear imgui, and hide them from
-// your application based on those two flags.
 bool ImGui_ImplSdlGL3_ProcessEvent(const SDL_Event* event)
 {
     ImGuiIO& io = ImGui::GetIO();
@@ -778,33 +770,16 @@ void ImGui_ImplSdlGL3_InvalidateDeviceObjects()
 
 bool ImGui_ImplSdlGL3_Init(SDL_Window* window)
 {
-    // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard
     // Controls
 
-    // Setup Dear ImGui style
     ImGui::StyleColorsDark();
-    // ImGui::StyleColorsClassic();
 
     ImGuiIO& io = ImGui::GetIO();
-    // g_Window    = window;
+    io.BackendPlatformName = "imgui_menu";
 
-    // Setup back-end capabilities flags
-    //    io.BackendFlags |=
-    //        ImGuiBackendFlags_HasMouseCursors; // We can honor
-    //        GetMouseCursor()
-    //                                           // values (optional)
-    //    io.BackendFlags |=
-    //        ImGuiBackendFlags_HasSetMousePos; // We can honor
-    //        io.WantSetMousePos
-    //                                          // requests (optional, rarely
-    //                                          used)
-    io.BackendPlatformName = "imgui_impl_sdl";
-
-    // Keyboard mapping. ImGui will use those indices to peek into the
-    // io.KeysDown[] array.
     io.KeyMap[ImGuiKey_Tab]        = SDL_SCANCODE_TAB;
     io.KeyMap[ImGuiKey_LeftArrow]  = SDL_SCANCODE_LEFT;
     io.KeyMap[ImGuiKey_RightArrow] = SDL_SCANCODE_RIGHT;
@@ -916,7 +891,6 @@ void ImGui_ImplSdlGL3_NewFrame(SDL_Window* window)
     io.MouseWheel = g_MouseWheel;
     g_MouseWheel  = 0.0f;
 
-    // Hide OS mouse cursor if ImGui is drawing it
     if (io.MouseDrawCursor)
     {
         SDL_HideCursor();

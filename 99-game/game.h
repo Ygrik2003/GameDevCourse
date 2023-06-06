@@ -3,6 +3,7 @@
 #include "core/event.h"
 #include "core/types.h"
 #include "engine/engine.h"
+#include "objects/model.h"
 
 constexpr uint32_t fps = 60;
 
@@ -34,11 +35,13 @@ private:
     void start_game();
 
     config cfg;
+    ImGuiIO* io;
 
     engine_opengl* my_engine;
     uniform        uniforms;
     camera*        cam;
 
+    std::vector<figure>          primitives;
     std::vector<figure>          figures;
     std::vector<texture_opengl*> textures;
     shader_opengl*               shader_scene;

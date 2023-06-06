@@ -1,5 +1,4 @@
 #include "game.h"
-#include "objects/model.h"
 
 #include <chrono>
 #include <cmath>
@@ -30,7 +29,7 @@ int main()
     figure figure_temp;
 
     // cube 2x2x2
-    figure primitive_figure_1;
+    /*figure primitive_figure_1;
     for (int i = 0; i < model_cube.get_meshes().size(); i++)
     {
         figure_temp = model_cube.get_meshes()[i];
@@ -38,7 +37,7 @@ int main()
     }
     primitive_figure_1.set_scale(0.1, 0.1, 0.1);
     primitive_figure_1.set_translate(0, 1, 0);
-    my_game.add_figure(primitive_figure_1, cfg.texture_block, 0);
+    my_game.add_figure(primitive_figure_1, cfg.texture_block, 0);*/
 
     event e{};
     float phi      = 0;
