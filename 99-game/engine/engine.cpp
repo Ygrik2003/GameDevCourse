@@ -314,9 +314,9 @@ int engine_opengl::initialize(config& cfg)
     glDebugMessageCallback(gl_debug_output, nullptr);
     glDebugMessageControl(
         GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+    GL_CHECK_ERRORS()
 #endif
 
-    GL_CHECK_ERRORS()
 
     GLuint vertex_buffer = 0;
     glGenBuffers(1, &vertex_buffer);
@@ -849,10 +849,10 @@ bool ImGui_ImplSdlGL3_Init(SDL_Window* window)
     io.ClipboardUserData  = nullptr;
 
 #ifdef _WIN32
-    SDL_SysWMinfo wmInfo;
-    SDL_VERSION(&wmInfo.version);
-    SDL_GetWindowWMInfo(window, &wmInfo);
-    io.ImeWindowHandle = wmInfo.info.win.window;
+    //SDL_SysWMinfo wmInfo;
+    //SDL_VERSION(&wmInfo.version);
+    //SDL_GetWindowWMInfo(window, &wmInfo);
+    //io.ImeWindowHandle = wmInfo.info.win.window;
 #else
     (void)window;
 #endif

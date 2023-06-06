@@ -11,7 +11,9 @@
 #include <iostream>
 #include <vector>
 
+#ifndef _WIN32
 #include <KHR/khrplatform.h>
+#endif
 #include <SDL3/SDL.h>
 #include <glad/glad.h>
 

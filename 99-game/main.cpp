@@ -15,7 +15,10 @@ int main()
     cfg.texture_board   = "./99-game/textures/texture_board.png";
 
     game_tetris my_game;
-    my_game.initialize(cfg);
+    if (my_game.initialize(cfg))
+    {
+        return -1;
+    }
 
     model  model_board("./99-game/textures/board.obj");
     figure obj_board = model_board.get_meshes()[0];

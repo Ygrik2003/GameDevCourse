@@ -22,7 +22,9 @@ int game_tetris::initialize(config cfg)
     my_engine = new engine_opengl();
 
     my_engine->set_uniform(uniforms);
-    my_engine->initialize(this->cfg);
+    if (!my_engine->initialize(this->cfg))
+        return -1;
+
 
     shader_scene = new shader_opengl(cfg.shader_vertex, cfg.shader_fragment);
     // shader_temp = new shader_opengl(cfg.shader_vertex,

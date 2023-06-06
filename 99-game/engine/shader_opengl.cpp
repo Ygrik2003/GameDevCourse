@@ -123,7 +123,7 @@ void shader_opengl::set_uniform1(const char* name, int value)
     GL_CHECK_ERRORS()
 }
 
-void shader_opengl::set_uniform1(const char* name, uint value)
+void shader_opengl::set_uniform1(const char* name, uint32_t value)
 {
     const int location = glGetUniformLocation(program, name);
     GL_CHECK_ERRORS()
@@ -162,7 +162,7 @@ void shader_opengl::set_uniform2(const char* name, int val1, int val2)
     GL_CHECK_ERRORS()
 }
 
-void shader_opengl::set_uniform2(const char* name, uint val1, uint val2)
+void shader_opengl::set_uniform2(const char* name, uint32_t val1, uint32_t val2)
 {
     const int location = glGetUniformLocation(program, name);
     GL_CHECK_ERRORS()
@@ -202,9 +202,9 @@ void shader_opengl::set_uniform3(const char* name, int val1, int val2, int val3)
 }
 
 void shader_opengl::set_uniform3(const char* name,
-                                 uint        val1,
-                                 uint        val2,
-                                 uint        val3)
+                                 uint32_t        val1,
+                                 uint32_t        val2,
+                                 uint32_t        val3)
 {
     const int location = glGetUniformLocation(program, name);
     GL_CHECK_ERRORS()
@@ -248,7 +248,7 @@ void shader_opengl::set_uniform4(
 }
 
 void shader_opengl::set_uniform4(
-    const char* name, uint val1, uint val2, uint val3, uint val4)
+    const char* name, uint32_t val1, uint32_t val2, uint32_t val3, uint32_t val4)
 {
     const int location = glGetUniformLocation(program, name);
     GL_CHECK_ERRORS()
