@@ -36,7 +36,7 @@ add_library(99-engine STATIC
             core/picopng.hxx)
 target_include_directories(99-engine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_features(99-engine PUBLIC cxx_std_20)
-target_link_libraries(99-engine SDL3::SDL3-shared OpenGL::GL imgui assimp::assimp)
+target_link_libraries(99-engine SDL3::SDL3-static OpenGL::GL imgui assimp::assimp)
 
 
 

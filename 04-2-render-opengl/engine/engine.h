@@ -3,7 +3,6 @@
 #include "core/event.h"
 #include "objects/camera.h"
 
-#include "KHR/khrplatform.h"
 #include "glad/glad.h"
 
 #include <SDL3/SDL.h>
