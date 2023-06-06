@@ -4,6 +4,7 @@
 class figure : public object
 {
 public:
+    figure();
     auto get_triangle(size_t index)
     {
         return triangle(vertexes[indexes[3 * index + 0]],
@@ -35,6 +36,8 @@ public:
 
     void   set_texture_index(size_t index) { texture_index = index; }
     size_t get_texture_index() { return texture_index; }
+
+    void add_figure(const figure& fig);
 
 protected:
     std::vector<vertex3d_textured> vertexes;

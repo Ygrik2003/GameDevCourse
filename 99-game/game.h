@@ -19,6 +19,8 @@ public:
 class game_tetris : public game
 {
 public:
+    game_tetris();
+
     int  initialize(config) override;
     bool event_listener(event&) override;
     void update() override;
@@ -29,6 +31,7 @@ public:
 private:
     void render_menu();
     void render_scene();
+    void start_game();
 
     config cfg;
 
@@ -41,8 +44,16 @@ private:
     shader_opengl*               shader_scene;
     shader_opengl*               shader_temp;
 
-    double phi   = 0;
-    double theta = 0;
+    double phi         = 0;
+    double view_height = 1.5;
+    double theta       = 0;
 
-    bool isStarted = true;
+    struct flags
+    {
+        uint8_t is_started : 1;
+        uint8_t is_quit : 1;
+        uint8_t is_rotated : 1;
+        uint8_t is_moving : 1;
+
+    } state;
 };

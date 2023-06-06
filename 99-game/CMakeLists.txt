@@ -16,11 +16,7 @@ target_include_directories(imgui PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 set_property(TARGET imgui PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 
-find_package(SDL3 REQUIRED)
 find_package(OpenGL REQUIRED)
-
-find_package(assimp REQUIRED)
-message(STATUS "Found ASSIMP in ${ASSIMP_INCLUDE_DIR}")
 
 add_library(99-engine STATIC
             glad/glad.h glad/glad.c
@@ -31,7 +27,8 @@ add_library(99-engine STATIC
             engine/vertex_buffer.h engine/vertex_buffer.cpp
             engine/index_buffer.h engine/index_buffer.cpp
             core/config.h core/event.h
-            core/types.h core/types.cpp objects/figure.h 
+            core/types.h core/types.cpp 
+            objects/figure.h objects/figure.cpp 
             objects/camera.h objects/camera.cpp
             objects/mesh.h objects/mesh.cpp
             objects/model.h objects/model.cpp
@@ -39,7 +36,7 @@ add_library(99-engine STATIC
             core/picopng.hxx)
 target_include_directories(99-engine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_features(99-engine PUBLIC cxx_std_20)
-target_link_libraries(99-engine SDL3::SDL3-shared OpenGL::GL imgui -lassimp)
+target_link_libraries(99-engine SDL3::SDL3-shared OpenGL::GL imgui assimp::assimp)
 
 
 

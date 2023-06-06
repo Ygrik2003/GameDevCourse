@@ -244,6 +244,11 @@ static void ImGui_ImplSdlGL3_SetClipboardText(void*, const char* text)
 
 int engine_opengl::initialize(config& cfg)
 {
+    if (SDL_Init(SDL_INIT_EVERYTHING) > 0)
+    {
+        std::runtime_error(std::string("Error in Init SDL3: ") +
+                           SDL_GetError());
+    }
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 
@@ -353,11 +358,10 @@ void engine_opengl::uninitialize()
 
 bool engine_opengl::event_keyboard(event& e)
 {
-    e.clear();
     bool      is_event = false;
     SDL_Event sdl_event;
 
-    if (SDL_PollEvent(&sdl_event))
+    while (SDL_PollEvent(&sdl_event))
     {
         ImGui_ImplSdlGL3_ProcessEvent(&sdl_event);
         if (sdl_event.type == SDL_EVENT_QUIT)
@@ -368,10 +372,10 @@ bool engine_opengl::event_keyboard(event& e)
         else if (sdl_event.type == SDL_EVENT_KEY_DOWN)
         {
             // clang-format off
-            if (sdl_event.key.keysym.sym == SDLK_w) e.keyboard.up_clicked        = 1;
-            if (sdl_event.key.keysym.sym == SDLK_s) e.keyboard.down_clicked      = 1;
-            if (sdl_event.key.keysym.sym == SDLK_a) e.keyboard.left_clicked      = 1;
-            if (sdl_event.key.keysym.sym == SDLK_d) e.keyboard.right_clicked     = 1;
+            if (sdl_event.key.keysym.sym == SDLK_w) e.keyboard.w_clicked         = 1;
+            if (sdl_event.key.keysym.sym == SDLK_s) e.keyboard.s_clicked         = 1;
+            if (sdl_event.key.keysym.sym == SDLK_a) e.keyboard.a_clicked         = 1;
+            if (sdl_event.key.keysym.sym == SDLK_d) e.keyboard.d_clicked         = 1;
             if (sdl_event.key.keysym.sym == SDLK_SPACE) e.keyboard.space_clicked = 1;
             // clang-format on
             is_event = true;
@@ -379,10 +383,10 @@ bool engine_opengl::event_keyboard(event& e)
         else if (sdl_event.type == SDL_EVENT_KEY_UP)
         {
             // clang-format off
-            if (sdl_event.key.keysym.sym == SDLK_w) e.keyboard.up_released        = 1;
-            if (sdl_event.key.keysym.sym == SDLK_s) e.keyboard.down_released      = 1;
-            if (sdl_event.key.keysym.sym == SDLK_a) e.keyboard.left_released      = 1;
-            if (sdl_event.key.keysym.sym == SDLK_d) e.keyboard.right_released     = 1;
+            if (sdl_event.key.keysym.sym == SDLK_w) e.keyboard.w_released         = 1;
+            if (sdl_event.key.keysym.sym == SDLK_s) e.keyboard.s_released         = 1;
+            if (sdl_event.key.keysym.sym == SDLK_a) e.keyboard.a_released         = 1;
+            if (sdl_event.key.keysym.sym == SDLK_d) e.keyboard.d_released         = 1;
             if (sdl_event.key.keysym.sym == SDLK_SPACE) e.keyboard.space_released = 1;
             // clang-format on
             is_event = true;
@@ -392,6 +396,20 @@ bool engine_opengl::event_keyboard(event& e)
             e.motion.x = sdl_event.motion.xrel;
             e.motion.y = sdl_event.motion.yrel;
             is_event   = true;
+        }
+        else if (sdl_event.type == SDL_EVENT_MOUSE_BUTTON_DOWN)
+        {
+            // clang-format off
+            if (sdl_event.button.button == SDL_BUTTON_LEFT) e.mouse.left_cliked = 1;
+            // clang-format on
+            is_event = true;
+        }
+        else if (sdl_event.type == SDL_EVENT_MOUSE_BUTTON_UP)
+        {
+            // clang-format off
+            if (sdl_event.button.button == SDL_BUTTON_LEFT) e.mouse.left_released = 1;
+            // clang-format on
+            is_event = true;
         }
     }
     return is_event;
