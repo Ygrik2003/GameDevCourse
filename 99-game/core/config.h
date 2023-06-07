@@ -2,6 +2,7 @@
 
 struct config
 {
+    const char* app_name = "Tetris3D";
     const char* shader_vertex;
     const char* shader_fragment;
     const char* texture_block;

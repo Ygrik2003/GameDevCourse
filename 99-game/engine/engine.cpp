@@ -254,7 +254,7 @@ int engine_opengl::initialize(config& cfg)
 
     if (cfg.is_full_sreen)
     {
-        window = SDL_CreateWindow("Tetris3D",
+        window = SDL_CreateWindow(cfg.app_name,
                                   cfg.width,
                                   cfg.height,
                                   SDL_WINDOW_FULLSCREEN | SDL_WINDOW_OPENGL);
@@ -262,7 +262,7 @@ int engine_opengl::initialize(config& cfg)
     else
     {
         window = SDL_CreateWindow(
-            "Sphere Render", cfg.width, cfg.height, SDL_WINDOW_OPENGL);
+            cfg.app_name, cfg.width, cfg.height, SDL_WINDOW_OPENGL);
     }
     int w, h;
     SDL_GetWindowSize(window, &w, &h);
@@ -316,7 +316,6 @@ int engine_opengl::initialize(config& cfg)
         GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
     GL_CHECK_ERRORS()
 #endif
-
 
     GLuint vertex_buffer = 0;
     glGenBuffers(1, &vertex_buffer);
@@ -777,7 +776,7 @@ bool ImGui_ImplSdlGL3_Init(SDL_Window* window)
 
     ImGui::StyleColorsDark();
 
-    ImGuiIO& io = ImGui::GetIO();
+    ImGuiIO& io            = ImGui::GetIO();
     io.BackendPlatformName = "imgui_menu";
 
     io.KeyMap[ImGuiKey_Tab]        = SDL_SCANCODE_TAB;
@@ -824,10 +823,10 @@ bool ImGui_ImplSdlGL3_Init(SDL_Window* window)
     io.ClipboardUserData  = nullptr;
 
 #ifdef _WIN32
-    //SDL_SysWMinfo wmInfo;
-    //SDL_VERSION(&wmInfo.version);
-    //SDL_GetWindowWMInfo(window, &wmInfo);
-    //io.ImeWindowHandle = wmInfo.info.win.window;
+    // SDL_SysWMinfo wmInfo;
+    // SDL_VERSION(&wmInfo.version);
+    // SDL_GetWindowWMInfo(window, &wmInfo);
+    // io.ImeWindowHandle = wmInfo.info.win.window;
 #else
     (void)window;
 #endif
@@ -873,6 +872,7 @@ void ImGui_ImplSdlGL3_NewFrame(SDL_Window* window)
 
     ImVec2   mouse_pos(-FLT_MAX, -FLT_MAX);
     uint32_t mouse_state = SDL_GetMouseState(&mouse_pos.x, &mouse_pos.y);
+    // std::cout << mouse_pos.x << " " << mouse_pos.y << std::endl;
     if (SDL_GetWindowFlags(window) & SDL_WINDOW_MOUSE_FOCUS)
     {
         io.MousePos = mouse_pos;

@@ -30,11 +30,11 @@ public:
     void add_figure(figure, const char* texture, size_t texture_index);
 
 private:
-    void render_menu();
+    void draw_menu();
     void render_scene();
     void start_game();
 
-    config cfg;
+    config   cfg;
     ImGuiIO* io;
 
     engine_opengl* my_engine;

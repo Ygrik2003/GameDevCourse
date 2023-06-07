@@ -13,7 +13,7 @@ game_tetris::game_tetris()
     {
         char buff[40]{ 0 };
         std::sprintf(buff, "./99-game/textures/primitive_%d.obj", model_i + 1);
-        model model_cube(buff);
+        model  model_cube(buff);
         figure figure_temp;
         for (int i = 0; i < model_cube.get_meshes().size(); i++)
         {
@@ -22,8 +22,6 @@ game_tetris::game_tetris()
             primitives[model_i].set_scale(0.1, 0.1, 0.1);
         }
     }
-
-    io = &ImGui::GetIO();
 }
 
 int game_tetris::initialize(config cfg)
@@ -42,7 +40,7 @@ int game_tetris::initialize(config cfg)
     my_engine->set_uniform(uniforms);
     if (!my_engine->initialize(this->cfg))
         return -1;
-
+    io = &ImGui::GetIO();
 
     shader_scene = new shader_opengl(cfg.shader_vertex, cfg.shader_fragment);
     my_engine->set_shader(shader_scene);
@@ -135,18 +133,7 @@ void game_tetris::render()
     ImGui::NewFrame();
     if (!state.is_started)
     {
-        ImGui::Begin("Menu",
-                     0,
-                     ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
-                         ImGuiWindowFlags_NoMove |
-                         ImGuiWindowFlags_NoScrollbar);
-        // ImGui::SetWindowPos(ImVec2(cfg.width / 2 - 200, cfg.height / 2 -
-        // 200));
-        ImGui::SetWindowSize(ImVec2(400, 400));
-
-        render_menu();
-
-        ImGui::End();
+        draw_menu();
     }
     else
     {
@@ -165,24 +152,38 @@ void game_tetris::add_figure(figure      fig,
     fig.set_texture_index(texture_index);
     figures.push_back(fig);
 }
-void game_tetris::render_menu()
+void game_tetris::draw_menu()
 {
+
+    static const int window_width  = 0.2 * cfg.width;
+    static const int window_height = 0.2 * cfg.height;
+    static const int window_x      = (cfg.width - window_width) / 2 / 2;
+    static const int window_y      = (cfg.height - window_height) / 2 / 2;
+
+    ImGui::SetWindowSize(ImVec2(window_width, window_height));
+    ImGui::SetWindowPos(ImVec2(window_x, window_y));
+
+    ImGui::Begin("Menu",
+                 0,
+                 ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
+                     ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar);
+
     static float f       = 0.0f;
     static int   counter = 0;
-    io->MouseDrawCursor   = true;
-    
 
-    if (ImGui::Button("Start", ImVec2(100, 30)))
+    if (ImGui::Button("Start", ImVec2(0.1 * cfg.width, 0.05 * cfg.height)))
     {
         start_game();
     }
-    if (ImGui::Button("Settings"))
+    if (ImGui::Button("Settings", ImVec2(0.15 * cfg.width, 0.05 * cfg.height)))
     {
     }
     // ImGui::SameLine();
-    if (ImGui::Button("Quit"))
+    if (ImGui::Button("Quit", ImVec2(0.09 * cfg.width, 0.05 * cfg.height)))
     {
     }
+
+    ImGui::End();
 }
 void game_tetris::render_scene()
 {
@@ -204,15 +205,6 @@ void game_tetris::render_scene()
 
         delete vertex_buff;
         delete index_buff;
-
-        // TODO test speed
-
-        // my_engine->set_texture(fig.get_texture_index());
-        // for (size_t i = 0; i < fig.get_count(); i++)
-        // {
-        //     triangle tr = fig.get_triangle(i);
-        //     my_engine->render_triangle(tr);
-        // }
     }
 }
 
