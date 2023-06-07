@@ -94,11 +94,14 @@ struct vector3d
     vector3d();
     vector3d(float x, float y, float z);
 
-    vector3d  operator+(const vector3d& right);
-    vector3d  operator+=(const vector3d& right);
-    vector3d  operator-(const vector3d& right);
-    vector3d& operator=(const vector3d& right);
-    float     length() const;
+    vector3d        operator+(const vector3d& right);
+    vector3d        operator+=(const vector3d& right);
+    vector3d        operator-(const vector3d& right);
+    vector3d        operator*(const float& right);
+    vector3d        operator/(const float& right);
+    friend vector3d operator*(const float& left, const vector3d& right);
+    vector3d&       operator=(const vector3d& right);
+    float           length() const;
 
     vector3d& normalize();
 

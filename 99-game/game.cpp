@@ -125,7 +125,13 @@ void game_tetris::update()
 
     cam->set_rotate(0, M_PI / 2 + phi, M_PI / 4);
     cam->set_translate(1.5 * std::cos(phi), -view_height, -1.5 * std::sin(phi));
-    // theta += M_PI / 300;
+
+    for (figure& fig : figures)
+    {
+        fig.set_physics_state(true);
+        fig.set_acceleration(vector3d(0, -0.01, 0));
+        fig.update();
+    }
 };
 
 void game_tetris::render()
@@ -157,19 +163,18 @@ void game_tetris::draw_menu()
 
     static const int window_width  = 0.2 * cfg.width;
     static const int window_height = 0.2 * cfg.height;
-    static const int window_x      = (cfg.width - window_width) / 2 / 2;
-    static const int window_y      = (cfg.height - window_height) / 2 / 2;
+    static const int window_x      = (cfg.width - window_width) / 2;
+    static const int window_y      = (cfg.height - window_height) / 2;
 
-    ImGui::SetWindowSize(ImVec2(window_width, window_height));
-    ImGui::SetWindowPos(ImVec2(window_x, window_y));
+    ImGui::SetNextWindowSize(ImVec2(window_width, window_height));
+    ImGui::SetNextWindowPos(ImVec2(window_x, window_y));
+
+    // ImGui::Set
 
     ImGui::Begin("Menu",
                  0,
                  ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
                      ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar);
-
-    static float f       = 0.0f;
-    static int   counter = 0;
 
     if (ImGui::Button("Start", ImVec2(0.1 * cfg.width, 0.05 * cfg.height)))
     {
@@ -188,7 +193,7 @@ void game_tetris::draw_menu()
 void game_tetris::render_scene()
 {
 
-    for (auto fig : figures)
+    for (figure& fig : figures)
     {
         fig.uniform_link(uniforms);
 

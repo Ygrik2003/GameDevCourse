@@ -1,10 +1,12 @@
 #pragma once
+#include "core/physics.h"
 #include "object.h"
 
-class figure : public object
+class figure : public object, public physics
 {
 public:
     figure();
+    figure(vector3d start_pos);
     auto get_triangle(size_t index)
     {
         return triangle(vertexes[indexes[3 * index + 0]],
@@ -38,6 +40,8 @@ public:
     size_t get_texture_index() { return texture_index; }
 
     void add_figure(const figure& fig);
+
+    void update();
 
 protected:
     std::vector<vertex3d_textured> vertexes;

@@ -9,6 +9,7 @@ class object
 public:
     virtual void set_rotate(float alpha, float beta, float gamma);
     virtual void set_translate(float dx, float dy, float dz);
+    virtual void set_translate(vector3d pos);
     virtual void set_scale(float scale_x, float scale_y, float scale_z);
     virtual void uniform_link(uniform& uni){};
 

@@ -27,6 +27,7 @@ add_library(99-engine STATIC
             engine/index_buffer.h engine/index_buffer.cpp
             core/config.h core/event.h
             core/types.h core/types.cpp 
+            core/physics.h core/physics.cpp 
             objects/figure.h objects/figure.cpp 
             objects/camera.h objects/camera.cpp
             objects/mesh.h objects/mesh.cpp

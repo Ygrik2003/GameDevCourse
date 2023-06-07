@@ -38,6 +38,7 @@ void object::set_translate(float dx, float dy, float dz)
     tr_obj.translate[1] = dy;
     tr_obj.translate[2] = dz;
 }
+
 void object::set_scale(float scale_x, float scale_y, float scale_z)
 {
     tr_obj.scale[0] = scale_x;

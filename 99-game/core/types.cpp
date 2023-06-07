@@ -31,6 +31,21 @@ vector3d vector3d::operator-(const vector3d& right)
 {
     return vector3d(this->x - right.x, this->y - right.y, this->z - right.z);
 }
+vector3d vector3d::operator*(const float& right)
+{
+    return vector3d(this->x * right, this->y * right, this->z * right);
+}
+
+vector3d vector3d::operator/(const float& right)
+{
+    return vector3d(this->x / right, this->y / right, this->z / right);
+}
+
+vector3d operator*(const float& left, const vector3d& right)
+{
+    return vector3d(right.x * left, right.y * left, right.z * left);
+}
+
 vector3d& vector3d::operator=(const vector3d& right)
 {
     this->x = right.x;
