@@ -14,8 +14,11 @@ endif()
 find_package(SDL3)
 
 if ( (NOT SDL3_FOUND) AND EXISTS "${CMAKE_SOURCE_DIR}/modules/SDL/CMakeLists.txt" )
-message(STATUS "SDL3 doesnt found")
-message(STATUS "Compiling...")
+    message(STATUS "SDL3 doesnt found")
+    message(STATUS "Compiling...")
+
+
+    set(SDL_TEST OFF)
     add_subdirectory(${CMAKE_SOURCE_DIR}/modules/SDL
                     ${CMAKE_BINARY_DIR}/lib/SDL)
     message(STATUS "Compiling SDL3 is succesuful.")

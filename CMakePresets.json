@@ -2,22 +2,30 @@
     "version": 2,
     "configurePresets": [
         {
-            "name": "ninja",
-            "displayName": "ninja",
+            "name": "ninja-linux",
+            "displayName": "Configure preset using ninja on Linux",
             "description": "Sets Ninja generator, build and install directory",
             "generator": "Ninja",
-            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "binaryDir": "${sourceDir}/build/${presetName}",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
-                "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
-                "Boost_EXAMPLE": true
+                "CMAKE_TOOLCHAIN_FILE": "",
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/install/${presetName}"
             }
-        }
-    ],
-    "buildPresets": [
+        },
         {
-            "name": "ninja",
-            "configurePreset": "ninja"
+            "name": "ninja-windows",
+            "displayName": "Configure preset using ninja on Windows",
+            "description": "Sets Ninja generator, build and install directory",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "x86_64-w64-mingw32-gcc",
+                "CMAKE_CXX_COMPILER": "x86_64-w64-mingw32-g++",
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_TOOLCHAIN_FILE": "",
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/install/${presetName}"
+            }
         }
     ]
 }
