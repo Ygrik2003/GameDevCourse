@@ -45,8 +45,8 @@ int game_tetris::initialize(config cfg)
     shader_scene = new shader_opengl(cfg.shader_vertex, cfg.shader_fragment);
     my_engine->set_shader(shader_scene);
 
-    textures.push_back(my_engine->load_texture(0, cfg.texture_block));
-    textures.push_back(my_engine->load_texture(1, cfg.texture_board));
+    textures.push_back(my_engine->load_texture(1, cfg.texture_block));
+    textures.push_back(my_engine->load_texture(2, cfg.texture_board));
 
     return 1;
 };
@@ -70,7 +70,6 @@ bool game_tetris::event_listener(event& e)
         // Only game buttons
         if (state.is_started)
         {
-            // std::cout << static_cast<int>(state.is_rotated) << std::endl;
             if (e.mouse.left_cliked)
             {
                 state.is_rotated = true;
@@ -128,8 +127,8 @@ void game_tetris::update()
 
     for (figure& fig : figures)
     {
-        fig.set_physics_state(true);
-        fig.set_acceleration(vector3d(0, -0.01, 0));
+        // fig.set_physics_state(true);
+        // fig.set_acceleration(vector3d(0, -0.1, 0));
         fig.update();
     }
 };
@@ -149,7 +148,6 @@ void game_tetris::render()
     ImGui::Render();
     my_engine->swap_buffers();
 };
-
 void game_tetris::add_figure(figure      fig,
                              const char* texture,
                              size_t      texture_index)
@@ -160,7 +158,6 @@ void game_tetris::add_figure(figure      fig,
 }
 void game_tetris::draw_menu()
 {
-
     static const int window_width  = 0.2 * cfg.width;
     static const int window_height = 0.2 * cfg.height;
     static const int window_x      = (cfg.width - window_width) / 2;
@@ -170,7 +167,6 @@ void game_tetris::draw_menu()
     ImGui::SetNextWindowPos(ImVec2(window_x, window_y));
 
     // ImGui::Set
-
     ImGui::Begin("Menu",
                  0,
                  ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
@@ -212,7 +208,6 @@ void game_tetris::render_scene()
         delete index_buff;
     }
 }
-
 void game_tetris::start_game()
 {
     state.is_started = ~state.is_started;

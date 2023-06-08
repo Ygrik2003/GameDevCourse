@@ -192,6 +192,9 @@ void ImGui_ImplSdlGL3_RenderDrawLists(engine* eng, ImDrawData* draw_data)
 
     g_imgui_shader->set_uniform1("u_texture",
                                  static_cast<int>(0 + texture_unit));
+    g_imgui_shader->set_uniform1("width", static_cast<float>(io.DisplaySize.x));
+    g_imgui_shader->set_uniform1("height",
+                                 static_cast<float>(io.DisplaySize.y));
 
     glDisable(GL_DEPTH_TEST);
     for (int n = 0; n < draw_data->CmdListsCount; n++)

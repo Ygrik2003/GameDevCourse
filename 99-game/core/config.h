@@ -9,8 +9,8 @@ struct config
     const char* texture_board;
     const char* texture_checker_white;
     const char* texture_checker_black;
-    double      width         = 960;
-    double      height        = 540;
+    double      width         = 1920 - 100;
+    double      height        = 1080 - 100;
     bool        is_full_sreen = false;
 
     float camera_speed_rotate = 1. / 100.;

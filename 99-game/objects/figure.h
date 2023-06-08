@@ -13,12 +13,12 @@ public:
                         vertexes[indexes[3 * index + 1]],
                         vertexes[indexes[3 * index + 2]]);
     }
-    size_t                                get_count() const { return count; }
-    const std::vector<vertex3d_textured>& get_vertexes() const
+    size_t get_count() const { return count; }
+    virtual const std::vector<vertex3d_textured>& get_vertexes() const
     {
         return vertexes;
     }
-    const std::vector<uint16_t>& get_indexes() const { return indexes; }
+    virtual const std::vector<uint16_t>& get_indexes() const { return indexes; }
 
     void uniform_link(uniform& uni) override
     {
@@ -39,7 +39,7 @@ public:
     void   set_texture_index(size_t index) { texture_index = index; }
     size_t get_texture_index() { return texture_index; }
 
-    void add_figure(const figure& fig);
+    virtual void add_figure(const figure& fig);
 
     void update();
 

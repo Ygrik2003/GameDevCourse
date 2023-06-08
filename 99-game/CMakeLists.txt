@@ -29,6 +29,7 @@ add_library(99-engine STATIC
             core/types.h core/types.cpp 
             core/physics.h core/physics.cpp 
             objects/figure.h objects/figure.cpp 
+            objects/primitive.h objects/primitive.cpp 
             objects/camera.h objects/camera.cpp
             objects/mesh.h objects/mesh.cpp
             objects/model.h objects/model.cpp
