@@ -15,8 +15,8 @@ if((NOT SDL3_FOUND) AND EXISTS
     option(SDL_TEST OFF)
     option(SDL_TESTS OFF)
     option(SDL_TESTS_LINK_SHARED OFF)
-    add_subdirectory(${CMAKE_SOURCE_DIR}/modules/SDL
-                     ${CMAKE_BINARY_DIR}/lib/SDL)
+    add_subdirectory(${CMAKE_SOURCE_DIR}/modules/SDL3
+                     ${CMAKE_BINARY_DIR}/lib/SDL3)
     message(STATUS "Compiling SDL3 is succesuful.")
 elseif(NOT SDL3_FOUND)
     message(
@@ -25,7 +25,7 @@ elseif(NOT SDL3_FOUND)
         )
 endif()
 
-set(SDL3_DIR ${CMAKE_BINARY_DIR}/lib/SDL)
+set(SDL3_DIR ${CMAKE_BINARY_DIR}/lib/SDL3 CACHE INTERNAL "SDL3_DIR")
 find_package(SDL3 REQUIRED)
 message(
     STATUS
@@ -52,17 +52,17 @@ else()
         )
 endif()
 
-if(EXISTS "${CMAKE_SOURCE_DIR}/modules/Catch2/CMakeLists.txt")
+# if(EXISTS "${CMAKE_SOURCE_DIR}/modules/Catch2/CMakeLists.txt")
 
-    add_subdirectory(${CMAKE_SOURCE_DIR}/modules/Catch2/
-                     ${CMAKE_BINARY_DIR}/lib/Catch2)
-    message(STATUS "Catch2 compiled!")
-else()
-    message(
-        FATAL_ERROR
-            "Cant find Catch2 source, please try execute:\ngit submodule init\ngit submodule update"
-        )
-endif()
+#     add_subdirectory(${CMAKE_SOURCE_DIR}/modules/Catch2/
+#                      ${CMAKE_BINARY_DIR}/lib/Catch2)
+#     message(STATUS "Catch2 compiled!")
+# else()
+#     message(
+#         FATAL_ERROR
+#             "Cant find Catch2 source, please try execute:\ngit submodule init\ngit submodule update"
+#         )
+# endif()
 
 if(EXISTS "${CMAKE_SOURCE_DIR}/modules/imgui/")
 

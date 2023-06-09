@@ -54,5 +54,8 @@ target_include_directories(99-game PUBLIC ${CMAKE_CURRENT_LIST_DIR}
                                           ${CMAKE_SOURCE_DIR}/modules)
 target_compile_features(99-game PUBLIC cxx_std_20)
 target_link_libraries(99-game PRIVATE 99-engine)
-set_target_properties(99-game PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY
-                                         "${CMAKE_SOURCE_DIR}")
+
+if(MSVC)
+    set_target_properties(99-game PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY
+                                             ${CMAKE_SOURCE_DIR})
+endif()
