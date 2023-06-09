@@ -4,3 +4,9 @@
 [submodule "modules/Assimp"]
 	path = modules/Assimp
 	url = https://github.com/assimp/assimp.git
+[submodule "modules/Catch2"]
+	path = modules/Catch2
+	url = https://github.com/catchorg/Catch2
+[submodule "modules/imgui"]
+	path = modules/imgui
+	url = https://github.com/ocornut/imgui

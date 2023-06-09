@@ -2,50 +2,57 @@ cmake_minimum_required(VERSION 3.20)
 
 project(99-game CXX)
 
-add_library(imgui STATIC 
-            imgui/imconfig.h 
-            imgui/imgui.h imgui/imgui.cpp
-            imgui/imstb_rectpack.h imgui/imgui_draw.cpp
-            imgui/imgui_widgets.cpp
-            imgui/imgui_demo.cpp imgui/imgui_tables.cpp
-            imgui/imgui_internal.h imgui/imstb_textedit.h
-            imgui/imstb_truetype.h
-            )
-target_include_directories(imgui PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-set_property(TARGET imgui PROPERTY POSITION_INDEPENDENT_CODE ON)
-
-
 find_package(OpenGL REQUIRED)
+find_package(SDL3 REQUIRED)
 
-add_library(99-engine STATIC
-            glad/glad.h glad/glad.c
-            KHR/khrplatform.h
-            engine/engine.h engine/engine.cpp
-            engine/shader_opengl.h engine/shader_opengl.cpp
-            engine/texture_opengl.h engine/texture_opengl.cpp
-            engine/vertex_buffer.h engine/vertex_buffer.cpp
-            engine/index_buffer.h engine/index_buffer.cpp
-            core/config.h core/event.h
-            core/types.h core/types.cpp 
-            core/physics.h core/physics.cpp 
-            objects/figure.h objects/figure.cpp 
-            objects/primitive.h objects/primitive.cpp 
-            objects/camera.h objects/camera.cpp
-            objects/mesh.h objects/mesh.cpp
-            objects/model.h objects/model.cpp
-            objects/object.h objects/object.cpp
-            core/picopng.hxx)
-target_include_directories(99-engine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+add_library(
+    99-engine STATIC
+    core/config.h
+    core/event.h
+    core/physics.cpp
+    core/physics.h
+    core/picopng.hxx
+    core/types.cpp
+    core/types.h
+    engine/engine.cpp
+    engine/engine.h
+    engine/index_buffer.cpp
+    engine/index_buffer.h
+    engine/shader_opengl.cpp
+    engine/shader_opengl.h
+    engine/texture_opengl.cpp
+    engine/texture_opengl.h
+    engine/vertex_buffer.cpp
+    engine/vertex_buffer.h
+    glad/glad.c
+    glad/glad.h
+    KHR/khrplatform.h
+    objects/camera.cpp
+    objects/camera.h
+    objects/figure.cpp
+    objects/figure.h
+    objects/mesh.cpp
+    objects/mesh.h
+    objects/model.cpp
+    objects/model.h
+    objects/object.cpp
+    objects/object.h
+    objects/primitive.cpp
+    objects/primitive.h)
+target_include_directories(99-engine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
+                                             ${CMAKE_SOURCE_DIR}/modules)
 target_compile_features(99-engine PUBLIC cxx_std_20)
-target_link_libraries(99-engine SDL3::SDL3-static OpenGL::GL imgui assimp::assimp)
+target_link_libraries(
+    99-engine
+    PUBLIC SDL3::SDL3-static
+           OpenGL::GL
+           imgui
+           assimp::assimp)
 
-
-
-
-
-add_executable(99-game main.cpp game.h game.cpp)
-target_include_directories(99-game PUBLIC ${CMAKE_CURRENT_LIST_DIR})
+add_executable(99-game game.cpp game.h main.cpp)
+target_include_directories(99-game PUBLIC ${CMAKE_CURRENT_LIST_DIR}
+                                          ${CMAKE_SOURCE_DIR}/modules)
 target_compile_features(99-game PUBLIC cxx_std_20)
 target_link_libraries(99-game PRIVATE 99-engine)
-set_target_properties(99-game PROPERTIES
-    VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
+set_target_properties(99-game PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY
+                                         "${CMAKE_SOURCE_DIR}")
