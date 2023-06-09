@@ -4,16 +4,17 @@ project(modules)
 
 find_package(SDL3)
 
-if((NOT SDL3_FOUND) AND EXISTS "${CMAKE_SOURCE_DIR}/modules/SDL/CMakeLists.txt")
+if((NOT SDL3_FOUND) AND EXISTS
+                        "${CMAKE_SOURCE_DIR}/modules/SDL3/CMakeLists.txt")
     message(STATUS "SDL3 doesnt found")
     message(STATUS "Compiling...")
 
     option(SDL_STATIC " " ON)
     option(SDL_SHARED " " OFF)
-    # option(SDL_STATIC_PIC OFF)
-    # option(SDL_TEST OFF)
-    # option(SDL_TESTS OFF)
-    # option(SDL_TESTS_LINK_SHARED OFF)
+    option(SDL_STATIC_PIC ON)
+    option(SDL_TEST OFF)
+    option(SDL_TESTS OFF)
+    option(SDL_TESTS_LINK_SHARED OFF)
     add_subdirectory(${CMAKE_SOURCE_DIR}/modules/SDL
                      ${CMAKE_BINARY_DIR}/lib/SDL)
     message(STATUS "Compiling SDL3 is succesuful.")
