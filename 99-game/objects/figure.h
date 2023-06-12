@@ -1,5 +1,6 @@
 #pragma once
 #include "core/physics.h"
+#include "engine/texture_opengl.h"
 #include "object.h"
 
 class figure : public object, public physics
@@ -36,8 +37,8 @@ public:
         uni.scale_z_obj = &scale_z;
     }
 
-    void   set_texture_index(size_t index) { texture_index = index; }
-    size_t get_texture_index() { return texture_index; }
+    void set_texture(texture_opengl* texture) { this->texture = texture; }
+    texture_opengl* get_texture() { return texture; }
 
     virtual void add_figure(const figure& fig);
 
@@ -50,5 +51,5 @@ protected:
     size_t count;
 
 private:
-    size_t texture_index = 0;
+    texture_opengl* texture = nullptr;
 };
