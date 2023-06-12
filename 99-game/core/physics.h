@@ -17,7 +17,10 @@ public:
     void set_acceleration(float x, float y, float z);
     // vector3d get_acceleration();
 
+    void     set_position(vector3d pos);
+    void     set_position(float x, float y, float z);
     vector3d get_position();
+
     vector3d get_velocity();
 
     void set_physics_state(bool state);

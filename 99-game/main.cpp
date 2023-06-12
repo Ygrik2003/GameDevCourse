@@ -19,25 +19,11 @@ int main()
         return -1;
     }
 
-    model  model_board("./99-game/textures/board.obj");
-    figure obj_board = model_board.get_meshes()[0];
+    // model model_cube("./99-game/textures/primitive2x2x2.obj");
 
-    my_game.add_figure(obj_board, cfg.texture_board, 1);
-
-    model model_cube("./99-game/textures/primitive2x2x2.obj");
-
-    figure figure_temp;
-
-    // cube 2x2x2
-    /*figure primitive_figure_1;
-    for (int i = 0; i < model_cube.get_meshes().size(); i++)
-    {
-        figure_temp = model_cube.get_meshes()[i];
-        primitive_figure_1.add_figure(figure_temp);
-    }
-    primitive_figure_1.set_scale(0.1, 0.1, 0.1);
-    primitive_figure_1.set_translate(0, 1, 0);
-    my_game.add_figure(primitive_figure_1, cfg.texture_block, 0);*/
+    // primitive_figure_1.set_scale(0.1, 0.1, 0.1);
+    // primitive_figure_1.set_translate(0, 1, 0);
+    // my_game.add_figure(primitive_figure_1, cfg.texture_block, 0);
 
     event e{};
     float phi      = 0;

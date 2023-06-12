@@ -25,6 +25,15 @@ void physics::set_acceleration(float x, float y, float z)
     this->acceleration = vector3d(x, y, z);
 }
 
+void physics::set_position(vector3d pos)
+{
+    start_position = pos;
+}
+void physics::set_position(float x, float y, float z)
+{
+    start_position = vector3d(x, y, z);
+}
+
 vector3d physics::get_position()
 {
     calc_past_time();

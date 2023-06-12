@@ -33,12 +33,12 @@ void main()
     float specular_strength = 0.9f;
     vec3  view_dir          = normalize(camera_pos - v_position);
     vec3  reflect_dir       = reflect(-light_dir, v_normal_facing);
-    float spec              = pow(max(dot(view_dir, reflect_dir), 0.0), 32.);
-    vec3  specular          = specular_strength * spec * light_color;
+    // float spec              = pow(max(dot(view_dir, reflect_dir), 0.0), 32.);
+    // vec3  specular          = specular_strength * spec * light_color;
 
     vec3 dist = v_position - light_pos;
 
-    vec3 result = (ambient + diffuse + specular) * color.xyz;
+    vec3 result = (ambient + diffuse /* + specular*/) * color.xyz;
 
     o_color = vec4(result, color.w);
 }

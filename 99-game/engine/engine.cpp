@@ -584,7 +584,7 @@ void engine_opengl::swap_buffers()
 
     ImGui_ImplSdlGL3_NewFrame(window);
 
-    glClearColor(1.f, 1.f, 1.f, 1.f);
+    glClearColor(77. / 255., 143. / 255., 210. / 255., 1.);
     GL_CHECK_ERRORS()
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

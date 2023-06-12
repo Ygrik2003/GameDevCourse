@@ -10,6 +10,7 @@ public:
     model(const char* path);
 
     std::vector<mesh>& get_meshes();
+    figure*            get_figure();
 
 private:
     std::vector<mesh> meshes;
