@@ -83,6 +83,7 @@ public:
 
 private:
     void draw_menu();
+    void draw_ui();
     void render_scene();
     void start_game();
 
@@ -94,7 +95,9 @@ private:
     void move_primitive(direction dir);
     void check_layers(cell& last_cell);
 
-    config cfg;
+    config  cfg;
+    size_t  score = 0;
+    ImFont* font  = nullptr;
 
     std::chrono::steady_clock timer;
     time_point                last_time_update;

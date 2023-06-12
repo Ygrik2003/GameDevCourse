@@ -53,6 +53,11 @@ int game_tetris::initialize(config cfg)
     if (!my_engine->initialize(this->cfg))
         return -1;
 
+    // TODO
+    //  ImGuiIO& io = ImGui::GetIO();
+    //  font        = io.Fonts->AddFontFromFileTTF("./99-game/res/font.ttf",
+    //  20);
+
     shader_scene = new shader_opengl(cfg.shader_vertex, cfg.shader_fragment);
     my_engine->set_shader(shader_scene);
 
@@ -191,6 +196,7 @@ void game_tetris::render()
     {
         shader_scene->use();
         render_scene();
+        draw_ui();
     }
     ImGui::Render();
     my_engine->swap_buffers();
@@ -225,6 +231,28 @@ void game_tetris::draw_menu()
     if (ImGui::Button("Quit", ImVec2(0.09 * cfg.width, 0.05 * cfg.height)))
     {
     }
+
+    ImGui::End();
+}
+void game_tetris::draw_ui()
+{
+
+    static const int window_width  = 0.1 * cfg.width;
+    static const int window_height = 0.05 * cfg.height;
+    static const int window_x      = 10;
+    static const int window_y      = 10;
+
+    ImGui::SetNextWindowSize(ImVec2(window_width, window_height));
+    ImGui::SetNextWindowPos(ImVec2(window_x, window_y));
+
+    ImGui::Begin("State",
+                 0,
+                 ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
+                     ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar);
+
+    ImGui::PushFont(font);
+    ImGui::Text("Score: %d", score);
+    ImGui::PopFont();
 
     ImGui::End();
 }
@@ -399,7 +427,7 @@ void game_tetris::check_layers(cell& last_cell)
     {
         if (c.z == last_cell.z)
         {
-            buffer_z[c.y * cells_max + c.x] = 0;
+            buffer_z[c.y * cells_max + c.x] = c.z;
             c.is_free                       = true;
         }
         c.set_moving(true);
