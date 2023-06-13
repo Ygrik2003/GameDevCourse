@@ -402,7 +402,7 @@ void game_tetris::new_primitive()
     static float x  = 0;
     static float y  = 0;
     controlled_cell = &get_cell((int)x, (int)y, cells_max_z - 1);
-    x += 0.5;
+    x++;
     if (x == cells_max)
     {
         x = 0;
@@ -423,6 +423,7 @@ void game_tetris::check_layers(cell& last_cell)
             if (get_cell(x, y, last_cell.z).is_free)
                 return;
         }
+    score++;
     for (cell& c : cells)
     {
         if (c.z == last_cell.z)
