@@ -1,4 +1,6 @@
 #include "shader_opengl.h"
+#include "glad/glad.h"
+
 #include <cassert>
 #include <filesystem>
 #include <fstream>

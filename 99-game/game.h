@@ -2,7 +2,8 @@
 #include "core/config.h"
 #include "core/event.h"
 #include "core/types.h"
-#include "engine/engine.h"
+#include "engine/engine_opengl.h"
+#include "objects/camera.h"
 #include "objects/model.h"
 
 /*
@@ -79,7 +80,7 @@ public:
     void update() override;
     void render() override;
 
-    void add_figure(figure* fig, texture_opengl* texture);
+    void add_figure(figure* fig, texture* texture);
 
 private:
     void draw_menu();
@@ -95,16 +96,15 @@ private:
     void move_primitive(direction dir);
     void check_layers(cell& last_cell);
 
-    config  cfg;
-    size_t  score = 0;
-    ImFont* font  = nullptr;
+    config cfg;
+    size_t score = 0;
 
     std::chrono::steady_clock timer;
     time_point                last_time_update;
 
-    engine_opengl* my_engine;
-    uniform        uniforms;
-    camera*        cam;
+    engine* my_engine = nullptr;
+    camera* cam       = nullptr;
+    uniform uniforms;
 
     // std::vector<figure>  primitives;
     std::vector<figure*> figures;
@@ -113,14 +113,14 @@ private:
     cell*               controlled_cell = nullptr;
     std::vector<size_t> buffer_z;
 
-    shader_opengl* shader_scene;
-    shader_opengl* shader_temp;
+    shader* shader_scene;
+    shader* shader_temp;
 
     figure* figure_board;
     figure* figure_cube;
 
-    texture_opengl* texture_board = nullptr;
-    texture_opengl* texture_block = nullptr;
+    texture* texture_board = nullptr;
+    texture* texture_block = nullptr;
 
     double phi         = 0;
     double view_height = 1.;

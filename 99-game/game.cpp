@@ -53,11 +53,6 @@ int game_tetris::initialize(config cfg)
     if (!my_engine->initialize(this->cfg))
         return -1;
 
-    // TODO
-    //  ImGuiIO& io = ImGui::GetIO();
-    //  font        = io.Fonts->AddFontFromFileTTF("./99-game/res/font.ttf",
-    //  20);
-
     shader_scene = new shader_opengl(cfg.shader_vertex, cfg.shader_fragment);
     my_engine->set_shader(shader_scene);
 
@@ -201,7 +196,7 @@ void game_tetris::render()
     ImGui::Render();
     my_engine->swap_buffers();
 };
-void game_tetris::add_figure(figure* fig, texture_opengl* tex)
+void game_tetris::add_figure(figure* fig, texture* tex)
 {
     fig->set_texture(tex);
     figures.push_back(fig);
@@ -250,9 +245,7 @@ void game_tetris::draw_ui()
                  ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
                      ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar);
 
-    ImGui::PushFont(font);
     ImGui::Text("Score: %d", score);
-    ImGui::PopFont();
 
     ImGui::End();
 }

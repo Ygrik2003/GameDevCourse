@@ -1,5 +1,6 @@
 #pragma once
 #include "core/physics.h"
+#include "engine/texture.h"
 #include "engine/texture_opengl.h"
 #include "object.h"
 
@@ -37,8 +38,8 @@ public:
         uni.scale_z_obj = &scale_z;
     }
 
-    void set_texture(texture_opengl* texture) { this->texture = texture; }
-    texture_opengl* get_texture() { return texture; }
+    void     set_texture(texture* texture) { tex = texture; }
+    texture* get_texture() { return tex; }
 
     virtual void add_figure(const figure& fig);
 
@@ -51,5 +52,5 @@ protected:
     size_t count;
 
 private:
-    texture_opengl* texture = nullptr;
+    texture* tex = nullptr;
 };

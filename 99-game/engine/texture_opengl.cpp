@@ -1,7 +1,8 @@
 #include "texture_opengl.h"
 #include "core/picopng.hxx"
+#include "glad/glad.h"
+
 #include <fstream>
-#include <iostream>
 #include <vector>
 
 texture_opengl::texture_opengl(const char* path)
@@ -52,13 +53,13 @@ texture_opengl::texture_opengl(const void*  pixels,
 
 texture_opengl::~texture_opengl()
 {
-    glDeleteTextures(1, &tex_handl);
+    glDeleteTextures(1, &handle);
     GL_CHECK_ERRORS()
 }
 
 void texture_opengl::bind() const
 {
-    glBindTexture(GL_TEXTURE_2D, tex_handl);
+    glBindTexture(GL_TEXTURE_2D, handle);
     GL_CHECK_ERRORS()
 }
 
@@ -66,9 +67,9 @@ void texture_opengl::gen_texture_from_pixels(const void*  pixels,
                                              const size_t width,
                                              const size_t height)
 {
-    glGenTextures(1, &tex_handl);
+    glGenTextures(1, &handle);
     GL_CHECK_ERRORS()
-    glBindTexture(GL_TEXTURE_2D, tex_handl);
+    glBindTexture(GL_TEXTURE_2D, handle);
     GL_CHECK_ERRORS()
 
     GLint   mipmap_level = 0;

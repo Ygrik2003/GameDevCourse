@@ -1,11 +1,25 @@
-#include "engine.h"
+#include "engine_opengl.h"
 
 #include "objects/mesh.h"
 
-#include "engine_opengl.h"
+#ifndef _WIN32
+#include <KHR/khrplatform.h>
+#endif
+#include <SDL3/SDL.h>
+#include <glad/glad.h>
+
+#include <SDL3/SDL.h>
 #include <filesystem>
 #include <fstream>
 #include <stdexcept>
+
+bool ImGui_ImplSdlGL3_Init(SDL_Window* window);
+void ImGui_ImplSdlGL3_Shutdown();
+void ImGui_ImplSdlGL3_InvalidateDeviceObjects();
+bool ImGui_ImplSdlGL3_CreateDeviceObjects();
+void ImGui_ImplSdlGL3_NewFrame(SDL_Window* window);
+bool ImGui_ImplSdlGL3_ProcessEvent(const SDL_Event* event);
+void ImGui_ImplSdlGL3_RenderDrawLists(engine* eng, ImDrawData* draw_data);
 
 #ifndef _WIN32
 void APIENTRY gl_debug_output(GLenum        source,
@@ -172,8 +186,6 @@ static shader_opengl* g_imgui_shader    = nullptr;
 
 void ImGui_ImplSdlGL3_RenderDrawLists(engine* eng, ImDrawData* draw_data)
 {
-    // Avoid rendering when minimized, scale coordinates for retina displays
-    // (screen coordinates != framebuffer coordinates)
     ImGuiIO& io        = ImGui::GetIO();
     int      fb_width  = int(io.DisplaySize.x * io.DisplayFramebufferScale.x);
     int      fb_height = int(io.DisplaySize.y * io.DisplayFramebufferScale.y);
@@ -183,9 +195,7 @@ void ImGui_ImplSdlGL3_RenderDrawLists(engine* eng, ImDrawData* draw_data)
     }
     draw_data->ScaleClipRects(io.DisplayFramebufferScale);
 
-    texture_opengl* texture =
-        reinterpret_cast<texture_opengl*>(io.Fonts->TexID);
-
+    texture* texture = reinterpret_cast<texture_opengl*>(io.Fonts->TexID);
     g_imgui_shader->use();
 
     unsigned int texture_unit = 0;
@@ -258,18 +268,19 @@ int engine_opengl::initialize(config& cfg)
 
     if (cfg.is_full_sreen)
     {
-        window = SDL_CreateWindow(cfg.app_name,
-                                  cfg.width,
-                                  cfg.height,
-                                  SDL_WINDOW_FULLSCREEN | SDL_WINDOW_OPENGL);
+        window = static_cast<SDL_Window*>(
+            SDL_CreateWindow(cfg.app_name,
+                             cfg.width,
+                             cfg.height,
+                             SDL_WINDOW_FULLSCREEN | SDL_WINDOW_OPENGL));
     }
     else
     {
-        window = SDL_CreateWindow(
-            cfg.app_name, cfg.width, cfg.height, SDL_WINDOW_OPENGL);
+        window = static_cast<SDL_Window*>(SDL_CreateWindow(
+            cfg.app_name, cfg.width, cfg.height, SDL_WINDOW_OPENGL));
     }
     int w, h;
-    SDL_GetWindowSize(window, &w, &h);
+    SDL_GetWindowSize(static_cast<SDL_Window*>(window), &w, &h);
     cfg.width  = w;
     cfg.height = h;
 
@@ -289,7 +300,8 @@ int engine_opengl::initialize(config& cfg)
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, gl_major_v);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, gl_minor_v);
 
-    SDL_GLContext gl_context = SDL_GL_CreateContext(window);
+    SDL_GLContext gl_context =
+        SDL_GL_CreateContext(static_cast<SDL_Window*>(window));
 
     if (gl_context == nullptr)
     {
@@ -321,10 +333,10 @@ int engine_opengl::initialize(config& cfg)
     GL_CHECK_ERRORS()
 #endif
 
-    GLuint vertex_buffer = 0;
-    glGenBuffers(1, &vertex_buffer);
+    GLuint vertex_buff = 0;
+    glGenBuffers(1, &vertex_buff);
     GL_CHECK_ERRORS()
-    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+    glBindBuffer(GL_ARRAY_BUFFER, vertex_buff);
     GL_CHECK_ERRORS()
     GLuint vertex_array_object = 0;
     glGenVertexArrays(1, &vertex_array_object);
@@ -342,12 +354,12 @@ int engine_opengl::initialize(config& cfg)
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    if (!ImGui_ImplSdlGL3_Init(window))
+    if (!ImGui_ImplSdlGL3_Init(static_cast<SDL_Window*>(window)))
     {
         std::runtime_error("error: failed to init ImGui");
     }
 
-    ImGui_ImplSdlGL3_NewFrame(window);
+    ImGui_ImplSdlGL3_NewFrame(static_cast<SDL_Window*>(window));
 
     return 1;
 }
@@ -355,7 +367,7 @@ int engine_opengl::initialize(config& cfg)
 void engine_opengl::uninitialize()
 {
     SDL_GL_DeleteContext(gl_context);
-    SDL_DestroyWindow(window);
+    SDL_DestroyWindow(static_cast<SDL_Window*>(window));
     SDL_Quit();
 }
 
@@ -514,9 +526,9 @@ void engine_opengl::render_triangles(vertex_buffer<vertex3d_colored>* vertexes,
 }
 void engine_opengl::render_triangles(vertex_buffer<vertex3d_textured>* vertexes,
                                      index_buffer*                     indexes,
-                                     const texture_opengl*             tex,
-                                     const std::uint16_t* start_vertex_index,
-                                     size_t               num_vertexes)
+                                     const texture*                    tex,
+                                     const uint16_t* start_vertex_index,
+                                     size_t          num_vertexes)
 {
     reload_uniform();
 
@@ -537,8 +549,8 @@ void engine_opengl::render_triangles(vertex_buffer<vertex3d_textured>* vertexes,
 void engine_opengl::render_triangles(
     vertex_buffer<vertex3d_colored_textured>* vertexes,
     index_buffer*                             indexes,
-    const texture_opengl*                     tex,
-    const std::uint16_t*                      start_vertex_index,
+    const texture*                            tex,
+    const uint16_t*                           start_vertex_index,
     size_t                                    num_vertexes)
 {
     vertexes->bind();
@@ -559,8 +571,8 @@ void engine_opengl::render_triangles(
 void engine_opengl::render_triangles(
     vertex_buffer<vertex2d_colored_textured>* vertexes,
     index_buffer*                             indexes,
-    const texture_opengl*                     tex,
-    const std::uint16_t*                      start_vertex_index,
+    const texture*                            tex,
+    const uint16_t*                           start_vertex_index,
     size_t                                    num_vertexes)
 {
     vertexes->bind();
@@ -581,9 +593,9 @@ void engine_opengl::swap_buffers()
 
     ImGui_ImplSdlGL3_RenderDrawLists(this, ImGui::GetDrawData());
 
-    SDL_GL_SwapWindow(window);
+    SDL_GL_SwapWindow(static_cast<SDL_Window*>(window));
 
-    ImGui_ImplSdlGL3_NewFrame(window);
+    ImGui_ImplSdlGL3_NewFrame(static_cast<SDL_Window*>(window));
 
     glClearColor(77. / 255., 143. / 255., 210. / 255., 1.);
     GL_CHECK_ERRORS()
@@ -592,13 +604,13 @@ void engine_opengl::swap_buffers()
     GL_CHECK_ERRORS()
 }
 
-texture_opengl* engine_opengl::load_texture(uint32_t index, const char* path)
+texture* engine_opengl::load_texture(uint32_t index, const char* path)
 {
     // glActiveTexture(GL_TEXTURE0 + index);
     // GL_CHECK_ERRORS()
     // active_shader->set_uniform1("u_texture", index);
 
-    texture_opengl* tex = new texture_opengl(path);
+    texture* tex = new texture_opengl(path);
     tex->bind();
 
     return tex;
@@ -608,37 +620,6 @@ void engine_opengl::set_texture(uint32_t index)
 {
     glActiveTexture(GL_TEXTURE0 + index);
     active_shader->set_uniform1("u_texture", index);
-}
-
-void engine_opengl::create_shadow_map()
-{
-    glGenFramebuffers(1, &obj_depth_map);
-
-    glGenTextures(1, &texture_depth_map);
-    glBindTexture(GL_TEXTURE_2D, texture_depth_map);
-    glTexImage2D(GL_TEXTURE_2D,
-                 0,
-                 GL_DEPTH_COMPONENT,
-                 _config.width,
-                 _config.height,
-                 0,
-                 GL_DEPTH_COMPONENT,
-                 GL_FLOAT,
-                 NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-    glBindFramebuffer(GL_FRAMEBUFFER, obj_depth_map);
-    glFramebufferTexture2D(GL_FRAMEBUFFER,
-                           GL_DEPTH_ATTACHMENT,
-                           GL_TEXTURE_2D,
-                           texture_depth_map,
-                           0);
-    // glDrawBuffer(GL_NONE);
-    glReadBuffer(GL_NONE);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void engine_opengl::set_uniform(uniform& uni)
@@ -687,7 +668,7 @@ void engine_opengl::reload_uniform()
                                 *uniforms_world->scale_z_obj);
 }
 
-void engine_opengl::set_shader(shader_opengl* shader)
+void engine_opengl::set_shader(shader* shader)
 {
     this->active_shader = shader;
 
@@ -833,14 +814,14 @@ bool ImGui_ImplSdlGL3_Init(SDL_Window* window)
     io.GetClipboardTextFn = ImGui_ImplSdlGL3_GetClipboardText;
     io.ClipboardUserData  = nullptr;
 
-#ifdef _WIN32
-    // SDL_SysWMinfo wmInfo;
-    // SDL_VERSION(&wmInfo.version);
-    // SDL_GetWindowWMInfo(window, &wmInfo);
-    // io.ImeWindowHandle = wmInfo.info.win.window;
-#else
-    (void)window;
-#endif
+    // #ifdef _WIN32
+    //     // SDL_SysWMinfo wmInfo;
+    //     // SDL_VERSION(&wmInfo.version);
+    //     // SDL_GetWindowWMInfo(window, &wmInfo);
+    //     // io.ImeWindowHandle = wmInfo.info.win.window;
+    // #else
+    //     (void)window;
+    // #endif
 
     g_Time = SDL_GetTicks() / 1000.f;
 
