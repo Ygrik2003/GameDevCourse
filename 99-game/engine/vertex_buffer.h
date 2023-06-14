@@ -1,6 +1,5 @@
 #pragma once
 #include "core/types.h"
-#include "glad/glad.h"
 
 #include <iostream>
 
