@@ -61,6 +61,7 @@ int game_tetris::initialize(config cfg)
 
     add_figure(figure_board, texture_board);
     new_primitive();
+    my_engine->play_sound("./99-game/res/8-bit_detective.wav");
 
     return 1;
 };
@@ -408,7 +409,7 @@ void game_tetris::new_primitive()
     controlled_cell->set_moving(true);
 }
 
-void game_tetris::check_layers(cell& last_cell)
+void game_tetris::check_layers(cell last_cell)
 {
     for (size_t x = 0; x < cells_max; x++)
         for (size_t y = 0; y < cells_max; y++)
@@ -421,13 +422,24 @@ void game_tetris::check_layers(cell& last_cell)
     {
         if (c.z == last_cell.z)
         {
-            buffer_z[c.y * cells_max + c.x] = c.z;
-            c.is_free                       = true;
+            buffer_z[c.y * cells_max + c.x]--;
+            if (c.next)
+            {
+                check_layers(*c.next);
+                c.next->prev = nullptr;
+                c.next       = nullptr;
+            }
+            if (c.prev)
+            {
+                check_layers(*c.prev);
+                c.prev->next = nullptr;
+                c.prev       = nullptr;
+            }
+            c.is_free = true;
         }
-        c.set_moving(true);
+        else if (c.z > last_cell.z)
+        {
+            move_cell(&c, direction::down);
+        }
     }
-    if (last_cell.next)
-        check_layers(*last_cell.next);
-    if (last_cell.prev)
-        check_layers(*last_cell.prev);
 }
