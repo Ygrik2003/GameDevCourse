@@ -1,5 +1,6 @@
 #include "engine_opengl.h"
 
+#include "audio_buffer.h"
 #include "objects/mesh.h"
 
 #ifndef _WIN32
@@ -11,6 +12,7 @@
 #include <SDL3/SDL.h>
 #include <filesystem>
 #include <fstream>
+#include <map>
 #include <stdexcept>
 
 bool ImGui_ImplSdlGL3_Init(SDL_Window* window);
@@ -20,6 +22,19 @@ bool ImGui_ImplSdlGL3_CreateDeviceObjects();
 void ImGui_ImplSdlGL3_NewFrame(SDL_Window* window);
 bool ImGui_ImplSdlGL3_ProcessEvent(const SDL_Event* event);
 void ImGui_ImplSdlGL3_RenderDrawLists(engine* eng, ImDrawData* draw_data);
+
+static const char* get_sound_format_name(uint16_t format_value)
+{
+    static const std::map<uint16_t, const char*> format = {
+        { AUDIO_U8, "AUDIO_U8" },         { AUDIO_S8, "AUDIO_S8" },
+        { AUDIO_S16LSB, "AUDIO_S16LSB" }, { AUDIO_S16MSB, "AUDIO_S16MSB" },
+        { AUDIO_S32LSB, "AUDIO_S32LSB" }, { AUDIO_S32MSB, "AUDIO_S32MSB" },
+        { AUDIO_F32LSB, "AUDIO_F32LSB" }, { AUDIO_F32MSB, "AUDIO_F32MSB" },
+    };
+
+    auto it = format.find(format_value);
+    return it->second;
+}
 
 #ifndef _WIN32
 void APIENTRY gl_debug_output(GLenum        source,
@@ -291,6 +306,64 @@ int engine_opengl::initialize(config& cfg)
         std::cerr << SDL_GetError();
         SDL_Quit();
         return 0;
+    }
+    audio_device_spec.freq     = 48000;
+    audio_device_spec.format   = AUDIO_S16LSB;
+    audio_device_spec.channels = 2;
+    audio_device_spec.samples  = 1024; // must be power of 2
+    audio_device_spec.callback = engine_opengl::audio_callback;
+    audio_device_spec.userdata = this;
+
+    const int num_audio_drivers = SDL_GetNumAudioDrivers();
+    // for (int i = 0; i < num_audio_drivers; ++i)
+    // {
+    //     std::cout << "audio_driver #:" << i << " " << SDL_GetAudioDriver(i)
+    //               << '\n';
+    // }
+    // std::cout << std::flush;
+
+    const char* default_audio_device_name = nullptr;
+
+    // SDL_FALSE - mean get only OUTPUT audio devices
+    const int num_audio_devices = SDL_GetNumAudioDevices(SDL_FALSE);
+    if (num_audio_devices > 0)
+    {
+        default_audio_device_name =
+            SDL_GetAudioDeviceName(num_audio_devices - 1, SDL_FALSE);
+        for (int i = 0; i < num_audio_devices; ++i)
+        {
+            std::cout << "audio device #" << i << ": "
+                      << SDL_GetAudioDeviceName(i, SDL_FALSE) << '\n';
+        }
+    }
+    std::cout << std::flush;
+
+    audio_device = SDL_OpenAudioDevice(default_audio_device_name,
+                                       0,
+                                       &audio_device_spec,
+                                       nullptr,
+                                       SDL_AUDIO_ALLOW_ANY_CHANGE);
+
+    if (audio_device == 0)
+    {
+        std::cerr << "failed open audio device: " << SDL_GetError();
+        throw std::runtime_error("audio failed");
+    }
+    else
+    {
+        std::cout << "--------------------------------------------\n";
+        std::cout << "audio device selected: " << default_audio_device_name
+                  << '\n'
+                  << "freq: " << audio_device_spec.freq << '\n'
+                  << "format: "
+                  << get_sound_format_name(audio_device_spec.format) << '\n'
+                  << "channels: "
+                  << static_cast<uint32_t>(audio_device_spec.channels) << '\n'
+                  << "samples: " << audio_device_spec.samples << '\n'
+                  << std::flush;
+
+        // unpause device
+        SDL_PlayAudioDevice(audio_device);
     }
 
     int gl_major_v = 3;
@@ -668,6 +741,8 @@ void engine_opengl::reload_uniform()
                                 *uniforms_world->scale_z_obj);
 }
 
+std::mutex engine_opengl::audio_mutex;
+
 void engine_opengl::audio_callback(void*    engine_ptr,
                                    uint8_t* stream,
                                    int      stream_size)
@@ -736,6 +811,21 @@ void engine_opengl::set_relative_mouse_mode(bool state)
     else
         SDL_SetRelativeMouseMode(SDL_FALSE);
 }
+
+void engine_opengl::play_sound(const char* path)
+{
+    std::lock_guard<std::mutex> lock(audio_mutex);
+
+    audio_buffer* audio_buff =
+        new audio_buffer(path, audio_device, audio_device_spec);
+
+    audio_buff->current_index = 0;
+    audio_buff->is_playing    = true;
+    audio_buff->is_looped     = true;
+
+    audio_output.push_back(audio_buff);
+}
+
 bool ImGui_ImplSdlGL3_ProcessEvent(const SDL_Event* event)
 {
     ImGuiIO& io = ImGui::GetIO();

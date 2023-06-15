@@ -62,6 +62,8 @@ public:
     virtual void set_shader(shader* shader)          = 0;
     virtual void set_relative_mouse_mode(bool state) = 0;
 
+    virtual void play_sound(const char* path) = 0;
+
 protected:
     config _config;
 };

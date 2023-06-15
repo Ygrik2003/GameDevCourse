@@ -52,6 +52,8 @@ public:
     void set_shader(shader* shader) override;
     void set_relative_mouse_mode(bool state) override;
 
+    void play_sound(const char* path) override;
+
     void reload_uniform() override;
 
 private:
