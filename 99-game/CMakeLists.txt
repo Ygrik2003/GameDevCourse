@@ -14,6 +14,8 @@ add_library(
     core/picopng.hxx
     core/types.cpp
     core/types.h
+    engine/audio_buffer.cpp
+    engine/audio_buffer.h
     engine/engine.h
     engine/engine_opengl.cpp
     engine/engine_opengl.h
