@@ -10,6 +10,7 @@
 0100 1110 0100 0110
 0110 0000 0100 0000
 0000 0000 0100 0000
+
 */
 
 constexpr uint32_t fps = 120;
@@ -93,7 +94,7 @@ private:
     // Game func's
     void new_primitive();
     void move_primitive(direction dir);
-    void check_layers(cell& last_cell);
+    void check_layers(cell last_cell);
 
     config cfg;
     size_t score = 0;
