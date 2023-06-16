@@ -56,7 +56,7 @@ struct cell
     }
 };
 
-constexpr size_t cells_max    = 8;
+constexpr size_t cells_max    = 10;
 constexpr size_t cells_max_z  = 14;
 constexpr size_t cells_z_lose = 10;
 

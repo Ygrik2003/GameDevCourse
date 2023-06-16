@@ -309,7 +309,6 @@ cell& game_tetris::get_cell(size_t x, size_t y, size_t z)
 }
 bool game_tetris::move_cell(cell* c, direction dir)
 {
-
     switch (dir)
     {
         case direction::down:
@@ -438,7 +437,7 @@ void game_tetris::check_layers(cell last_cell)
             }
             c.is_free = true;
         }
-        else if (c.z > last_cell.z)
+        else
         {
             move_cell(&c, direction::down);
         }
