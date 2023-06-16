@@ -14,12 +14,17 @@ add_library(
     core/picopng.hxx
     core/types.cpp
     core/types.h
-    engine/engine.cpp
+    engine/audio_buffer.cpp
+    engine/audio_buffer.h
     engine/engine.h
+    engine/engine_opengl.cpp
+    engine/engine_opengl.h
     engine/index_buffer.cpp
     engine/index_buffer.h
+    engine/shader.h
     engine/shader_opengl.cpp
     engine/shader_opengl.h
+    engine/texture.h
     engine/texture_opengl.cpp
     engine/texture_opengl.h
     engine/vertex_buffer.cpp

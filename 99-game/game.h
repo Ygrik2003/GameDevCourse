@@ -2,14 +2,15 @@
 #include "core/config.h"
 #include "core/event.h"
 #include "core/types.h"
-#include "engine/engine.h"
-#include "objects/model.h"
+#include "engine/engine_opengl.h"
+#include "objects/camera.h"
 
 /*
 0100 0100 0100 0110
 0100 1110 0100 0110
 0110 0000 0100 0000
 0000 0000 0100 0000
+
 */
 
 constexpr uint32_t fps = 120;
@@ -55,7 +56,7 @@ struct cell
     }
 };
 
-constexpr size_t cells_max    = 8;
+constexpr size_t cells_max    = 10;
 constexpr size_t cells_max_z  = 14;
 constexpr size_t cells_z_lose = 10;
 
@@ -79,10 +80,11 @@ public:
     void update() override;
     void render() override;
 
-    void add_figure(figure* fig, texture_opengl* texture);
+    void add_figure(figure* fig, texture* texture);
 
 private:
     void draw_menu();
+    void draw_ui();
     void render_scene();
     void start_game();
 
@@ -92,16 +94,17 @@ private:
     // Game func's
     void new_primitive();
     void move_primitive(direction dir);
-    void check_layers(cell& last_cell);
+    void check_layers(cell last_cell);
 
     config cfg;
+    size_t score = 0;
 
     std::chrono::steady_clock timer;
     time_point                last_time_update;
 
-    engine_opengl* my_engine;
-    uniform        uniforms;
-    camera*        cam;
+    engine* my_engine = nullptr;
+    camera* cam       = nullptr;
+    uniform uniforms;
 
     // std::vector<figure>  primitives;
     std::vector<figure*> figures;
@@ -110,14 +113,14 @@ private:
     cell*               controlled_cell = nullptr;
     std::vector<size_t> buffer_z;
 
-    shader_opengl* shader_scene;
-    shader_opengl* shader_temp;
+    shader* shader_scene;
+    shader* shader_temp;
 
     figure* figure_board;
     figure* figure_cube;
 
-    texture_opengl* texture_board = nullptr;
-    texture_opengl* texture_block = nullptr;
+    texture* texture_board = nullptr;
+    texture* texture_block = nullptr;
 
     double phi         = 0;
     double view_height = 1.;

@@ -1,4 +1,5 @@
 #include "game.h"
+#include "objects/model.h"
 
 game_tetris::game_tetris()
 {
@@ -61,6 +62,7 @@ int game_tetris::initialize(config cfg)
 
     add_figure(figure_board, texture_board);
     new_primitive();
+    my_engine->play_sound("./99-game/res/8-bit_detective.wav");
 
     return 1;
 };
@@ -191,11 +193,12 @@ void game_tetris::render()
     {
         shader_scene->use();
         render_scene();
+        draw_ui();
     }
     ImGui::Render();
     my_engine->swap_buffers();
 };
-void game_tetris::add_figure(figure* fig, texture_opengl* tex)
+void game_tetris::add_figure(figure* fig, texture* tex)
 {
     fig->set_texture(tex);
     figures.push_back(fig);
@@ -225,6 +228,26 @@ void game_tetris::draw_menu()
     if (ImGui::Button("Quit", ImVec2(0.09 * cfg.width, 0.05 * cfg.height)))
     {
     }
+
+    ImGui::End();
+}
+void game_tetris::draw_ui()
+{
+
+    static const int window_width  = 0.1 * cfg.width;
+    static const int window_height = 0.05 * cfg.height;
+    static const int window_x      = 10;
+    static const int window_y      = 10;
+
+    ImGui::SetNextWindowSize(ImVec2(window_width, window_height));
+    ImGui::SetNextWindowPos(ImVec2(window_x, window_y));
+
+    ImGui::Begin("State",
+                 0,
+                 ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
+                     ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar);
+
+    ImGui::Text("Score: %d", score);
 
     ImGui::End();
 }
@@ -286,7 +309,6 @@ cell& game_tetris::get_cell(size_t x, size_t y, size_t z)
 }
 bool game_tetris::move_cell(cell* c, direction dir)
 {
-
     switch (dir)
     {
         case direction::down:
@@ -374,7 +396,7 @@ void game_tetris::new_primitive()
     static float x  = 0;
     static float y  = 0;
     controlled_cell = &get_cell((int)x, (int)y, cells_max_z - 1);
-    x += 0.5;
+    x++;
     if (x == cells_max)
     {
         x = 0;
@@ -387,7 +409,7 @@ void game_tetris::new_primitive()
     controlled_cell->set_moving(true);
 }
 
-void game_tetris::check_layers(cell& last_cell)
+void game_tetris::check_layers(cell last_cell)
 {
     for (size_t x = 0; x < cells_max; x++)
         for (size_t y = 0; y < cells_max; y++)
@@ -395,17 +417,29 @@ void game_tetris::check_layers(cell& last_cell)
             if (get_cell(x, y, last_cell.z).is_free)
                 return;
         }
+    score++;
     for (cell& c : cells)
     {
         if (c.z == last_cell.z)
         {
-            buffer_z[c.y * cells_max + c.x] = 0;
-            c.is_free                       = true;
+            buffer_z[c.y * cells_max + c.x]--;
+            if (c.next)
+            {
+                check_layers(*c.next);
+                c.next->prev = nullptr;
+                c.next       = nullptr;
+            }
+            if (c.prev)
+            {
+                check_layers(*c.prev);
+                c.prev->next = nullptr;
+                c.prev       = nullptr;
+            }
+            c.is_free = true;
         }
-        c.set_moving(true);
+        else
+        {
+            move_cell(&c, direction::down);
+        }
     }
-    if (last_cell.next)
-        check_layers(*last_cell.next);
-    if (last_cell.prev)
-        check_layers(*last_cell.prev);
 }
