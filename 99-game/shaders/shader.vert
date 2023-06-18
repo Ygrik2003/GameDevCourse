@@ -2,30 +2,13 @@
 
 struct uniforms
 {
-    float alpha; // For animation
-
-    float width; // Resolution
-    float height;
-
-    float rotate_alpha_obj; // Rotate object
-    float rotate_beta_obj;
-    float rotate_gamma_obj;
-
-    float rotate_alpha_camera; // Rotate camera
-    float rotate_beta_camera;
-    float rotate_gamma_camera;
-
-    float translate_x_obj; // Translate object
-    float translate_y_obj;
-    float translate_z_obj;
-
-    float translate_x_camera; // Translate camera
-    float translate_y_camera;
-    float translate_z_camera;
-
-    float scale_x_obj; // Scale object
-    float scale_y_obj;
-    float scale_z_obj;
+    float alpha;            // For animation
+    vec2  size_window;      // Resolution
+    vec3  rotate_obj;       // Rotate object
+    vec3  rotate_camera;    // Rotate camera
+    vec3  translate_obj;    // Translate object
+    vec3  translate_camera; // Translate camera
+    vec3  scale_obj;        // Scale object
 };
 
 in vec3 i_position;
@@ -38,8 +21,8 @@ out vec3 v_normal;
 out vec2 v_tex_coord;
 out vec3 camera_pos;
 
-uniform uniforms u_uniforms;
 uniform vec3     u_normal;
+uniform uniforms u_uniforms;
 
 const float front = 0.0001f;
 const float back  = 30.f;
@@ -91,33 +74,33 @@ void main()
 {
 
     mat4 projection = perspective_matrix(
-        fovy, u_uniforms.width / u_uniforms.height, front, back);
+        fovy, u_uniforms.size_window.x / u_uniforms.size_window.y, front, back);
 
     v_tex_coord = i_tex_coord;
-    camera_pos  = vec3(-u_uniforms.translate_x_camera,
-                      -u_uniforms.translate_y_camera,
-                      -u_uniforms.translate_z_camera);
+    camera_pos  = vec3(-u_uniforms.translate_camera.x,
+                      -u_uniforms.translate_camera.y,
+                      -u_uniforms.translate_camera.z);
 
-    mat4 model = scale_matrix(u_uniforms.scale_x_obj,
-                              u_uniforms.scale_y_obj,
-                              u_uniforms.scale_z_obj) *
-                 translate_matrix(u_uniforms.translate_x_obj,
-                                  u_uniforms.translate_y_obj,
-                                  u_uniforms.translate_z_obj) *
-                 rotate_matrix(u_uniforms.rotate_alpha_obj,
-                               u_uniforms.rotate_beta_obj,
-                               u_uniforms.rotate_gamma_obj);
+    mat4 model = scale_matrix(u_uniforms.scale_obj.x,
+                              u_uniforms.scale_obj.y,
+                              u_uniforms.scale_obj.z) *
+                 translate_matrix(u_uniforms.translate_obj.x,
+                                  u_uniforms.translate_obj.y,
+                                  u_uniforms.translate_obj.z) *
+                 rotate_matrix(u_uniforms.rotate_obj.x,
+                               u_uniforms.rotate_obj.y,
+                               u_uniforms.rotate_obj.z);
 
     v_position = vec3(vec4(i_position, 1.) * model);
 
     v_normal = normalize((vec4(i_normal, 0.f) * model).xyz);
 
     gl_Position = vec4(v_position, 1.) *
-                  translate_matrix(u_uniforms.translate_x_camera,
-                                   u_uniforms.translate_y_camera,
-                                   u_uniforms.translate_z_camera) *
-                  rotate_matrix(u_uniforms.rotate_alpha_camera,
-                                u_uniforms.rotate_beta_camera,
-                                u_uniforms.rotate_gamma_camera) *
+                  translate_matrix(u_uniforms.translate_camera.x,
+                                   u_uniforms.translate_camera.y,
+                                   u_uniforms.translate_camera.z) *
+                  rotate_matrix(u_uniforms.rotate_camera.x,
+                                u_uniforms.rotate_camera.y,
+                                u_uniforms.rotate_camera.z) *
                   projection;
 }

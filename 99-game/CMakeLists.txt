@@ -44,8 +44,9 @@ add_library(
     objects/object.h
     objects/primitive.cpp
     objects/primitive.h)
-target_include_directories(99-engine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
-                                             ${CMAKE_SOURCE_DIR}/modules)
+target_include_directories(
+    99-engine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/modules
+                      ${CMAKE_SOURCE_DIR}/modules/SDL3/include)
 target_compile_features(99-engine PUBLIC cxx_std_20)
 target_link_libraries(
     99-engine
