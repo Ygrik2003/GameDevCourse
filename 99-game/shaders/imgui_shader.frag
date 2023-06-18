@@ -8,7 +8,7 @@ uniform sampler2D u_texture;
 
 out vec4 o_color;
 
-vec4 texture2D(sampler2D tex, vec2 uv);
+// vec4 texture2D(sampler2D tex, vec2 uv);
 
 void main()
 {
