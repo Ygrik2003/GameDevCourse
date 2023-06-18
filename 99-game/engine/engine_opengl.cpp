@@ -26,10 +26,10 @@ void ImGui_ImplSdlGL3_RenderDrawLists(engine* eng, ImDrawData* draw_data);
 static const char* get_sound_format_name(uint16_t format_value)
 {
     static const std::map<uint16_t, const char*> format = {
-        { AUDIO_U8, "AUDIO_U8" },         { AUDIO_S8, "AUDIO_S8" },
-        { AUDIO_S16LSB, "AUDIO_S16LSB" }, { AUDIO_S16MSB, "AUDIO_S16MSB" },
-        { AUDIO_S32LSB, "AUDIO_S32LSB" }, { AUDIO_S32MSB, "AUDIO_S32MSB" },
-        { AUDIO_F32LSB, "AUDIO_F32LSB" }, { AUDIO_F32MSB, "AUDIO_F32MSB" },
+        { SDL_AUDIO_U8, "AUDIO_U8" },         { SDL_AUDIO_S8, "AUDIO_S8" },
+        { SDL_AUDIO_S16LSB, "AUDIO_S16LSB" }, { SDL_AUDIO_S16MSB, "AUDIO_S16MSB" },
+        { SDL_AUDIO_S32LSB, "AUDIO_S32LSB" }, { SDL_AUDIO_S32MSB, "AUDIO_S32MSB" },
+        { SDL_AUDIO_F32LSB, "AUDIO_F32LSB" }, { SDL_AUDIO_F32MSB, "AUDIO_F32MSB" },
     };
 
     auto it = format.find(format_value);
@@ -216,11 +216,18 @@ void ImGui_ImplSdlGL3_RenderDrawLists(engine* eng, ImDrawData* draw_data)
     unsigned int texture_unit = 0;
     texture->bind();
 
+    try
+    {
     g_imgui_shader->set_uniform1("u_texture",
                                  static_cast<int>(0 + texture_unit));
     g_imgui_shader->set_uniform1("width", static_cast<float>(io.DisplaySize.x));
     g_imgui_shader->set_uniform1("height",
                                  static_cast<float>(io.DisplaySize.y));
+    }
+    catch (std::runtime_error e)
+    {
+    e.what();
+    }
 
     glDisable(GL_DEPTH_TEST);
     for (int n = 0; n < draw_data->CmdListsCount; n++)
@@ -308,7 +315,7 @@ int engine_opengl::initialize(config& cfg)
         return 0;
     }
     audio_device_spec.freq     = 48000;
-    audio_device_spec.format   = AUDIO_S16LSB;
+    audio_device_spec.format   = SDL_AUDIO_S16LSB;
     audio_device_spec.channels = 2;
     audio_device_spec.samples  = 1024; // must be power of 2
     audio_device_spec.callback = engine_opengl::audio_callback;
@@ -367,7 +374,7 @@ int engine_opengl::initialize(config& cfg)
     }
 
     int gl_major_v = 3;
-    int gl_minor_v = 2;
+    int gl_minor_v = 0;
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, gl_major_v);
@@ -702,43 +709,50 @@ void engine_opengl::set_uniform(uniform& uni)
 
 void engine_opengl::reload_uniform()
 {
-    active_shader->set_uniform1("u_uniforms.width", uniforms_world->width);
-    active_shader->set_uniform1("u_uniforms.height", uniforms_world->height);
+    try
+    {
+    active_shader->set_uniform1("width", uniforms_world->width);
+    active_shader->set_uniform1("height", uniforms_world->height);
 
-    active_shader->set_uniform1("u_uniforms.rotate_alpha_obj",
+    active_shader->set_uniform1("rotate_alpha_obj",
                                 *uniforms_world->rotate_alpha_obj);
-    active_shader->set_uniform1("u_uniforms.rotate_beta_obj",
+    active_shader->set_uniform1("rotate_beta_obj",
                                 *uniforms_world->rotate_beta_obj);
-    active_shader->set_uniform1("u_uniforms.rotate_gamma_obj",
+    active_shader->set_uniform1("rotate_gamma_obj",
                                 *uniforms_world->rotate_gamma_obj);
 
-    active_shader->set_uniform1("u_uniforms.rotate_alpha_camera",
+    active_shader->set_uniform1("rotate_alpha_camera",
                                 *uniforms_world->rotate_alpha_camera);
-    active_shader->set_uniform1("u_uniforms.rotate_beta_camera",
+    active_shader->set_uniform1("rotate_beta_camera",
                                 *uniforms_world->rotate_beta_camera);
-    active_shader->set_uniform1("u_uniforms.rotate_gamma_camera",
+    active_shader->set_uniform1("rotate_gamma_camera",
                                 *uniforms_world->rotate_gamma_camera);
 
-    active_shader->set_uniform1("u_uniforms.translate_x_obj",
+    active_shader->set_uniform1("translate_x_obj",
                                 *uniforms_world->translate_x_obj);
-    active_shader->set_uniform1("u_uniforms.translate_y_obj",
+    active_shader->set_uniform1("translate_y_obj",
                                 *uniforms_world->translate_y_obj);
-    active_shader->set_uniform1("u_uniforms.translate_z_obj",
+    active_shader->set_uniform1("translate_z_obj",
                                 *uniforms_world->translate_z_obj);
 
-    active_shader->set_uniform1("u_uniforms.translate_x_camera",
+    active_shader->set_uniform1("translate_x_camera",
                                 *uniforms_world->translate_x_camera);
-    active_shader->set_uniform1("u_uniforms.translate_y_camera",
+    active_shader->set_uniform1("translate_y_camera",
                                 *uniforms_world->translate_y_camera);
-    active_shader->set_uniform1("u_uniforms.translate_z_camera",
+    active_shader->set_uniform1("translate_z_camera",
                                 *uniforms_world->translate_z_camera);
 
-    active_shader->set_uniform1("u_uniforms.scale_x_obj",
+    active_shader->set_uniform1("scale_x_obj",
                                 *uniforms_world->scale_x_obj);
-    active_shader->set_uniform1("u_uniforms.scale_y_obj",
+    active_shader->set_uniform1("scale_y_obj",
                                 *uniforms_world->scale_y_obj);
-    active_shader->set_uniform1("u_uniforms.scale_z_obj",
+    active_shader->set_uniform1("scale_z_obj",
                                 *uniforms_world->scale_z_obj);
+    }
+    catch (std::runtime_error e)
+    {
+    e.what();
+    }
 }
 
 std::mutex engine_opengl::audio_mutex;
