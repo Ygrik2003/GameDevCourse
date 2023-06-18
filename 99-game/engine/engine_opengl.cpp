@@ -192,8 +192,8 @@ void* load_gl_func(const char* name)
     SDL_FunctionPointer gl_pointer = SDL_GL_GetProcAddress(name);
     if (gl_pointer == nullptr)
     {
-        throw std::runtime_error(std::string("can't load GL function: ") +
-                                 name);
+        std::cout << "can't load GL function: " << 
+                                 name << std::endl;
     }
     return reinterpret_cast<void*>(gl_pointer);
 }
@@ -379,11 +379,11 @@ int engine_opengl::initialize(config& cfg)
     }
 
     int gl_major_v = 2;
-    int gl_minor_v = 0;
+    int gl_minor_v = 1;
 
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, gl_major_v);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, gl_minor_v);
+    //SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+    //SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, gl_major_v);
+    //SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, gl_minor_v);
 
     SDL_GLContext gl_context =
         SDL_GL_CreateContext(static_cast<SDL_Window*>(window));
@@ -436,9 +436,7 @@ int engine_opengl::initialize(config& cfg)
 
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
+    
     if (!ImGui_ImplSdlGL3_Init(static_cast<SDL_Window*>(window)))
     {
         std::runtime_error("error: failed to init ImGui");
@@ -716,38 +714,38 @@ void engine_opengl::reload_uniform()
 {
     try
     {
-        active_shader->set_uniform2("u_uniforms.size_window",
+        active_shader->set_uniform2("u_size_window",
                                     uniforms_world->width,
                                     uniforms_world->height);
 
-        active_shader->set_uniform3("u_uniforms.rotate_obj",
+        active_shader->set_uniform3("u_rotate_obj",
                                     *uniforms_world->rotate_alpha_obj,
                                     *uniforms_world->rotate_beta_obj,
                                     *uniforms_world->rotate_gamma_obj);
 
-        active_shader->set_uniform3("u_uniforms.rotate_camera",
+        active_shader->set_uniform3("u_rotate_camera",
                                     *uniforms_world->rotate_alpha_camera,
                                     *uniforms_world->rotate_beta_camera,
                                     *uniforms_world->rotate_gamma_camera);
 
-        active_shader->set_uniform3("u_uniforms.translate_obj",
+        active_shader->set_uniform3("u_translate_obj",
                                     *uniforms_world->translate_x_obj,
                                     *uniforms_world->translate_y_obj,
                                     *uniforms_world->translate_z_obj);
 
-        active_shader->set_uniform3("u_uniforms.translate_camera",
+        active_shader->set_uniform3("u_translate_camera",
                                     *uniforms_world->translate_x_camera,
                                     *uniforms_world->translate_y_camera,
                                     *uniforms_world->translate_z_camera);
 
-        active_shader->set_uniform3("u_uniforms.scale_obj",
+        active_shader->set_uniform3("u_scale_obj",
                                     *uniforms_world->scale_x_obj,
                                     *uniforms_world->scale_y_obj,
                                     *uniforms_world->scale_z_obj);
     }
     catch (std::runtime_error e)
     {
-        e.what();
+        std::cout << e.what() << std::endl;
     }
 }
 
@@ -759,7 +757,7 @@ void engine_opengl::audio_callback(void*    engine_ptr,
 {
 
     std::lock_guard<std::mutex> lock(audio_mutex);
-    // no sound default
+
     std::fill_n(stream, stream_size, '\0');
 
     engine_opengl* e = static_cast<engine_opengl*>(engine_ptr);

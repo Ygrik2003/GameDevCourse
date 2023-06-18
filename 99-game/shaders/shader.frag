@@ -14,8 +14,6 @@ const vec3  ambient          = ambient_strength * light_color;
 
 out vec4 o_color;
 
-// vec4 texture2D(sampler2D tex, vec2 uv);
-
 void main()
 {
     vec3 light_pos = camera_pos;
@@ -25,7 +23,7 @@ void main()
     else
         v_normal_facing = v_normal;
 
-    vec4 color = texture2D(u_texture, v_tex_coord);
+    vec4 color = texture(u_texture, v_tex_coord);
 
     vec3  light_dir = normalize(light_pos - v_position);
     float diff      = max(dot(v_normal_facing, light_dir), 0.);

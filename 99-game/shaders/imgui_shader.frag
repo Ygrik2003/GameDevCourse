@@ -12,5 +12,5 @@ out vec4 o_color;
 
 void main()
 {
-    o_color = Frag_Color * texture2D(u_texture, Frag_UV);
+    o_color = Frag_Color * texture(u_texture, Frag_UV);
 }
