@@ -61,6 +61,15 @@ target_include_directories(99-game PUBLIC ${CMAKE_CURRENT_LIST_DIR}
 target_compile_features(99-game PUBLIC cxx_std_20)
 target_link_libraries(99-game PRIVATE 99-engine)
 
+if(MINGW)
+    add_custom_command(
+        TARGET 99-game
+        POST_BUILD
+        COMMAND
+            ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:assimp::assimp>
+            $<TARGET_FILE_DIR:99-game>)
+endif()
+
 if(MSVC)
     set_target_properties(99-game PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY
                                              ${CMAKE_SOURCE_DIR})
