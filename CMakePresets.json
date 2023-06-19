@@ -1,6 +1,6 @@
 {
     "version": 2,
-  "configurePresets": [
+    "configurePresets": [
     {
       "name": "ninja",
       "displayName": "Debug",
@@ -32,16 +32,16 @@
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build/${presetName}",
       "cacheVariables": {
-        "CMAKE_SYSTEM_NAME": "Windows",
-        "CMAKE_C_COMPILER": "x86_64-w64-mingw32-gcc",
-        "CMAKE_CXX_COMPILER": "x86_64-w64-mingw32-g++",
-        "CMAKE_BUILD_TYPE": "Debug",
-        "CMAKE_TOOLCHAIN_FILE": "",
-        "CMAKE_INSTALL_PREFIX": "${sourceDir}/install/${presetName}",
-        "CMAKE_FIND_ROOT_PATH": "/usr/x86_64-w64-mingw64",
-        "CMAKE_FIND_ROOT_PATH_MODE_PROGRAM": "NEVER",
-        "CMAKE_FIND_ROOT_PATH_MODE_LIBRARY": "ONLY",
-        "CMAKE_FIND_ROOT_PATH_MODE_INCLUDE": "ONLY"
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
       }
     }
   ],
@@ -55,4 +55,64 @@
             "configurePreset": "ninja-windows"
         }
     ]
+{
+  "version": 2,
+  "configurePresets": [
+    {
+      "name": "ninja-debug",
+      "displayName": "Debug",
+      "description": "Sets Ninja generator, build and install directory",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_TOOLCHAIN_FILE": "",
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/install/${presetName}"
+      }
+    },
+    {
+      "name": "ninja-release",
+      "displayName": "Release",
+      "description": "Sets Ninja generator, build and install directory",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_TOOLCHAIN_FILE": "",
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/install/${presetName}"
+      }
+    },
+    {
+      "name": "ninja-windows-release",
+      "displayName": "Configure preset using ninja on Windows",
+      "description": "Sets Ninja generator, build and install directory",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_SYSTEM_NAME": "Windows",
+	"CMAKE_C_COMPILER": "x86_64-w64-mingw32-gcc", 
+	"CMAKE_C_COMPILER": "x86_64-w64-mingw32-gcc",
+        "CMAKE_CXX_COMPILER": "x86_64-w64-mingw32-g++",
+	"CMAKE_CXX_COMPILER": "x86_64-w64-mingw32-g++",
+        "CMAKE_BUILD_TYPE": "Debug",
+	"CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_TOOLCHAIN_FILE": "",
+	"CMAKE_TOOLCHAIN_FILE": "",
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/install/${presetName}",
+     	"CMAKE_INSTALL_PREFIX": "${sourceDir}/install/${presetName}"
+      },
+    {
+      "name": "ninja-debug",
+      "configurePreset": "ninja-debug"
+    },
+    {
+      "name": "ninja-release",
+      "configurePreset": "ninja-release"
+    },
+    {
+      "name": "ninja-windows-release",
+      "configurePreset": "ninja-windows-release"
+    }
+  ]
 }
+
