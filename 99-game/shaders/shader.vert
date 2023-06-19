@@ -1,9 +1,9 @@
 #version 330
 
-in vec3 i_position;
-in vec3 i_normal;
-in vec2 i_tex_coord;
-in vec4 i_color;
+layout(location = 0) in vec3 i_position;
+layout(location = 1) in vec3 i_normal;
+layout(location = 2) in vec2 i_tex_coord;
+layout(location = 3) in vec4 i_color;
 
 out vec3 v_position;
 out vec3 v_normal;

@@ -456,6 +456,7 @@ void game_tetris::add_primitive(size_t number) {}
 
 void game_tetris::check_layers(cell last_cell)
 {
+    return; //TODO
     for (size_t x = 0; x < cells_max; x++)
         for (size_t y = 0; y < cells_max; y++)
         {

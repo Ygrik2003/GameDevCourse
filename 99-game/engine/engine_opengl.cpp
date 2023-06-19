@@ -230,7 +230,7 @@ void ImGui_ImplSdlGL3_RenderDrawLists(engine* eng, ImDrawData* draw_data)
     }
     catch (std::runtime_error e)
     {
-        e.what();
+        std::cout << e.what() << std::endl;
     }
 
     glDisable(GL_DEPTH_TEST);
