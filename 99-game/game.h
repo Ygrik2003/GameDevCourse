@@ -18,8 +18,8 @@ constexpr uint32_t fps = 120;
 enum class direction
 {
     left,
-    right,
     forward,
+    right,
     backward,
     down,
     up
@@ -56,7 +56,7 @@ struct cell
     }
 };
 
-constexpr size_t cells_max    = 10;
+constexpr size_t cells_max    = 5;
 constexpr size_t cells_max_z  = 14;
 constexpr size_t cells_z_lose = 10;
 
@@ -101,6 +101,7 @@ private:
 
     std::chrono::steady_clock timer;
     time_point                last_time_update;
+    float                     delay = 0.01; // Seconds
 
     engine* my_engine = nullptr;
     camera* cam       = nullptr;
@@ -122,9 +123,9 @@ private:
     texture* texture_board = nullptr;
     texture* texture_block = nullptr;
 
-    double phi         = 0;
-    double view_height = 1.;
-    double theta       = 0;
+    double camera_angle = -M_PI / 2;
+    double view_height  = 1.;
+    double theta        = 0;
 
     struct flags
     {

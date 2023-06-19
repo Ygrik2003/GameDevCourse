@@ -93,7 +93,7 @@ bool game_tetris::event_listener(event& e)
             }
             if (e.motion.x && state.is_rotated)
             {
-                phi += e.motion.x * M_PI / 300;
+                camera_angle += e.motion.x * M_PI / 300;
             }
             if (e.motion.y && state.is_rotated)
             {
@@ -151,12 +151,13 @@ bool game_tetris::event_listener(event& e)
 void game_tetris::update()
 {
     // cam->update();
-    cam->set_rotate(0, M_PI / 2 + phi, M_PI / 2 - atan(1. / sqrt(view_height)));
-    cam->set_translate(sqrt(view_height) * std::cos(phi),
+    cam->set_rotate(
+        0, M_PI / 2 + camera_angle, M_PI / 2 - atan(1. / sqrt(view_height)));
+    cam->set_translate(sqrt(view_height) * std::cos(camera_angle),
                        -view_height,
-                       -sqrt(view_height) * std::sin(phi));
+                       -sqrt(view_height) * std::sin(camera_angle));
 
-    if ((timer.now() - last_time_update).count() < 1.5e7)
+    if ((timer.now() - last_time_update).count() < delay * 1e9)
         return;
     last_time_update = timer.now();
     for (cell& c : cells)
@@ -233,14 +234,18 @@ void game_tetris::draw_menu()
 }
 void game_tetris::draw_ui()
 {
+    static const int window_score_width  = 0.1 * cfg.width;
+    static const int window_score_height = 0.03 * cfg.height;
+    static const int window_score_x      = 10;
+    static const int window_score_y      = 10;
 
-    static const int window_width  = 0.1 * cfg.width;
-    static const int window_height = 0.05 * cfg.height;
-    static const int window_x      = 10;
-    static const int window_y      = 10;
+    static const int window_control_width  = 0.2 * cfg.width;
+    static const int window_control_height = 0.95 * cfg.height;
+    static const int window_control_x      = 0.8 * cfg.width - 10;
+    static const int window_control_y      = 10;
 
-    ImGui::SetNextWindowSize(ImVec2(window_width, window_height));
-    ImGui::SetNextWindowPos(ImVec2(window_x, window_y));
+    ImGui::SetNextWindowSize(ImVec2(window_score_width, window_score_height));
+    ImGui::SetNextWindowPos(ImVec2(window_score_x, window_score_y));
 
     ImGui::Begin("State",
                  0,
@@ -248,6 +253,36 @@ void game_tetris::draw_ui()
                      ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar);
 
     ImGui::Text("Score: %d", score);
+
+    ImGui::End();
+
+    ImGui::SetNextWindowSize(
+        ImVec2(window_control_width, window_control_height));
+    ImGui::SetNextWindowPos(ImVec2(window_control_x, window_control_y));
+
+    ImGui::Begin("Controller",
+                 0,
+                 ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
+                     ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar);
+
+    if (ImGui::Button("Forvard"))
+    {
+        move_cell(controlled_cell, direction::forward);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Backward"))
+    {
+        move_cell(controlled_cell, direction::backward);
+    }
+    if (ImGui::Button("Left"))
+    {
+        move_cell(controlled_cell, direction::left);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Right"))
+    {
+        move_cell(controlled_cell, direction::right);
+    }
 
     ImGui::End();
 }
@@ -309,6 +344,12 @@ cell& game_tetris::get_cell(size_t x, size_t y, size_t z)
 }
 bool game_tetris::move_cell(cell* c, direction dir)
 {
+    if (dir != direction::up && dir != direction::down)
+        dir = static_cast<direction>(
+            (static_cast<int>(dir) +
+             static_cast<int>(M_PI / 2 + camera_angle / (M_PI / 2))) %
+            4);
+
     switch (dir)
     {
         case direction::down:
@@ -387,6 +428,8 @@ bool game_tetris::move_cell(cell* c, direction dir)
             std::swap(c, cell_to_swap);
             break;
     }
+    std::cout << static_cast<int>(c->z) << std::endl;
+
     return true;
 }
 void game_tetris::new_primitive()
@@ -418,28 +461,31 @@ void game_tetris::check_layers(cell last_cell)
                 return;
         }
     score++;
-    for (cell& c : cells)
+    for (std::vector<cell>::reverse_iterator cell_it = cells.rend();
+         cell_it != cells.rbegin();
+         cell_it--)
     {
-        if (c.z == last_cell.z)
+        std::cout << static_cast<int>(cell_it->z) << std::endl;
+        if (cell_it->z == last_cell.z)
         {
-            buffer_z[c.y * cells_max + c.x]--;
-            if (c.next)
+            buffer_z[cell_it->y * cells_max + cell_it->x]--;
+            if (cell_it->next)
             {
-                check_layers(*c.next);
-                c.next->prev = nullptr;
-                c.next       = nullptr;
+                check_layers(*cell_it->next);
+                cell_it->next->prev = nullptr;
+                cell_it->next       = nullptr;
             }
-            if (c.prev)
+            if (cell_it->prev)
             {
-                check_layers(*c.prev);
-                c.prev->next = nullptr;
-                c.prev       = nullptr;
+                check_layers(*cell_it->prev);
+                cell_it->prev->next = nullptr;
+                cell_it->prev       = nullptr;
             }
-            c.is_free = true;
+            cell_it->is_free = true;
         }
-        else
+        else if (cell_it->z > last_cell.z && !cell_it->is_free)
         {
-            move_cell(&c, direction::down);
+            move_cell(&*cell_it, direction::down);
         }
     }
 }
