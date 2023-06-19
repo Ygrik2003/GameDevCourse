@@ -56,7 +56,7 @@ struct cell
     }
 };
 
-constexpr size_t cells_max    = 5;
+constexpr size_t cells_max    = 8;
 constexpr size_t cells_max_z  = 14;
 constexpr size_t cells_z_lose = 10;
 
@@ -93,7 +93,7 @@ private:
 
     // Game func's
     void new_primitive();
-    void move_primitive(direction dir);
+    void add_primitive(size_t number);
     void check_layers(cell last_cell);
 
     config cfg;

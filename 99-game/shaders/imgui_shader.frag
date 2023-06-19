@@ -1,5 +1,4 @@
-#version 300 es
-precision mediump float;
+#version 330
 
 in vec2 Frag_UV;
 in vec4 Frag_Color;

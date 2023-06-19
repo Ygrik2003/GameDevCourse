@@ -192,8 +192,7 @@ void* load_gl_func(const char* name)
     SDL_FunctionPointer gl_pointer = SDL_GL_GetProcAddress(name);
     if (gl_pointer == nullptr)
     {
-        std::cout << "can't load GL function: " << 
-                                 name << std::endl;
+        std::cout << "can't load GL function: " << name << std::endl;
     }
     return reinterpret_cast<void*>(gl_pointer);
 }
@@ -350,40 +349,41 @@ int engine_opengl::initialize(config& cfg)
     }
     std::cout << std::flush;
 
-    audio_device = SDL_OpenAudioDevice(default_audio_device_name,
-                                       0,
-                                       &audio_device_spec,
-                                       nullptr,
-                                       SDL_AUDIO_ALLOW_ANY_CHANGE);
+    // audio_device = SDL_OpenAudioDevice(default_audio_device_name,
+    //                                    0,
+    //                                    &audio_device_spec,
+    //                                    nullptr,
+    //                                    SDL_AUDIO_ALLOW_ANY_CHANGE);
 
-    if (audio_device == 0)
-    {
-        std::cerr << "failed open audio device: " << SDL_GetError();
-        throw std::runtime_error("audio failed");
-    }
-    else
-    {
-        std::cout << "--------------------------------------------\n";
-        std::cout << "audio device selected: " << default_audio_device_name
-                  << '\n'
-                  << "freq: " << audio_device_spec.freq << '\n'
-                  << "format: "
-                  << get_sound_format_name(audio_device_spec.format) << '\n'
-                  << "channels: "
-                  << static_cast<uint32_t>(audio_device_spec.channels) << '\n'
-                  << "samples: " << audio_device_spec.samples << '\n'
-                  << std::flush;
+    // if (audio_device == 0)
+    // {
+    //     std::cerr << "failed open audio device: " << SDL_GetError();
+    //     throw std::runtime_error("audio failed");
+    // }
+    // else
+    // {
+    //     std::cout << "--------------------------------------------\n";
+    //     std::cout << "audio device selected: " << default_audio_device_name
+    //               << '\n'
+    //               << "freq: " << audio_device_spec.freq << '\n'
+    //               << "format: "
+    //               << get_sound_format_name(audio_device_spec.format) << '\n'
+    //               << "channels: "
+    //               << static_cast<uint32_t>(audio_device_spec.channels) <<
+    //               '\n'
+    //               << "samples: " << audio_device_spec.samples << '\n'
+    //               << std::flush;
 
-        // unpause device
-        SDL_PlayAudioDevice(audio_device);
-    }
+    //     SDL_PlayAudioDevice(audio_device);
+    // }
 
     int gl_major_v = 2;
     int gl_minor_v = 1;
 
-    //SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
-    //SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, gl_major_v);
-    //SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, gl_minor_v);
+    // SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,
+    // SDL_GL_CONTEXT_PROFILE_ES);
+    // SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, gl_major_v);
+    // SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, gl_minor_v);
 
     SDL_GLContext gl_context =
         SDL_GL_CreateContext(static_cast<SDL_Window*>(window));
@@ -436,7 +436,7 @@ int engine_opengl::initialize(config& cfg)
 
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
-    
+
     if (!ImGui_ImplSdlGL3_Init(static_cast<SDL_Window*>(window)))
     {
         std::runtime_error("error: failed to init ImGui");
@@ -714,9 +714,8 @@ void engine_opengl::reload_uniform()
 {
     try
     {
-        active_shader->set_uniform2("u_size_window",
-                                    uniforms_world->width,
-                                    uniforms_world->height);
+        active_shader->set_uniform2(
+            "u_size_window", uniforms_world->width, uniforms_world->height);
 
         active_shader->set_uniform3("u_rotate_obj",
                                     *uniforms_world->rotate_alpha_obj,
@@ -771,7 +770,6 @@ void engine_opengl::audio_callback(void*    engine_ptr,
 
             if (rest <= static_cast<uint32_t>(stream_size))
             {
-                // copy rest to buffer
                 SDL_MixAudioFormat(stream,
                                    current_buff,
                                    e->audio_device_spec.format,
@@ -793,7 +791,6 @@ void engine_opengl::audio_callback(void*    engine_ptr,
             {
                 if (buff->is_looped)
                 {
-                    // start from begining
                     buff->current_index = 0;
                 }
                 else

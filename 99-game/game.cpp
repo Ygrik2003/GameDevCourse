@@ -452,6 +452,8 @@ void game_tetris::new_primitive()
     controlled_cell->set_moving(true);
 }
 
+void game_tetris::add_primitive(size_t number) {}
+
 void game_tetris::check_layers(cell last_cell)
 {
     for (size_t x = 0; x < cells_max; x++)
@@ -483,7 +485,8 @@ void game_tetris::check_layers(cell last_cell)
             }
             cell_it->is_free = true;
         }
-        else if (cell_it->z > last_cell.z && !cell_it->is_free)
+        else if (cell_it->z > last_cell.z && !cell_it->is_free &&
+                 cell_it->z != 0)
         {
             move_cell(&*cell_it, direction::down);
         }

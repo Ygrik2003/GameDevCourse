@@ -3,3 +3,5 @@ build/
 .vs/
 .vscode/
 CMakeLists.txt.user
+*.dll
+imgui.ini

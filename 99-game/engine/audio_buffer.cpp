@@ -14,29 +14,10 @@ audio_buffer::audio_buffer(const char*   path,
     // freq, format, channels, and samples - used by SDL_LoadWAV_RW
     SDL_AudioSpec file_audio_spec;
 
-    if (nullptr == SDL_LoadWAV_RW(file, 1, &file_audio_spec, &buffer, &length))
+    if (SDL_LoadWAV_RW(file, 1, &file_audio_spec, &buffer, &length) == nullptr)
     {
         throw std::runtime_error(std::string("can't load wav: ") + path);
     }
-
-    // std::cout << "--------------------------------------------\n";
-    // std::cout << "audio format for: " << path << '\n'
-    //           << "format: " << get_sound_format_name(file_audio_spec.format)
-    //           << '\n'
-    //           << "sample_size: "
-    //           << get_sound_format_size(file_audio_spec.format) << '\n'
-    //           << "channels: " <<
-    //           static_cast<uint32_t>(file_audio_spec.channels)
-    //           << '\n'
-    //           << "frequency: " << file_audio_spec.freq << '\n'
-    //           << "length: " << length << '\n'
-    //           << "time: "
-    //           << static_cast<double>(length) /
-    //                  (file_audio_spec.channels *
-    //                   static_cast<uint32_t>(file_audio_spec.freq) *
-    //                   get_sound_format_size(file_audio_spec.format))
-    //           << "sec" << std::endl;
-    // std::cout << "--------------------------------------------\n";
 
     if (file_audio_spec.channels != audio_spec.channels ||
         file_audio_spec.format != audio_spec.format ||
@@ -74,10 +55,7 @@ audio_buffer::audio_buffer(const char*   path,
 
 audio_buffer::~audio_buffer()
 {
-    if (!tmp_buf)
-    {
-        SDL_free(buffer);
-    }
-    buffer = nullptr;
+    SDL_free(buffer);
+    // buffer = nullptr;
     length = 0;
 }

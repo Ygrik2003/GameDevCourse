@@ -1,4 +1,4 @@
-#version 300 es
+#version 330
 
 in vec3 i_position;
 in vec3 i_normal;
@@ -25,17 +25,23 @@ float       fovy  = 3.14159 / 2.;
 
 mat4 rotate_matrix(vec3 rotate)
 {
-    return mat4(
-        vec4(cos(rotate.x) * cos(rotate.y), sin(rotate.x) * cos(rotate.y), -sin(rotate.y), 0),
-        vec4(cos(rotate.x) * sin(rotate.y) * sin(rotate.z) - sin(rotate.x) * cos(rotate.z),
-             sin(rotate.x) * sin(rotate.y) * sin(rotate.z) + cos(rotate.x) * cos(rotate.z),
-             cos(rotate.y) * sin(rotate.z),
-             0),
-        vec4(cos(rotate.x) * sin(rotate.y) * cos(rotate.z) + sin(rotate.x) * sin(rotate.z),
-             sin(rotate.x) * sin(rotate.y) * cos(rotate.z) - cos(rotate.x) * sin(rotate.z),
-             cos(rotate.y) * cos(rotate.z),
-             0),
-        vec4(0., 0., 0., 1.));
+    return mat4(vec4(cos(rotate.x) * cos(rotate.y),
+                     sin(rotate.x) * cos(rotate.y),
+                     -sin(rotate.y),
+                     0),
+                vec4(cos(rotate.x) * sin(rotate.y) * sin(rotate.z) -
+                         sin(rotate.x) * cos(rotate.z),
+                     sin(rotate.x) * sin(rotate.y) * sin(rotate.z) +
+                         cos(rotate.x) * cos(rotate.z),
+                     cos(rotate.y) * sin(rotate.z),
+                     0),
+                vec4(cos(rotate.x) * sin(rotate.y) * cos(rotate.z) +
+                         sin(rotate.x) * sin(rotate.z),
+                     sin(rotate.x) * sin(rotate.y) * cos(rotate.z) -
+                         cos(rotate.x) * sin(rotate.z),
+                     cos(rotate.y) * cos(rotate.z),
+                     0),
+                vec4(0., 0., 0., 1.));
 }
 
 mat4 translate_matrix(vec3 tr)
@@ -74,16 +80,13 @@ void main()
     v_tex_coord = i_tex_coord;
     camera_pos  = -u_translate_camera;
 
-    mat4 model = scale_matrix(u_scale_obj) *
-                 translate_matrix(u_translate_obj) *
+    mat4 model = scale_matrix(u_scale_obj) * translate_matrix(u_translate_obj) *
                  rotate_matrix(u_rotate_obj);
 
     v_position = vec3(vec4(i_position, 1.) * model);
 
     v_normal = normalize((vec4(i_normal, 0.f) * model).xyz);
 
-    gl_Position = vec4(v_position, 1.) *
-                  translate_matrix(u_translate_camera) *
-                  rotate_matrix(u_rotate_camera) *
-                  projection;
+    gl_Position = vec4(v_position, 1.) * translate_matrix(u_translate_camera) *
+                  rotate_matrix(u_rotate_camera) * projection;
 }
