@@ -101,7 +101,7 @@ private:
 
     std::chrono::steady_clock timer;
     time_point                last_time_update;
-    float                     delay = 0.01; // Seconds
+    float                     delay = 0.5; // Seconds
 
     engine* my_engine = nullptr;
     camera* cam       = nullptr;

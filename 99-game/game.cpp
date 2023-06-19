@@ -62,7 +62,8 @@ int game_tetris::initialize(config cfg)
 
     add_figure(figure_board, texture_board);
     new_primitive();
-    my_engine->play_sound("./99-game/res/8-bit_detective.wav");
+    //my_engine->play_sound("./99-game/res/road.wav");
+    //my_engine->play_sound("./99-game/res/8-bit_detective.wav");
 
     return 1;
 };
@@ -172,6 +173,7 @@ void game_tetris::update()
             check_layers(c);
             if (c.is_controlled)
             {
+                my_engine->play_sound("./99-game/res/metal_pipe.wav");
                 c.set_controlling(false);
                 new_primitive();
             }

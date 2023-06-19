@@ -1,4 +1,5 @@
 #version 330
+precision mediump float;
 
 in vec3 v_position;
 in vec2 v_tex_coord;
