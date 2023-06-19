@@ -38,16 +38,22 @@ struct cell
     cell* next = nullptr;
     cell* prev = nullptr;
 
+    //?
     void set_moving(bool state)
     {
+        if (is_moving == state)
+            return;
         is_moving = state;
         if (next)
             next->set_moving(state);
         if (prev)
             prev->set_moving(state);
     }
+    //?
     void set_controlling(bool state)
     {
+        if (is_controlled == state)
+            return;
         is_controlled = state;
         if (next)
             next->set_controlling(state);
@@ -88,27 +94,24 @@ private:
     void render_scene();
     void start_game();
 
-    cell& get_cell(size_t x, size_t y, size_t z);
-    bool  move_cell(cell* c, direction dir);
-
-    // Game func's
     void new_primitive();
     void add_primitive(size_t number);
-    void check_layers(cell last_cell);
-
-    config cfg;
-    size_t score = 0;
-
+    
     std::chrono::steady_clock timer;
     time_point                last_time_update;
     float                     delay = 0.5; // Seconds
 
+
+
+    // Game func's
+    config cfg;
+    size_t score = 0;
+
     engine* my_engine = nullptr;
     camera* cam       = nullptr;
     uniform uniforms;
-
-    // std::vector<figure>  primitives;
     std::vector<figure*> figures;
+
 
     std::vector<cell>   cells;
     cell*               controlled_cell = nullptr;

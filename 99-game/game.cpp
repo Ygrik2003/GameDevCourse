@@ -382,6 +382,7 @@ bool game_tetris::move_cell(cell* c, direction dir)
             break;
     }
 
+    //TODO infinity recursion
     if (c->next)
         if (!move_cell(c->next, dir))
             return false;
