@@ -5,13 +5,7 @@
 #include "engine/engine_opengl.h"
 #include "objects/camera.h"
 
-/*
-0100 0100 0100 0110
-0100 1110 0100 0110
-0110 0000 0100 0000
-0000 0000 0100 0000
-
-*/
+using namespace std::chrono;
 
 constexpr uint32_t fps = 120;
 
@@ -22,48 +16,57 @@ enum class direction
     right,
     backward,
     down,
-    up
 };
 
-struct cell
+// clang-format off
+constexpr uint32_t column_bit_for_color = 2;
+constexpr uint32_t column_count_cells   = 16;
+#pragma pack(push, 1)
+/// @brief Bit field for definition each column in 3d tetris
+/// The each bit field have 2 bits for set color of block in column
+/// on height i. Position of block iterable each 2 bit. This struct is so
+/// example for explanation this logic 
+/// 00 - None 
+/// 01 - red 
+/// 10 - green 
+/// 11 - blue
+struct column
 {
-    bool is_free       = true;
-    bool is_moving     = true;
-    bool is_controlled = true;
+    // 2 smallest bit is color is lowest block, if color == 00, then block is absent
+    uint32_t colors = 0;
+    /// @brief Move all cells over selected position
+    /// For example we have static cells at ground with height 1 and we needed omit all 
+    /// cells start over selected position (in current case we can set position as 0 or 1 or 2, 
+    /// in any way was selected height - 1). Func move_down_over(height - 1) transfer left column 
+    /// to right column
+    /// 0 | 0
+    /// 1 | 0
+    /// 1 | 1
+    /// 0 | 1
+    /// 0 | 0
+    /// 1 | 1
+    ///
+    /// @param pos position, start from which cells was falling
+    // clang-format on
 
-    uint8_t x = 0;
-    uint8_t y = 0;
-    uint8_t z = 0;
+    void operator|=(uint32_t mask) { colors |= mask; }
 
-    cell* next = nullptr;
-    cell* prev = nullptr;
-
-    //?
-    void set_moving(bool state)
+    void move_down_over(uint8_t pos)
     {
-        if (is_moving == state)
-            return;
-        is_moving = state;
-        if (next)
-            next->set_moving(state);
-        if (prev)
-            prev->set_moving(state);
+        uint32_t mask = (1 << column_bit_for_color * (pos + 1)) - 1;
+        uint32_t result =
+            ((colors & ~mask) >> column_bit_for_color) | (colors & mask);
+        colors = result;
     }
-    //?
-    void set_controlling(bool state)
+    uint8_t get_z(uint32_t z)
     {
-        if (is_controlled == state)
-            return;
-        is_controlled = state;
-        if (next)
-            next->set_controlling(state);
-        if (prev)
-            prev->set_controlling(state);
+        uint8_t color_mask = (1 << column_bit_for_color) - 1;
+        return (colors >> (column_bit_for_color * z)) & color_mask;
     }
 };
 
 constexpr size_t cells_max    = 8;
-constexpr size_t cells_max_z  = 14;
+constexpr size_t cells_max_z  = 14; // no more 15
 constexpr size_t cells_z_lose = 10;
 
 class game
@@ -94,28 +97,27 @@ private:
     void render_scene();
     void start_game();
 
-    void new_primitive();
-    void add_primitive(size_t number);
-    
-    std::chrono::steady_clock timer;
-    time_point                last_time_update;
-    float                     delay = 0.5; // Seconds
+    void add_primitive();
 
+    void    set_cell_color(uint8_t x, uint8_t y, uint8_t z, uint8_t clr);
+    uint8_t get_cell_color(uint8_t x, uint8_t y, uint8_t z);
+    column& get_column(uint8_t x, uint8_t y);
+    uint8_t get_column_z(uint8_t x, uint8_t y);
+    void    set_column_z(uint8_t x, uint8_t y, uint8_t byte);
 
+    void update_buffer_z();
 
-    // Game func's
     config cfg;
     size_t score = 0;
+    float  delay = 0.01; // Seconds
 
-    engine* my_engine = nullptr;
-    camera* cam       = nullptr;
-    uniform uniforms;
+    engine*              my_engine = nullptr;
+    camera*              cam       = nullptr;
+    uniform              uniforms;
     std::vector<figure*> figures;
 
-
-    std::vector<cell>   cells;
-    cell*               controlled_cell = nullptr;
-    std::vector<size_t> buffer_z;
+    std::vector<column>  columns;
+    std::vector<uint8_t> buffer_z;
 
     shader* shader_scene;
     shader* shader_temp;

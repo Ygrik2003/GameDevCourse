@@ -8,32 +8,15 @@ game_tetris::game_tetris()
     state.is_rotated = 0;
     state.is_moving  = 0;
 
-    last_time_update = timer.now();
-
     figure_board = model("./99-game/textures/board.obj").get_figure();
     figure_cube  = model("./99-game/textures/cube.obj").get_figure();
 
     buffer_z.resize(cells_max * cells_max);
 
-    cells.resize(cells_max * cells_max * cells_max_z);
-    uint8_t x = 0, y = 0, z = 0;
-    for (cell& c : cells)
+    columns.resize(cells_max * cells_max * cells_max_z);
+    for (column& col : columns)
     {
-        c.is_free = true;
-        c.x       = x;
-        c.y       = y;
-        c.z       = z;
-        x++;
-        if (x == cells_max)
-        {
-            x = 0;
-            y++;
-            if (y == cells_max)
-            {
-                y = 0;
-                z++;
-            }
-        }
+        col = column{ 0 };
     }
 }
 
@@ -61,9 +44,9 @@ int game_tetris::initialize(config cfg)
     texture_board = my_engine->load_texture(2, cfg.texture_board);
 
     add_figure(figure_board, texture_board);
-    new_primitive();
-    //my_engine->play_sound("./99-game/res/road.wav");
-    //my_engine->play_sound("./99-game/res/8-bit_detective.wav");
+    add_primitive();
+    my_engine->play_sound("./99-game/res/road.wav");
+    // my_engine->play_sound("./99-game/res/8-bit_detective.wav");
 
     return 1;
 };
@@ -106,19 +89,15 @@ bool game_tetris::event_listener(event& e)
             }
             if (e.keyboard.w_clicked)
             {
-                move_cell(controlled_cell, direction::forward);
             }
             if (e.keyboard.s_clicked)
             {
-                move_cell(controlled_cell, direction::backward);
             }
             if (e.keyboard.a_clicked)
             {
-                move_cell(controlled_cell, direction::left);
             }
             if (e.keyboard.d_clicked)
             {
-                move_cell(controlled_cell, direction::right);
             }
 
             // Free Camera
@@ -151,7 +130,9 @@ bool game_tetris::event_listener(event& e)
 
 void game_tetris::update()
 {
-    // cam->update();
+    static std::chrono::steady_clock timer;
+    static auto                      last_time_update = timer.now();
+
     cam->set_rotate(
         0, M_PI / 2 + camera_angle, M_PI / 2 - atan(1. / sqrt(view_height)));
     cam->set_translate(sqrt(view_height) * std::cos(camera_angle),
@@ -161,29 +142,21 @@ void game_tetris::update()
     if ((timer.now() - last_time_update).count() < delay * 1e9)
         return;
     last_time_update = timer.now();
-    for (cell& c : cells)
-    {
-        if (c.is_free || !c.is_moving)
-            continue;
 
-        if (c.z == buffer_z[c.y * cells_max + c.x])
+    for (int x = 0; x < cells_max; x++)
+    {
+        for (int y = 0; y < cells_max; y++)
         {
-            buffer_z[c.y * cells_max + c.x]++;
-            c.set_moving(false);
-            check_layers(c);
-            if (c.is_controlled)
+            if (get_cell_color(x, y, get_column_z(x, y)) != 0)
             {
-                my_engine->play_sound("./99-game/res/metal_pipe.wav");
-                c.set_controlling(false);
-                new_primitive();
+                update_buffer_z();
+                add_primitive();
+                // my_engine->play_sound("./99-game/res/metal_pipe.wav");
             }
-        }
-        else
-        {
-            move_cell(&c, direction::down);
+            get_column(x, y).move_down_over(get_column_z(x, y));
         }
     }
-};
+}
 
 void game_tetris::render()
 {
@@ -267,23 +240,30 @@ void game_tetris::draw_ui()
                  ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
                      ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar);
 
-    if (ImGui::Button("Forvard"))
+    if (ImGui::Button("Forvard", ImVec2(100, 100)))
     {
-        move_cell(controlled_cell, direction::forward);
     }
     ImGui::SameLine();
-    if (ImGui::Button("Backward"))
+    // ImGui::SetCursorPos(ImVec2(100, 100));
+    if (ImGui::Button("Backward", ImVec2(100, 100)))
     {
-        move_cell(controlled_cell, direction::backward);
     }
-    if (ImGui::Button("Left"))
+    if (ImGui::Button("Left", ImVec2(100, 100)))
     {
-        move_cell(controlled_cell, direction::left);
     }
     ImGui::SameLine();
-    if (ImGui::Button("Right"))
+    if (ImGui::Button("Right", ImVec2(100, 100)))
     {
-        move_cell(controlled_cell, direction::right);
+    }
+
+    if (ImGui::Button("Rotate X axis", ImVec2(window_control_width - 20, 100)))
+    {
+    }
+    if (ImGui::Button("Rotate Y axis", ImVec2(window_control_width - 20, 100)))
+    {
+    }
+    if (ImGui::Button("Rotate Z axis", ImVec2(window_control_width - 20, 100)))
+    {
     }
 
     ImGui::End();
@@ -311,24 +291,28 @@ void game_tetris::render_scene()
     index_buffer* index_buff = new index_buffer(
         figure_cube->get_indexes().data(), figure_cube->get_indexes().size());
 
-    for (cell& c : cells)
-    {
-        if (c.is_free)
-            continue;
-        figure_cube->set_translate(
-            vector3d(-1. / 2. + (static_cast<float>(c.x) + 0.5) / cells_max,
-                     (static_cast<float>(c.z) + 0.5) / cells_max,
-                     -1. / 2. + (static_cast<float>(c.y) + 0.5) / cells_max));
-        figure_cube->set_texture(texture_block);
-        figure_cube->uniform_link(uniforms);
+    for (int x = 0; x < cells_max; x++)
+        for (int y = 0; y < cells_max; y++)
+        {
+            for (uint16_t z = 0; z < column_count_cells; z++)
+            {
+                if (!get_column(x, y).get_z(z))
+                    continue;
+                figure_cube->set_translate(
+                    vector3d(-1. / 2. + (x + 0.5) / cells_max,
+                             (z + 0.5) / cells_max,
+                             -1. / 2. + (y + 0.5) / cells_max));
+                figure_cube->set_texture(texture_block);
+                figure_cube->uniform_link(uniforms);
 
-        my_engine->reload_uniform();
-        my_engine->render_triangles(vertex_buff,
-                                    index_buff,
-                                    figure_cube->get_texture(),
-                                    0,
-                                    index_buff->size());
-    }
+                my_engine->reload_uniform();
+                my_engine->render_triangles(vertex_buff,
+                                            index_buff,
+                                            figure_cube->get_texture(),
+                                            0,
+                                            index_buff->size());
+            }
+        }
 
     delete vertex_buff;
     delete index_buff;
@@ -337,111 +321,13 @@ void game_tetris::start_game()
 {
     state.is_started = ~state.is_started;
 }
-cell& game_tetris::get_cell(size_t x, size_t y, size_t z)
+
+void game_tetris::add_primitive()
 {
-    return *std::find_if(cells.begin(),
-                         cells.end(),
-                         [&](const cell& c)
-                         { return (c.x == x) && (c.y == y) && (c.z == z); });
-}
-bool game_tetris::move_cell(cell* c, direction dir)
-{
-    if (dir != direction::up && dir != direction::down)
-        dir = static_cast<direction>(
-            (static_cast<int>(dir) +
-             static_cast<int>(M_PI / 2 + camera_angle / (M_PI / 2))) %
-            4);
+    static float x = 0;
+    static float y = 0;
 
-    switch (dir)
-    {
-        case direction::down:
-            if (c->z == 0)
-                return false;
-            break;
-        case direction::up:
-            if (c->z == cells_max_z - 1)
-                return false;
-            break;
-        case direction::left:
-            if (c->x == 0 || !get_cell(c->x - 1, c->y, c->z).is_free)
-                return false;
-            break;
-        case direction::right:
-            if (c->x == cells_max - 1 ||
-                !get_cell(c->x + 1, c->y, c->z).is_free)
-                return false;
-            break;
-        case direction::forward:
-            if (c->y == cells_max - 1 ||
-                !get_cell(c->x, c->y + 1, c->z).is_free)
-                return false;
-            break;
-        case direction::backward:
-            if (c->y == 0 || !get_cell(c->x, c->y - 1, c->z).is_free)
-                return false;
-            break;
-    }
-
-    //TODO infinity recursion
-    if (c->next)
-        if (!move_cell(c->next, dir))
-            return false;
-
-    if (c->prev)
-        if (!move_cell(c->prev, dir))
-            return false;
-
-    cell* cell_to_swap;
-    switch (dir)
-    {
-        case direction::down:
-            cell_to_swap = &get_cell(c->x, c->y, c->z - 1);
-            c->z--;
-            cell_to_swap->z++;
-            std::swap(c, cell_to_swap);
-            break;
-        case direction::up:
-            cell_to_swap = &get_cell(c->x, c->y, c->z + 1);
-            c->z++;
-            cell_to_swap->z--;
-            std::swap(c, cell_to_swap);
-            break;
-        case direction::left:
-            cell_to_swap = &get_cell(c->x - 1, c->y, c->z);
-            c->x--;
-            cell_to_swap->x++;
-            std::swap(c, cell_to_swap);
-            break;
-        case direction::right:
-            cell_to_swap = &get_cell(c->x + 1, c->y, c->z);
-            c->x++;
-            cell_to_swap->x--;
-            std::swap(c, cell_to_swap);
-            break;
-        case direction::forward:
-            cell_to_swap = &get_cell(c->x, c->y + 1, c->z);
-            c->y++;
-            cell_to_swap->y--;
-            std::swap(c, cell_to_swap);
-            break;
-        case direction::backward:
-            cell_to_swap = &get_cell(c->x, c->y - 1, c->z);
-            c->y--;
-            cell_to_swap->y++;
-            std::swap(c, cell_to_swap);
-            break;
-    }
-    std::cout << static_cast<int>(c->z) << std::endl;
-
-    return true;
-}
-void game_tetris::new_primitive()
-{
-    // controlled_cell = &get_cell(
-    //     std::rand() % cells_max, std::rand() % cells_max, cells_max_z - 1);
-    static float x  = 0;
-    static float y  = 0;
-    controlled_cell = &get_cell((int)x, (int)y, cells_max_z - 1);
+    set_cell_color(x, y, cells_max_z, 1);
     x++;
     if (x == cells_max)
     {
@@ -450,49 +336,45 @@ void game_tetris::new_primitive()
         if (y == cells_max)
             y = 0;
     }
-    controlled_cell->is_free = false;
-    controlled_cell->set_controlling(true);
-    controlled_cell->set_moving(true);
 }
 
-void game_tetris::add_primitive(size_t number) {}
-
-void game_tetris::check_layers(cell last_cell)
+void game_tetris::set_cell_color(uint8_t x, uint8_t y, uint8_t z, uint8_t clr)
 {
-    return; //TODO
-    for (size_t x = 0; x < cells_max; x++)
-        for (size_t y = 0; y < cells_max; y++)
-        {
-            if (get_cell(x, y, last_cell.z).is_free)
-                return;
-        }
-    score++;
-    for (std::vector<cell>::reverse_iterator cell_it = cells.rend();
-         cell_it != cells.rbegin();
-         cell_it--)
+    columns[y * cells_max + x] |= static_cast<uint32_t>(clr)
+                                  << (column_bit_for_color * z);
+}
+
+uint8_t game_tetris::get_cell_color(uint8_t x, uint8_t y, uint8_t z)
+{
+    return get_column(x, y).get_z(z);
+}
+
+column& game_tetris::get_column(uint8_t x, uint8_t y)
+{
+    return columns[y * cells_max + x];
+}
+
+uint8_t game_tetris::get_column_z(uint8_t x, uint8_t y)
+{
+    return buffer_z[y * cells_max + x];
+}
+
+void game_tetris::set_column_z(uint8_t x, uint8_t y, uint8_t byte)
+{
+    buffer_z[y * cells_max + x] = byte;
+}
+
+void game_tetris::update_buffer_z()
+{
+    for (int x = 0; x < cells_max; x++)
     {
-        std::cout << static_cast<int>(cell_it->z) << std::endl;
-        if (cell_it->z == last_cell.z)
+        for (int y = 0; y < cells_max; y++)
         {
-            buffer_z[cell_it->y * cells_max + cell_it->x]--;
-            if (cell_it->next)
+            for (int z = get_column_z(x, y); z < cells_max_z; z++)
             {
-                check_layers(*cell_it->next);
-                cell_it->next->prev = nullptr;
-                cell_it->next       = nullptr;
+                if (get_cell_color(x, y, z))
+                    set_column_z(x, y, z + 1);
             }
-            if (cell_it->prev)
-            {
-                check_layers(*cell_it->prev);
-                cell_it->prev->next = nullptr;
-                cell_it->prev       = nullptr;
-            }
-            cell_it->is_free = true;
-        }
-        else if (cell_it->z > last_cell.z && !cell_it->is_free &&
-                 cell_it->z != 0)
-        {
-            move_cell(&*cell_it, direction::down);
         }
     }
 }

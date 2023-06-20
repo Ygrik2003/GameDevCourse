@@ -19,12 +19,6 @@ int main()
         return -1;
     }
 
-    // model model_cube("./99-game/textures/primitive2x2x2.obj");
-
-    // primitive_figure_1.set_scale(0.1, 0.1, 0.1);
-    // primitive_figure_1.set_translate(0, 1, 0);
-    // my_game.add_figure(primitive_figure_1, cfg.texture_block, 0);
-
     event e{};
     float phi      = 0;
     auto time_last = std::chrono::steady_clock::now() - std::chrono::seconds(1);

@@ -349,11 +349,8 @@ int engine_opengl::initialize(config& cfg)
     }
     std::cout << std::flush;
 
-    audio_device = SDL_OpenAudioDevice(default_audio_device_name,
-                                       0,
-                                       &audio_device_spec,
-                                       nullptr,
-                                       0);
+    audio_device = SDL_OpenAudioDevice(
+        default_audio_device_name, 0, &audio_device_spec, nullptr, 0);
 
     if (audio_device == 0)
     {
@@ -369,8 +366,7 @@ int engine_opengl::initialize(config& cfg)
                   << "format: "
                   << get_sound_format_name(audio_device_spec.format) << '\n'
                   << "channels: "
-                  << static_cast<uint32_t>(audio_device_spec.channels) <<
-                  '\n'
+                  << static_cast<uint32_t>(audio_device_spec.channels) << '\n'
                   << "samples: " << audio_device_spec.samples << '\n'
                   << std::flush;
 
@@ -748,14 +744,14 @@ void engine_opengl::reload_uniform()
     }
 }
 
-//std::mutex engine_opengl::audio_mutex;
+std::mutex engine_opengl::audio_mutex;
 
 void engine_opengl::audio_callback(void*    engine_ptr,
                                    uint8_t* stream,
                                    int      stream_size)
 {
 
-    //std::lock_guard<std::mutex> lock(audio_mutex);
+    std::lock_guard<std::mutex> lock(audio_mutex);
 
     std::fill_n(stream, stream_size, '\0');
 
@@ -819,7 +815,7 @@ void engine_opengl::set_relative_mouse_mode(bool state)
 
 void engine_opengl::play_sound(const char* path)
 {
-    //std::lock_guard<std::mutex> lock(audio_mutex);
+    std::lock_guard<std::mutex> lock(audio_mutex);
 
     audio_buffer* audio_buff =
         new audio_buffer(path, audio_device, audio_device_spec);

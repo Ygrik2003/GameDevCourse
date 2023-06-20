@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 3.25)
 
 project(modules)
-
-if(EXISTS "${CMAKE_SOURCE_DIR}/modules/SDL3/CMakeLists.txt")
+find_package(SDL3)
+if((NOT SDL3_FOUND) AND EXISTS
+                        "${CMAKE_SOURCE_DIR}/modules/SDL3/CMakeLists.txt")
     message(STATUS "SDL3 doesnt found")
     message(STATUS "Compiling...")
 
