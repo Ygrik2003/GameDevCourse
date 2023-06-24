@@ -1,18 +1,17 @@
-cmake_minimum_required(VERSION 3.25)
+cmake_minimum_required(VERSION 3.22)
 
 project(modules)
-find_package(SDL3)
-if((NOT SDL3_FOUND) AND EXISTS
-                        "${CMAKE_SOURCE_DIR}/modules/SDL3/CMakeLists.txt")
+
+if(EXISTS "${CMAKE_SOURCE_DIR}/modules/SDL3/CMakeLists.txt")
     message(STATUS "SDL3 doesnt found")
     message(STATUS "Compiling...")
 
-    set(SDL_STATIC ON)
-    set(SDL_SHARED OFF)
-    #set(SDL_STATIC_PIC ON)
-    set(SDL_TEST OFF)
-    set(SDL_TESTS OFF)
-    set(SDL_TESTS_LINK_SHARED OFF)
+    set(SDL_STATIC ON CACHE INTERNAL "" FORCE)
+    set(SDL_SHARED ON CACHE INTERNAL "" FORCE)
+    set(SDL_STATIC_PIC ON CACHE INTERNAL "" FORCE)
+    set(SDL_TEST OFF CACHE INTERNAL "" FORCE)
+    set(SDL_TESTS OFF CACHE INTERNAL "" FORCE)
+    set(SDL_TESTS_LINK_SHARED OFF CACHE INTERNAL "" FORCE)
     add_subdirectory(${CMAKE_SOURCE_DIR}/modules/SDL3
                      ${CMAKE_BINARY_DIR}/lib/SDL3)
     message(STATUS "Compiling SDL3 is succesuful.")
@@ -24,7 +23,7 @@ elseif(NOT SDL3_FOUND)
 endif()
 
 set(SDL3_DIR ${CMAKE_BINARY_DIR}/lib/SDL3 CACHE INTERNAL "SDL3_DIR")
-find_package(SDL3 REQUIRED)
+
 message(
     STATUS
         "SDL version find: ${SDL3_VERSION_MAJOR}.${SDL3_VERSION_MINOR}.${SDL3_VERSION_PATCH}"
@@ -32,13 +31,17 @@ message(
 
 if(EXISTS "${CMAKE_SOURCE_DIR}/modules/Assimp/CMakeLists.txt")
 
-    # set(ZLIB_LIBRARIES zlibstatic)
-    option(ENABLE_BOOST_WORKAROUND OFF)
-    # option(BUILD_SHARED_LIBS OFF)
-    option(ASSIMP_BUILD_ASSIMP_TOOLS OFF)
-    option(ASSIMP_BUILD_TESTS OFF)
-    option(ASSIMP_WARNINGS_AS_ERRORS OFF)
-    option(ASSIMP_INSTALL OFF)
+    set(ENABLE_BOOST_WORKAROUND OFF CACHE INTERNAL "" FORCE)
+    set(BUILD_SHARED_LIBS OFF CACHE INTERNAL "" FORCE)
+    set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE INTERNAL "" FORCE)
+    set(ASSIMP_BUILD_TESTS OFF CACHE INTERNAL "" FORCE)
+    set(ASSIMP_WARNINGS_AS_ERRORS OFF CACHE INTERNAL "" FORCE)
+    set(ASSIMP_INSTALL OFF CACHE INTERNAL "" FORCE)
+    set(SDL_STATIC ON CACHE INTERNAL "" FORCE)
+
+    if(${CMAKE_SYSTEM_NAME} STREQUAL "Android")
+        option(ASSIMP_ANDROID_JNIIOSYSTEM ON)
+    endif()
 
     add_subdirectory(${CMAKE_SOURCE_DIR}/modules/Assimp/
                      ${CMAKE_BINARY_DIR}/lib/Assimp)

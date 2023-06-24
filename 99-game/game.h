@@ -6,6 +6,7 @@
 #include "objects/camera.h"
 
 using namespace std::chrono;
+using positions = std::vector<std::pair<uint8_t, uint8_t>>;
 
 constexpr uint32_t fps = 120;
 
@@ -15,13 +16,13 @@ enum class direction
     forward,
     right,
     backward,
-    down,
 };
 
-// clang-format off
 constexpr uint32_t column_bit_for_color = 2;
 constexpr uint32_t column_count_cells   = 16;
+
 #pragma pack(push, 1)
+// clang-format off
 /// @brief Bit field for definition each column in 3d tetris
 /// The each bit field have 2 bits for set color of block in column
 /// on height i. Position of block iterable each 2 bit. This struct is so
@@ -49,11 +50,19 @@ struct column
     /// @param pos position, start from which cells was falling
     // clang-format on
 
-    void operator|=(uint32_t mask) { colors |= mask; }
+    void   operator|=(const uint32_t& mask) { colors |= mask; }
+    void   operator&=(const uint32_t& mask) { colors &= mask; }
+    void   operator|=(const column& mask) { colors |= mask.colors; }
+    void   operator&=(const column& mask) { colors &= mask.colors; }
+    column operator&(const uint32_t& mask)
+    {
+        return column{ .colors = colors & mask };
+    }
+    uint32_t operator~() { return ~colors; }
 
     void move_down_over(uint8_t pos)
     {
-        uint32_t mask = (1 << column_bit_for_color * (pos + 1)) - 1;
+        uint32_t mask = (1 << column_bit_for_color * pos) - 1;
         uint32_t result =
             ((colors & ~mask) >> column_bit_for_color) | (colors & mask);
         colors = result;
@@ -105,11 +114,14 @@ private:
     uint8_t get_column_z(uint8_t x, uint8_t y);
     void    set_column_z(uint8_t x, uint8_t y, uint8_t byte);
 
-    void update_buffer_z();
+    void      update_buffer_z();
+    positions get_bound_object(direction dir, const positions& object);
+    void      move_cell(direction dir);
+    void      check_layer();
 
     config cfg;
     size_t score = 0;
-    float  delay = 0.01; // Seconds
+    float  delay = 0.2; // Seconds
 
     engine*              my_engine = nullptr;
     camera*              cam       = nullptr;
@@ -117,6 +129,7 @@ private:
     std::vector<figure*> figures;
 
     std::vector<column>  columns;
+    column               column_wall{ .colors = static_cast<uint32_t>(-1) };
     std::vector<uint8_t> buffer_z;
 
     shader* shader_scene;

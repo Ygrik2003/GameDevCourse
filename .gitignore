@@ -5,3 +5,5 @@ build/
 CMakeLists.txt.user
 *.dll
 imgui.ini
+**/app/.cxx
+**/app/build

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.25)
+cmake_minimum_required(VERSION 3.22)
 
 project(GameDevCourse)
 
@@ -13,4 +13,8 @@ add_subdirectory(modules)
 # add_subdirectory(04-3-render-morphing)
 # add_subdirectory(05-1-texture)
 
-add_subdirectory(99-game)
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Android")
+    add_subdirectory(99-game-port)
+else()
+    add_subdirectory(99-game)
+endif()

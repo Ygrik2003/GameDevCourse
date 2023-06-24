@@ -3,7 +3,6 @@ cmake_minimum_required(VERSION 3.20)
 project(99-game CXX)
 
 find_package(OpenGL REQUIRED)
-find_package(SDL3 REQUIRED)
 
 add_library(
     99-engine STATIC
@@ -48,6 +47,7 @@ target_include_directories(
     99-engine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/modules
                       ${CMAKE_SOURCE_DIR}/modules/SDL3/include)
 target_compile_features(99-engine PUBLIC cxx_std_20)
+
 target_link_libraries(
     99-engine
     PUBLIC SDL3::SDL3-static
@@ -55,7 +55,12 @@ target_link_libraries(
            imgui
            assimp::assimp)
 
-add_executable(99-game game.cpp game.h main.cpp)
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Android")
+    add_library(99-game SHARED game.cpp game.h main.cpp)
+else()
+    add_executable(99-game game.cpp game.h main.cpp)
+endif()
+
 target_include_directories(99-game PUBLIC ${CMAKE_CURRENT_LIST_DIR}
                                           ${CMAKE_SOURCE_DIR}/modules)
 target_compile_features(99-game PUBLIC cxx_std_20)
